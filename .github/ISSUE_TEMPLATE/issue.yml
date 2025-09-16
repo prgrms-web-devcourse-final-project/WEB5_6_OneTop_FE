@@ -1,0 +1,88 @@
+name: Issue
+description: 변경 유형을 선택하고, 무엇/왜/어떻게를 중심으로 작성합니다.
+title: "[TYPE]: <이슈 제목을 50자 이내로>"
+labels:
+  - needs-triage
+
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 변경 유형 (Type)
+      description: 상단 컨벤션의 유형 중 하나를 선택하세요.
+      options:
+        - FEAT
+        - FIX
+        - REFACTOR
+        - COMMENT
+        - STYLE
+        - TEST
+        - CHORE
+        - INIT
+    validations:
+      required: true
+
+  - type: input
+    id: subject
+    attributes:
+      label: 제목(Subject)
+      description: 첫 글자 대문자, 명령문. 50자 이내.
+      placeholder: 예) 회원가입 기능 추가
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-why
+    attributes:
+      label: 무엇을 / 왜
+      description: 어떻게 보다는 **무엇을**, **왜** 변경하는지 위주로 간단명료하게 작성하세요.
+      placeholder: |
+        - 무엇(What):
+        - 왜(Why):
+    validations:
+      required: true
+
+  - type: textarea
+    id: how-summary
+    attributes:
+      label: 어떻게(요약) — 3줄 이내
+      description: 핵심 변경점/설계 흐름/의존성 요약
+      placeholder: "- "
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: 영향 범위
+      options:
+        - label: "**API 변경**"
+        - label: "**DB 마이그레이션**"
+        - label: "**Breaking Change**"
+        - label: "**보안/권한 영향**"
+        - label: "문서/가이드 업데이트 필요"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 체크리스트
+      options:
+        - label: "타입 라벨 부착 (FEAT/FIX/REFACTOR/COMMENT/STYLE/TEST/CHORE/INIT)"
+        - label: "로컬/CI 테스트 통과"
+        - label: "영향도 점검 완료"
+        - label: "주석/문서 반영(필요 시)"
+
+  - type: textarea
+    id: todo
+    attributes:
+      label: ToDo (선택)
+      value: |
+        - [ ] 할 일 1
+        - [ ] 할 일 2
+
+  - type: textarea
+    id: proofs
+    attributes:
+      label: 스크린샷/증빙(선택)
+      description: 이미지/로그 첨부
+      placeholder: "<!-- 이미지/로그 첨부 -->"

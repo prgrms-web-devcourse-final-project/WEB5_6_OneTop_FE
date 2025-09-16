@@ -1,0 +1,357 @@
+name: PR → Title Check + Auto-link/Auto-create Issue (project-ensure)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+env:
+  PROJECT_OWNER: prgrms-be-devcourse
+  PROJECT_NUMBER: 269
+
+concurrency:
+  group: pr-auto-issue-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = (context.payload.pull_request.title || "").trim();
+            const TYPES = ["FEAT","FIX","REFACTOR","COMMENT","STYLE","TEST","CHORE","INIT"];
+            const m = title.match(/^\s*\[([A-Za-z]+)\]\s*:\s*(.+)\s*$/);
+            if (!m) core.setFailed("PR 제목 형식은 `[TYPE]: 제목` 이어야 합니다.");
+            else {
+              const type = m[1].toUpperCase();
+              if (!TYPES.includes(type)) core.setFailed(`TYPE은 ${TYPES.join(", ")} 중 하나여야 합니다.`);
+              const subject = m[2].trim();
+              if (/\(#\d+\)|#\d+\b/.test(subject)) core.setFailed("제목에 이슈번호를 넣지 마세요.");
+              const len = [...subject].length;
+              if (len < 1 || len > 50) core.setFailed(`제목(Subject)은 1~50자 이내여야 합니다. 현재 ${len}자`);
+            }
+
+      - name: Link or create issue + ensure project
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECTS_TOKEN }}
+          script: |
+            const pr    = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+
+            // ---------- (추가) PR 템플릿 전용 파서 유틸 ----------
+            const escapeRe = (s) => (s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // "## <header>" ~ 다음 "## " 전까지를 추출
+            const section = (md, headerText) => {
+              const h  = escapeRe(headerText);
+              const re = new RegExp(`^##\\s*${h}\\s*[\\r\\n]+([\\s\\S]*?)(?=^##\\s|\\Z)`, 'mi');
+              const m  = (md || '').match(re);
+              return (m ? m[1].trim() : '');
+            };
+
+
+            const stripBullets = (txt) =>
+              (txt || '').replace(/^\s*[-*]\s+/gm, '').trim();
+            
+            const ensureTaskList = (txt) => {
+              const lines = (txt || '').split('\n').map(l => {
+                // 이미 체크박스면 그대로
+                if (/^\s*-\s+\[[ xX]\]\s+/.test(l)) return l;
+                // 일반 목록이면 체크박스로 승격
+                if (/^\s*[-*]\s+/.test(l)) return l.replace(/^\s*[-*]\s+/, '- [ ] ');
+                return l;
+              });
+              return lines.join('\n').trim();
+            };
+            
+            
+            const renderIssueFormBody = (TYPE, SUBJECT, prNumber) => {
+              const body = (context.payload.pull_request.body || "");
+            
+              // 섹션 추출은 기존 section() 유틸 그대로 사용한다고 가정
+              const wwRaw   = section(body, "무엇을 / 왜");
+              const howRaw  = section(body, "어떻게(요약) — 3줄 이내");
+              const impRaw  = section(body, "영향 범위");
+              const chkRaw  = section(body, "체크리스트");
+              const todoRaw = section(body, "ToDo (선택)");
+              const prfRaw  = section(body, "스크린샷/증빙(선택)");
+            
+              // 들여쓰기 통일: 문단 vs 체크박스
+              const whatWhy   = stripBullets(wwRaw)  || "**무엇(What)**:\n**왜(Why)**:";
+              const how       = stripBullets(howRaw) || "-";
+              const impact    = ensureTaskList(impRaw) || [
+                "- [ ] **API 변경**",
+                "- [ ] **DB 마이그레이션**",
+                "- [ ] **Breaking Change**",
+                "- [ ] **보안/권한 영향**",
+                "- [ ] 문서/가이드 업데이트 필요"
+              ].join("\n");
+              const checklist = ensureTaskList(chkRaw) || [
+                "- [ ] 타입 라벨 부착 (FEAT/FIX/REFACTOR/COMMENT/STYLE/TEST/CHORE/INIT)",
+                "- [ ] 로컬/CI 테스트 통과",
+                "- [ ] 영향도 점검 완료",
+                "- [ ] 주석/문서 반영(필요 시)"
+              ].join("\n");
+              const todo = ensureTaskList(todoRaw) || [
+                "- [ ] 할 일 1",
+                "- [ ] 할 일 2"
+              ].join("\n");
+              const proofs = (prfRaw || "").trim();
+            
+              return `**변경 유형 (Type):** ${TYPE}
+            **제목(Subject):** ${SUBJECT}
+            
+            ## 무엇을 / 왜
+            ${whatWhy}
+            
+            ## 어떻게(요약) — 3줄 이내
+            ${how}
+            
+            ## 영향 범위
+            ${impact}
+            
+            ## 체크리스트
+            ${checklist}
+            
+            ## ToDo (선택)
+            ${todo}
+            
+            ## 스크린샷/증빙(선택)
+            ${proofs}
+            
+            ---
+            Auto-created for PR #${prNumber}
+            <!-- auto-issue-for-pr:${prNumber} -->
+            <!-- auto-issue-uses-form:Issue -->`;
+            };
+
+            const normalize = (s) => (s || "").replace(/\r\n/g, "\n").replace(/[ \t]+$/gm, "").replace(/\n+$/,"");
+            const stripForScan = (s) => (s || "").replace(/```[\s\S]*?```/g, "").replace(/`[^`]*`/g, "");
+            const ensureLabels = async (names) => {
+              for (const name of names) {
+                try { await github.rest.issues.getLabel({ owner, repo, name }); }
+                catch { await github.rest.issues.createLabel({ owner, repo, name, color: "ededed" }); }
+              }
+            };
+            const appendCloseAndMarkerIfNeeded = (body, n) => {
+              let out = body || "";
+              const hasClose = new RegExp(`\\b(?:close[sd]?|fixe?[sd]?|resolve[sd]?)\\b\\s*[:\\-–]?\\s*#${n}\\b`, 'i').test(out);
+              const hasMark  = new RegExp(`<!--\\s*auto-linked-issue:${n}\\s*-->`).test(out);
+              if (!hasClose) out += `\n\nCloses #${n}`;
+              if (!hasMark)  out += `\n<!-- auto-linked-issue:${n} -->`;
+              return out;
+            };
+
+            const typeMatch = (pr.title || "").match(/^\s*\[(FEAT|FIX|REFACTOR|COMMENT|STYLE|TEST|CHORE|INIT)\]\s*:\s*/i);
+            const TYPE     = (typeMatch ? typeMatch[1] : "CHORE").toUpperCase();
+            const SUBJECT  = (pr.title || "").replace(/^\s*\[[^\]]+\]\s*:\s*/,'').trim() || `PR #${pr.number}`;
+            const FULL     = pr.title || "";
+
+            const rawBody  = pr.body || "";
+            const scanBody = stripForScan(rawBody);
+            const autoLinkedNums = [...rawBody.matchAll(/<!--\s*auto-linked-issue:(\d+)\s*-->/g)].map(m => Number(m[1]));
+            const closeRefs = [...scanBody.matchAll(/\b(?:close[sd]?|fixe?[sd]?|resolve[sd]?)\b\s*[:\-–]?\s*#(\d+)\b/ig)].map(m => Number(m[1]));
+            const manualCloseNumbers = closeRefs.filter(n => !autoLinkedNums.includes(n));
+            const hasManualClose = manualCloseNumbers.length > 0;
+
+            let issueNumber = null;
+            let mode = null; // 'manual' | 'auto-existing' | 'auto-created'
+
+            if (hasManualClose) {
+              const n = manualCloseNumbers[0];
+              try { await github.rest.issues.get({ owner, repo, issue_number: n }); issueNumber = n; mode = 'manual'; } catch {}
+            }
+
+            if (!issueNumber) {
+              const q = `repo:${owner}/${repo} is:issue is:open in:title "${FULL.replace(/"/g,'\\"')}"`;
+              const res = await github.request('GET /search/issues', { q, per_page: 1, advanced_search: true, headers: { 'X-GitHub-Api-Version': '2022-11-28' } });
+              if (res.data.items.length === 1) { issueNumber = res.data.items[0].number; mode = 'manual'; }
+            }
+
+            if (!issueNumber) {
+              const q = `repo:${owner}/${repo} is:issue is:open in:body "auto-issue-for-pr:${pr.number}" label:auto`;
+              const r = await github.request('GET /search/issues', { q, per_page: 1, advanced_search: true, headers: { 'X-GitHub-Api-Version': '2022-11-28' } });
+              if (r.data.items.length > 0) { issueNumber = r.data.items[0].number; mode = 'auto-existing'; }
+            }
+
+            if (!issueNumber && !hasManualClose) {
+              mode = 'auto-created';
+              await ensureLabels(["auto", "needs-triage", TYPE]);
+              const created = await github.rest.issues.create({
+                owner, repo,
+                title: `[${TYPE}]: ${SUBJECT}`,
+                body: renderIssueFormBody(TYPE, SUBJECT, pr.number),
+                labels: ["auto", "needs-triage", TYPE]
+              });
+              issueNumber = created.data.number;
+            }
+
+            if (issueNumber) {
+              const body0 = pr.body || "";
+              const desired = appendCloseAndMarkerIfNeeded(body0, issueNumber);
+              if (normalize(desired) !== normalize(body0)) {
+                await github.rest.pulls.update({ owner, repo, pull_number: pr.number, body: desired });
+              }
+            }
+
+            try {
+              const author = pr?.user?.login;
+              if (author) {
+                try { await github.rest.issues.addAssignees({ owner, repo, issue_number: pr.number, assignees: [author] }); } catch {}
+                if (mode && mode.startsWith('auto') && issueNumber) {
+                  try { await github.rest.issues.addAssignees({ owner, repo, issue_number: issueNumber, assignees: [author] }); } catch {}
+                }
+              }
+            } catch {}
+
+            try {
+              const login  = process.env.PROJECT_OWNER || context.repo.owner;
+              const number = Number(process.env.PROJECT_NUMBER || 1);
+              let projectId = null;
+              try {
+                const r = await github.graphql(`query($login:String!,$number:Int!){ organization(login:$login){ projectV2(number:$number){ id } } }`, { login, number });
+                projectId = r?.organization?.projectV2?.id || null;
+              } catch {}
+              if (!projectId) {
+                try {
+                  const r2 = await github.graphql(`query($login:String!,$number:Int!){ user(login:$login){ projectV2(number:$number){ id } } }`, { login, number });
+                  projectId = r2?.user?.projectV2?.id || null;
+                } catch {}
+              }
+              if (!projectId) return;
+
+              const prResp = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
+              const prNodeId = prResp.data.node_id;
+              let issueNodeId = null;
+              if (issueNumber) {
+                const iss = await github.rest.issues.get({ owner, repo, issue_number: issueNumber });
+                issueNodeId = iss.data.node_id;
+              }
+
+              const listQ = `
+                query($projectId:ID!, $after:String) {
+                  node(id:$projectId) {
+                    ... on ProjectV2 {
+                      items(first:50, after:$after) {
+                        pageInfo { hasNextPage endCursor }
+                        nodes { id content { ... on Issue { id } ... on PullRequest { id } } }
+                      }
+                    }
+                  }
+                }`;
+              const addM = `
+                mutation($projectId:ID!, $contentId:ID!) {
+                  addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}) { item { id } }
+                }`;
+              const addIfMissing = async (contentId) => {
+                if (!contentId) return null;
+                let cursor = null, found = null;
+                while (true) {
+                  const r = await github.graphql(listQ, { projectId, after: cursor });
+                  const items = r?.node?.items?.nodes || [];
+                  for (const it of items) if (it?.content?.id === contentId) { found = it.id; break; }
+                  if (found || !r?.node?.items?.pageInfo?.hasNextPage) break;
+                  cursor = r.node.items.pageInfo.endCursor;
+                }
+                if (found) return found;
+                const a = await github.graphql(addM, { projectId, contentId });
+                return a?.addProjectV2ItemById?.item?.id || null;
+              };
+
+              const prItemId    = await addIfMissing(prNodeId);
+              const issueItemId = await addIfMissing(issueNodeId);
+
+              const fieldsQ = `
+                query($projectId:ID!) {
+                  node(id:$projectId) {
+                    ... on ProjectV2 {
+                      fields(first:50) {
+                        nodes {
+                          ... on ProjectV2FieldCommon { id name dataType }
+                          ... on ProjectV2SingleSelectField { id name options { id name } }
+                        }
+                      }
+                    }
+                  }
+                }`;
+              const fr = await github.graphql(fieldsQ, { projectId });
+              const fields = fr?.node?.fields?.nodes || [];
+              const statusField = fields.find(f => f.name === "Status" && f.options);
+
+              const desiredStatus = pr.draft ? "Ready" : "In progress";
+              if (statusField) {
+                const opt = statusField.options.find(o => o.name === desiredStatus);
+                if (opt) {
+                  const setM = `
+                    mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $optId:String!) {
+                      updateProjectV2ItemFieldValue(input:{ projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:{ singleSelectOptionId:$optId } }) { projectV2Item { id } }
+                    }`;
+                  if (prItemId)    await github.graphql(setM, { projectId, itemId: prItemId,    fieldId: statusField.id, optId: opt.id });
+                  if (issueItemId) await github.graphql(setM, { projectId, itemId: issueItemId, fieldId: statusField.id, optId: opt.id });
+                }
+              }
+
+              const startFieldName = "Start date";
+              const startDate = (pr.created_at || new Date().toISOString()).substring(0,10);
+
+              const getDateFieldValue = async (itemId, fieldName) => {
+                if (!itemId) return null;
+                const q = `
+                  query($itemId:ID!) {
+                    node(id:$itemId) {
+                      ... on ProjectV2Item {
+                        fieldValues(first:50) {
+                          nodes {
+                            ... on ProjectV2ItemFieldDateValue {
+                              date
+                              field { ... on ProjectV2FieldCommon { id name } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }`;
+                const r = await github.graphql(q, { itemId });
+                const nodes = r?.node?.fieldValues?.nodes || [];
+                const hit = nodes.find(n => n?.field?.name === fieldName);
+                return hit?.date || null;
+              };
+
+              const fieldsQ2 = `
+                query($projectId:ID!) {
+                  node(id:$projectId) {
+                    ... on ProjectV2 {
+                      fields(first:50) { nodes { ... on ProjectV2FieldCommon { id name dataType } } }
+                    }
+                  }
+                }`;
+              const fr2 = await github.graphql(fieldsQ2, { projectId });
+              const fields2 = fr2?.node?.fields?.nodes || [];
+              const startField = fields2.find(f => f.name === startFieldName && f.dataType === "DATE");
+              const startFieldId = startField?.id || null;
+
+              const setDateM = `
+                mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $d:Date!) {
+                  updateProjectV2ItemFieldValue(input:{ projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:{ date:$d } }) { projectV2Item { id } }
+                }`;
+
+              const setStartIfEmpty = async (itemId) => {
+                if (!itemId || !startFieldId) return;
+                const existing = await getDateFieldValue(itemId, startFieldName);
+                if (existing) return;
+                await github.graphql(setDateM, { projectId, itemId, fieldId: startFieldId, d: startDate });
+              };
+
+              await setStartIfEmpty(prItemId);
+              await setStartIfEmpty(issueItemId);
+            } catch (e) {
+              core.warning(`Project ensure failed: ${e?.message || e}`);
+            }

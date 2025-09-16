@@ -1,0 +1,150 @@
+name: Project End Date on Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+env:
+  PROJECT_OWNER: prgrms-be-devcourse
+  PROJECT_NUMBER: 269
+
+jobs:
+  done:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Project Status=Done & End date
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECTS_TOKEN }}   # PAT(Projects write + read:org)
+          script: |
+            const pr    = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+
+            // --- project id (org → user 순차 조회)
+            const login  = process.env.PROJECT_OWNER || context.repo.owner;
+            const number = Number(process.env.PROJECT_NUMBER || 1);
+            let projectId = null;
+            try {
+              const r = await github.graphql(
+                `query($login:String!,$number:Int!){
+                  organization(login:$login){ projectV2(number:$number){ id } }
+                }`, { login, number }
+              );
+              projectId = r?.organization?.projectV2?.id || null;
+            } catch {}
+            if (!projectId) {
+              try {
+                const r2 = await github.graphql(
+                  `query($login:String!,$number:Int!){
+                    user(login:$login){ projectV2(number:$number){ id } }
+                  }`, { login, number }
+                );
+                projectId = r2?.user?.projectV2?.id || null;
+              } catch {}
+            }
+            if (!projectId) { core.setFailed("Project not found. Check env/permission."); return; }
+
+            // --- helpers
+            const listQ = `
+              query($projectId:ID!, $after:String) {
+                node(id:$projectId) {
+                  ... on ProjectV2 {
+                    items(first:50, after:$after) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes { id content { ... on Issue { id } ... on PullRequest { id } } }
+                    }
+                  }
+                }
+              }`;
+            const addM = `
+              mutation($projectId:ID!, $contentId:ID!) {
+                addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}) {
+                  item { id }
+                }
+              }`;
+            const addIfMissing = async (contentId) => {
+              let cursor = null, found = null;
+              while (true) {
+                const r = await github.graphql(listQ, { projectId, after: cursor });
+                const items = r?.node?.items?.nodes || [];
+                for (const it of items) if (it?.content?.id === contentId) { found = it.id; break; }
+                if (found || !r?.node?.items?.pageInfo?.hasNextPage) break;
+                cursor = r.node.items.pageInfo.endCursor;
+              }
+              if (found) return found;
+              const a = await github.graphql(addM, { projectId, contentId });
+              return a?.addProjectV2ItemById?.item?.id || null;
+            };
+
+            // --- PR/Issue items
+            const prInfo = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
+            const prNodeId = prInfo.data.node_id;
+            const prItemId = await addIfMissing(prNodeId);
+
+            let issueItemId = null;
+            const m = (pr.body || "").match(/<!--\s*auto-linked-issue:(\d+)\s*-->/);
+            if (m) {
+              const issueNum = Number(m[1]);
+              const issueInfo = await github.rest.issues.get({ owner, repo, issue_number: issueNum });
+              const issueNodeId = issueInfo.data.node_id;
+              issueItemId = await addIfMissing(issueNodeId);
+            }
+
+            // --- fields: Status(single-select), End date(date)
+            const fieldsQ = `
+              query($projectId:ID!) {
+                node(id:$projectId) {
+                  ... on ProjectV2 {
+                    fields(first:50) {
+                      nodes {
+                        ... on ProjectV2FieldCommon { id name dataType }
+                        ... on ProjectV2SingleSelectField { id name options { id name } }
+                      }
+                    }
+                  }
+                }
+              }`;
+            const fr = await github.graphql(fieldsQ, { projectId });
+            const fields = fr?.node?.fields?.nodes || [];
+            const statusField = fields.find(f => f.name === "Status" && f.options);
+            const endDateField = fields.find(f => f.name === "End date" && f.dataType === "DATE");
+
+            const setStatus = async (itemId, valueName) => {
+              if (!itemId || !statusField) return;
+              const opt = statusField.options.find(o => o.name === valueName);
+              if (!opt) return;
+              const mut = `
+                mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $optId:String!) {
+                  updateProjectV2ItemFieldValue(input:{
+                    projectId:$projectId, itemId:$itemId, fieldId:$fieldId,
+                    value:{ singleSelectOptionId:$optId }
+                  }) { projectV2Item { id } }
+                }`;
+              await github.graphql(mut, { projectId, itemId, fieldId: statusField.id, optId: opt.id });
+            };
+
+            const setEndDate = async (itemId, dateStr) => {
+              if (!itemId || !endDateField) return;
+              const mut = `
+                mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $d:Date!) {
+                  updateProjectV2ItemFieldValue(input:{
+                    projectId:$projectId, itemId:$itemId, fieldId:$fieldId,
+                    value:{ date:$d }
+                  }) { projectV2Item { id } }
+                }`;
+              await github.graphql(mut, { projectId, itemId, fieldId: endDateField.id, d: dateStr });
+            };
+
+            const endDate = (pr.merged_at || new Date().toISOString()).substring(0,10);
+
+            if (prItemId)    { await setStatus(prItemId, "Done"); await setEndDate(prItemId, endDate); }
+            if (issueItemId) { await setStatus(issueItemId, "Done"); await setEndDate(issueItemId, endDate); }
+
+            core.info(`Project updated: Status=Done, End date=${endDate}`);
