@@ -11,7 +11,7 @@ permissions:
 
 env:
   PROJECT_OWNER: prgrms-be-devcourse
-  PROJECT_NUMBER: 269
+  PROJECT_NUMBER: 144 
 
 concurrency:
   group: pr-auto-issue-${{ github.event.pull_request.number }}
