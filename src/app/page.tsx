@@ -8,6 +8,6 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div>홈페이지입니다.</div>
+    <div className="w-full flex-1">홈페이지입니다.</div>
   );
 }

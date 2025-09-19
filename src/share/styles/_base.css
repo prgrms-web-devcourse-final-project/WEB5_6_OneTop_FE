@@ -1,0 +1,68 @@
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    min-block-size: 99vh;
+    font-family: "Pretendard Variable", "Nanum Gothic", "Roboto Serif", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-image: url("/public/background.jpg");
+    background-repeat: repeat;
+    background-size: auto;
+    background-attachment: fixed;
+    touch-action: manipulation; /* 더블탭 확대 방지 */
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply text-indigo-700 leading-tight;
+  }
+
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  p {
+    @apply text-slate-700 text-base leading-normal;
+  }
+
+  button {
+    @apply disabled:cursor-not-allowed cursor-pointer;
+  }
+
+  a {
+    font-size: 100%;
+    color: inherit;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+  a:active,
+  a:hover {
+    outline: 0;
+    text-decoration: none;
+    color: inherit;
+  }
+}

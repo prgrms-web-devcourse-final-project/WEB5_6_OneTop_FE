@@ -1,0 +1,106 @@
+@theme {
+  --font-main: "Pretendard Variable", sans-serif;
+  --font-accent: var(--font-accent);
+  --font-logo: var(--font-logo);
+  --background-white: #F5F5F5FF;
+  --background-gray: #C6C6C6FF;
+  --white: #FFFFFFFF;
+  --gray-10: #F5F5F5FF;
+  --gray-50: #F0F0F0FF;
+  --gray-800: #303030FF;
+  --black: #000000FF;
+  --색상: #FFD700FF;
+  --Deep-Navy: #0F1A2BFF;
+  --Midnight-Blue: #1C2E4AFF;
+  --Ivory: #BDC4D4FF;
+  --Buttercream: #D1CFC9FF;
+  --Dusty-Blue: #52677DFF;
+  --animate-arrow-rise: arrow-rise 1.2s ease-in-out infinite;
+  --animate-arrow-up: arrow-up 2s ease-in-out infinite;
+  --animate-form-right-lg: form-right-lg 1.3s forwards;
+  --animate-form-right-md: form-right-md 1.3s forwards;
+  --animate-form-right-sm: form-right-sm 1.3s forwards;
+  --animate-shimmer: shimmer 1.2s linear infinite;
+  --shadow-sm: 1px 1px 5px 0 #b7b7b7;
+  --shadow-pin : 4px 10px 3px rgba(85,85,85,0.9);
+  --shadow-md: 3px 3px 3px 0 #b7b7b7;
+  --shadow-book: 4px 10px 10px 0 rgba(85, 85, 85, 0.9);
+  --shadow-book-pick: 4px 10px 30px 0 #e0ab0f;
+}
+
+@keyframes arrow-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  60% {
+    opacity: 0.6;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes arrow-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes form-right-lg {
+  0% {
+    transform: translateX(-520px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes form-right-md {
+  0% {
+    transform: translateX(-384px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes form-right-sm {
+  0% {
+    transform: translateX(-288px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes form-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-520px);
+  }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
