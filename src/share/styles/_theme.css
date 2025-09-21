@@ -1,28 +1,22 @@
 @theme {
   --font-main: "Pretendard Variable", sans-serif;
-  --font-accent: var(--font-accent);
-  --font-logo: var(--font-logo);
-  --background-white: #F5F5F5FF;
-  --background-gray: #C6C6C6FF;
-  --white: #FFFFFFFF;
-  --gray-10: #F5F5F5FF;
-  --gray-50: #F0F0F0FF;
-  --gray-800: #303030FF;
-  --black: #000000FF;
-  --색상: #FFD700FF;
-  --Deep-Navy: #0F1A2BFF;
-  --Midnight-Blue: #1C2E4AFF;
-  --Ivory: #BDC4D4FF;
-  --Buttercream: #D1CFC9FF;
-  --Dusty-Blue: #52677DFF;
-  --animate-arrow-rise: arrow-rise 1.2s ease-in-out infinite;
-  --animate-arrow-up: arrow-up 2s ease-in-out infinite;
-  --animate-form-right-lg: form-right-lg 1.3s forwards;
-  --animate-form-right-md: form-right-md 1.3s forwards;
-  --animate-form-right-sm: form-right-sm 1.3s forwards;
-  --animate-shimmer: shimmer 1.2s linear infinite;
+  --font-accent: "Pretendard Variable", sans-serif;
+  --font-logo: "Pretendard Variable", sans-serif;
+  --background-white: #f5f5f5;
+  --background-gray: #c6c6c6;
+  --white: #ffffff;
+  --gray-10: #f5f5f5;
+  --gray-50: #f0f0f0;
+  --gray-800: #303030;
+  --black: #000000;
+  --yellow: #ffd700;
+  --deep-navy: #0f1a2b;
+  --midnight-blue: #1c2e4a;
+  --ivory: #bdc4d4;
+  --buttercream: #d1cfc9;
+  --dusty-blue: #52677d;
   --shadow-sm: 1px 1px 5px 0 #b7b7b7;
-  --shadow-pin : 4px 10px 3px rgba(85,85,85,0.9);
+  --shadow-pin: 4px 10px 3px rgba(85, 85, 85, 0.9);
   --shadow-md: 3px 3px 3px 0 #b7b7b7;
   --shadow-book: 4px 10px 10px 0 rgba(85, 85, 85, 0.9);
   --shadow-book-pick: 4px 10px 30px 0 #e0ab0f;
@@ -101,6 +95,10 @@
 }
 
 @keyframes shimmer {
-    0%   { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
   }
+  100% {
+    background-position: 200% 0;
+  }
+}
