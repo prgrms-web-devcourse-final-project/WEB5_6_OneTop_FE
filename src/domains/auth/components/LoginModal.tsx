@@ -109,7 +109,7 @@ function LoginModal() {
               </button>
 
               <Link
-                href="/signup"
+                href="/sign-up"
                 className="flex items-center justify-center flex-1 h-14 bg-white text-deep-navy rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
               >
                 회원가입

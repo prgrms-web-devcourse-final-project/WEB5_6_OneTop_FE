@@ -4,7 +4,7 @@ import { useLoginModalStore } from "@/share/stores/loginModalStore";
 import tw from "@/share/utils/tw";
 
 interface Props {
-  variant?: "default" | "transparent" | "light" | "dark";
+  variant?: "default" | "transparent" | "light" | "primary";
 }
 
 function HeaderLoginButton({ variant = "default" }: Props) {
@@ -17,8 +17,8 @@ function HeaderLoginButton({ variant = "default" }: Props) {
         return "bg-transparent text-white";
       case "light":
         return "bg-white text-black border-black hover:bg-black hover:text-white";
-      case "dark":
-        return "bg-black text-white";
+      case "primary":
+        return "bg-inherit text-white";
     }
   };
 

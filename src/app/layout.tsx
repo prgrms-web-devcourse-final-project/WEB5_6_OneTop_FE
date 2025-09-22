@@ -1,4 +1,3 @@
-import ScrollSmootherProvider from "@/share/providers/ScrollSmoothProvider";
 import TanstackProvider from "@/share/providers/TanstackProvider";
 import "./globals.css";
 import { Metadata, Viewport } from "next";
@@ -59,12 +58,10 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="min-h-screen font-family-pretendard">
-        <ScrollSmootherProvider>
           <TanstackProvider>
             <LoginModal />
               {children}
           </TanstackProvider>
-        </ScrollSmootherProvider>
       </body>
     </html>
   );
