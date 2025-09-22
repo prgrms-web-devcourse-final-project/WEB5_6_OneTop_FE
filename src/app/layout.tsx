@@ -1,56 +1,68 @@
 import ScrollSmootherProvider from "@/share/providers/ScrollSmoothProvider";
 import TanstackProvider from "@/share/providers/TanstackProvider";
-import "@/share/styles/index.css";
-import ScrollTopButton from "@/share/components/ScrollTopButton";
-import Footer from "@/share/components/Footer";
-import { Metadata } from "next";
+import "./globals.css";
+import { Metadata, Viewport } from "next";
 import { Racing_Sans_One, Roboto_Serif } from "next/font/google";
+import LoginModal from "@/domains/auth/components/LoginModal";
 
 export const metadata: Metadata = {
   title: "Re:Life",
   description: "Re:Life",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo_32.svg", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/logo_64.svg", sizes: "64x64", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/logo_128.svg", sizes: "128x128", type: "image/svg+xml" },
+    ],
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 const racingSansOne = Racing_Sans_One({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-accent",
+  variable: "--font-racing-sans-one",
 });
 
 const robotoSerif = Roboto_Serif({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-logo",
+  variable: "--font-roboto-serif",
 });
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html className={`${racingSansOne.variable} ${robotoSerif.variable}`}>
+    <html
+      className={`${racingSansOne.variable} ${robotoSerif.variable}`}
+      lang="ko"
+      style={
+        {
+          "--font-racing-sans-one": racingSansOne.style.fontFamily,
+          "--font-roboto-serif": robotoSerif.style.fontFamily,
+        } as React.CSSProperties
+      }
+    >
       <head>
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css"
         />
       </head>
-      <body className="min-h-screen">
+      <body className="min-h-screen font-family-pretendard">
         <ScrollSmootherProvider>
           <TanstackProvider>
-            <div className="min-h-screen flex flex-col">
-              <header className="w-full h-10 bg-amber-200 flex-shrink-0">
-                헤더입니다.
-              </header>
-
-              <main className="flex flex-col items-center sm:items-start w-full flex-1">
-                {children}
-              </main>
-
-              <Footer />
-
-              <ScrollTopButton />
-            </div>
+            <LoginModal />
+              {children}
           </TanstackProvider>
         </ScrollSmootherProvider>
       </body>
