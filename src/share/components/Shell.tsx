@@ -5,7 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import ScrollTopButton from "./ScrollTopButton";
 import { usePathname } from "next/navigation";
-import { useLoginModalStore } from "../stores/loginModalStore";
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 
 interface ShellProps {
   children: React.ReactNode;

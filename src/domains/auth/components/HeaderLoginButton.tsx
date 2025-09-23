@@ -1,6 +1,6 @@
 "use client";
 
-import { useLoginModalStore } from "@/share/stores/loginModalStore";
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import tw from "@/share/utils/tw";
 
 interface Props {
