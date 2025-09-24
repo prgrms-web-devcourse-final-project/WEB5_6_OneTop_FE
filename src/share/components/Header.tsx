@@ -4,7 +4,7 @@ import logo from "@/public/logo_32.svg";
 import HeaderLoginButton from "@/domains/auth/components/HeaderLoginButton";
 
 interface HeaderProps {
-  variant?: "default" | "transparent" | "light" | "dark";
+  variant?: "default" | "transparent" | "light" | "primary";
 }
 
 /* 해결 방법 고민
@@ -34,9 +34,9 @@ function Header({ variant = "default" }: HeaderProps) {
           logoFilter: "brightness(0)",
           underlineColor: "after:bg-black",
         };
-      case "dark":
+      case "primary":
         return {
-          background: "bg-black",
+          background: "bg-deep-navy",
           text: "text-white",
           logoFilter: "brightness(0) invert(1)",
           underlineColor: "after:bg-white",
