@@ -20,10 +20,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   const data = useOnboardingStore((s) => s.data);
 
   // 애니메이션 훅으로 관심사 분리
-  const { rootRef, trackRef, addItemRef } = useSliderAnimation(
-    safeIdx,
-    steps.length
-  );
+  const { rootRef, trackRef, addItemRef } = useSliderAnimation(safeIdx);
 
   // 해당 슬라이드로 이동 이벤트 핸들러
   const goto = (to: number) => {
@@ -89,42 +86,38 @@ function FormSlider({ initialStep }: { initialStep: number }) {
             style={{ width: `${steps.length * 100}%` }}
           >
             {/* 전체 폼 구성 */}
-            {steps.map((s) => (
-              <div
-                key={s.key}
-                ref={addItemRef}
-                className="absolute top-0 left-0 h-full flex items-center justify-center flex-col gap-10"
-                style={{ width: `${100 / steps.length}%` }}
-              >
-                {/* 질문 라벨 */}
-                <label
-                  htmlFor={s.key}
-                  className="text-white text-5xl font-semibold"
+            {steps.map((s) => {
+              const StepComponent = s.component;
+              return (
+                <div
+                  key={s.key}
+                  ref={addItemRef}
+                  className="absolute top-0 left-0 h-full flex items-center justify-center flex-col gap-10"
+                  style={{ width: `${100 / steps.length}%` }}
                 >
-                  {s.label}
-                </label>
+                  {/* 질문 라벨 */}
+                  <label
+                    htmlFor={s.key}
+                    className="text-white text-5xl font-semibold"
+                  >
+                    {s.label}
+                  </label>
 
-                {/* 이곳을 커스텀 input 요소들로 교체해야 함. */}
-                {s.key && (
-                  <input
-                    id={s.key}
-                    type="text"
+                  {/* 이곳을 커스텀 input 요소들로 교체해야 함. */}
+                  {s.key &&  (
+                    <StepComponent id={s.key} placeholder={s.placeholder} />
+                  )}
+
+                  <button
+                    type="button"
                     className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
                                placeholder:text-gray-500 text-center text-2xl outline-none"
-                    placeholder={s.placeholder}
-                    // value={data[s.key as keyof typeof data] ?? ""}
-                    onChange={(e) => console.log(e.target.value)}
-                  />
-                )}
-                <button
-                  type="button"
-                  className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
-                               placeholder:text-gray-500 text-center text-2xl outline-none"
-                >
-                  Next
-                </button>
-              </div>
-            ))}
+                  >
+                    Next
+                  </button>
+                </div>
+              );
+            })}
           </form>
         </div>
 

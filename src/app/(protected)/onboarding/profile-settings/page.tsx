@@ -9,6 +9,11 @@ export function generateMetadata() {
 }
 
 function Page() {
-  return <FormSlider initialStep={0} />;
+  return (
+    <>
+    
+      <FormSlider initialStep={0} />
+    </>
+  );
 }
 export default Page;

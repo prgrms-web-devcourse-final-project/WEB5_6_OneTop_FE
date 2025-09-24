@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-export const useSliderAnimation = (index: number, totalSteps: number) => {
+export const useSliderAnimation = (index: number) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLFormElement>(null);
   const itemsRef = useRef<HTMLDivElement[]>([]);
@@ -19,7 +19,7 @@ export const useSliderAnimation = (index: number, totalSteps: number) => {
       gsap.set(rootRef.current, { autoAlpha: 0, clearProps: "visibility" });
     }
 
-    itemsRef.current.forEach((item, i) => {
+    itemsRef.current.forEach((item) => {
       gsap.set(item, { autoAlpha: 0 });
     });
   }, []);
