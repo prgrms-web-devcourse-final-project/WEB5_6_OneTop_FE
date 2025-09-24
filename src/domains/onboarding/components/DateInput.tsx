@@ -4,8 +4,9 @@ import { useState } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { BiCalendarAlt } from "react-icons/bi";
 import { ko } from "react-day-picker/locale";
+import { DateInputProps } from "../types";
 
-function DateInput({ id, placeholder }: { id: string; placeholder: string }) {
+function DateInput({ id, placeholder, register, errors }: DateInputProps) {
   // TODO: id와 placeholder를 실제로 사용하도록 구현 필요
   const today = new Date().getTime();
   const thisYear = new Date(today).getFullYear();
@@ -25,7 +26,7 @@ function DateInput({ id, placeholder }: { id: string; placeholder: string }) {
   const defaultClassNames = getDefaultClassNames();
 
   return (
-    <div className="flex gap-8 items-center justify-center w-full ">
+    <div className="flex gap-8 items-center justify-center w-full h-100">
       <div>
         <input
           type="number"
@@ -74,33 +75,32 @@ function DateInput({ id, placeholder }: { id: string; placeholder: string }) {
       <label htmlFor="date" className="invisible">
         날짜
       </label>
-      <div className="relative">
-        <div className="flex gap-4 items-center">
-          <button
-            type="button"
-            id="date"
-            onClick={() => setCalendarOpen(!calendarOpen)}
-          >
-            <BiCalendarAlt size={32} style={{ color: "white" }} />
-          </button>
-          {calendarOpen && (
-            <DayPicker
-              classNames={{
-                today: "border-2 border-amber-500 rounded-md",
-                selected: "bg-deep-navy text-white rounded-md",
-                root: `${defaultClassNames.root} shadow-lg p-5 rounded-md bg-white font-pretendard`,
-                chevron: `${defaultClassNames.chevron} fill-deep-navy`,
-                day: `${defaultClassNames.day} p-1 text-center transition-all duration-300`,
-                month_caption: `${defaultClassNames.month_caption} text-deep-navy text-xl font-bold my-3`,
-              }}
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => setSelectedDate(date ?? new Date())}
-              required={false}
-              locale={ko}
-            />
-          )}
-        </div>
+      <div className="relative flex gap-4 items-center -ml-10">
+        <button
+          type="button"
+          id="date"
+          onClick={() => setCalendarOpen(!calendarOpen)}
+        >
+          <BiCalendarAlt size={64} style={{ color: "white" }} />
+        </button>
+        {calendarOpen && (
+          <DayPicker
+            className="absolute top-0 left-0"
+            classNames={{
+              today: "border-1 border-red-500",
+              selected: "bg-deep-navy text-white rounded-md",
+              root: `${defaultClassNames.root} shadow-lg p-5 rounded-md bg-white font-pretendard`,
+              chevron: `${defaultClassNames.chevron} fill-deep-navy`,
+              day: `${defaultClassNames.day} p-1 text-center transition-all duration-300`,
+              month_caption: `${defaultClassNames.month_caption} text-deep-navy text-xl font-bold my-3`,
+            }}
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => setSelectedDate(date ?? new Date())}
+            required={false}
+            locale={ko}
+          />
+        )}
       </div>
     </div>
   );

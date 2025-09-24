@@ -38,7 +38,7 @@ export const useSliderAnimation = (index: number) => {
       gsap.to(trackRef.current, {
         x: index * -slideW, // 음수로 이동 (왼쪽으로)
         autoAlpha: 1,
-        duration: 1,
+        duration: 0.5,
         ease: "power3.inOut",
       });
     }

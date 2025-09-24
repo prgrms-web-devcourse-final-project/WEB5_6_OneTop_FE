@@ -6,6 +6,10 @@ import { steps } from "../lib/steps";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import tw from "@/share/utils/tw";
 import { useSliderAnimation } from "../hooks/useSliderAnimation";
+import { useForm } from "react-hook-form";
+import { FormSchema } from "../lib/schemas";
+import { isValidFormKey, StepDefinition, UserOnboardingData } from "../types";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function FormSlider({ initialStep }: { initialStep: number }) {
   // URL 정보 처리 HOOK
@@ -22,6 +26,11 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   // 애니메이션 훅으로 관심사 분리
   const { rootRef, trackRef, addItemRef } = useSliderAnimation(safeIdx);
 
+  const { register, handleSubmit, formState: { errors }, getValues } = useForm<UserOnboardingData>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: data,
+  });
+
   // 해당 슬라이드로 이동 이벤트 핸들러
   const goto = (to: number) => {
     const clamp = Math.max(0, Math.min(to, steps.length - 1));
@@ -35,7 +44,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   };
 
   const onNext = () => {
-    // TODO: 유효성 검사 로직 추가
+    // TODO: 유효성 검사 로직 추가 (이미지 파일 체크, 필수 입력 체크)
     goto(safeIdx + 1);
   };
 
@@ -86,7 +95,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
             style={{ width: `${steps.length * 100}%` }}
           >
             {/* 전체 폼 구성 */}
-            {steps.map((s) => {
+            {steps.map((s: StepDefinition) => {
               const StepComponent = s.component;
               return (
                 <div
@@ -104,8 +113,8 @@ function FormSlider({ initialStep }: { initialStep: number }) {
                   </label>
 
                   {/* 이곳을 커스텀 input 요소들로 교체해야 함. */}
-                  {s.key &&  (
-                    <StepComponent id={s.key} placeholder={s.placeholder} />
+                  {isValidFormKey(s.key) &&  (
+                    <StepComponent id={s.key} placeholder={s.placeholder} register={register} errors={errors[s.key]} />
                   )}
 
                   <button
