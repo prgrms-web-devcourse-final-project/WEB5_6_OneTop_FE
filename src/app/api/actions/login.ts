@@ -9,12 +9,18 @@ export async function loginAction(formData: FormData) {
 
   if (!email || !password) throw new Error("이메일과 비밀번호를 입력해주세요.");
 
-  const res = await fetch(`${process.env.API_URL}/auth/login`, {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+  const res = await fetch(`${apiUrl}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
     cache: "no-store",
     credentials: "include",
+    next: {
+      revalidate: 10,
+      tags: ["auth", "login"],
+    },
   });
 
   if (!res.ok) {
@@ -24,7 +30,7 @@ export async function loginAction(formData: FormData) {
 
   if (!res.ok) throw new Error("로그인 실패");
 
-  const  {accessToken, refreshToken} = await res.json();
+  const { accessToken, refreshToken } = await res.json();
 
   const cookieStore = await cookies();
 
@@ -39,8 +45,10 @@ export async function loginAction(formData: FormData) {
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 30,
   });
-  
 
   // 성공 시 쿼리 갱신
   revalidatePath("/");
+  const result = await res.json();
+  
+  return result;
 }
