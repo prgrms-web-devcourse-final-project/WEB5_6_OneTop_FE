@@ -1,10 +1,10 @@
 import { Metadata } from "next";
+import { BaselineContainer } from "@/domains/baselines/components/BaselineContainer";
 
 export const metadata: Metadata = {
   title: "Re:Life | 베이스라인 설정",
   description: "당신의 인생 분기점들을 기록하여 베이스라인을 만들어보세요.",
 };
-import { BaselineContainer } from "@/domains/baselines/components/BaselineContainer";
 
 export default function Page() {
   return (
