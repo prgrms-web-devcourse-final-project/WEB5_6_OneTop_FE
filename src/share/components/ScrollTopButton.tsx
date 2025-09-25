@@ -70,7 +70,7 @@ function ScrollTopButton({
     <>
       <button
         className={tw(
-          "fixed right-[50px] flex bg-primary-black backdrop-blur-sm",
+          "fixed right-[50px] flex bg-deep-navy border border-white backdrop-blur-sm",
           "w-[50px] h-[50px] rounded-full items-center justify-center overflow-hidden",
           "shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out z-20",
           "hover:scale-110",
