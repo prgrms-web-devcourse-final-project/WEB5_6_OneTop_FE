@@ -1,7 +1,7 @@
 import { steps } from "./lib/steps";
 import { FormSchema } from "./lib/schemas";
 import { z } from "zod";
-import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormReturn } from "react-hook-form";
+import { FieldErrors, UseFormRegister, UseFormSetValue, Control } from "react-hook-form";
 
 export const isValidFormKey = (
   key: StepKeys
@@ -12,10 +12,10 @@ export const isValidFormKey = (
 // 키 종류
 export type StepKeys =
   | "name"
-  | "birthday"
+  | "birthday_at"
   | "gender"
   | "mbti"
-  | "preference"
+  | "beliefs"
   | "additional"
 
 // lib에 정의된 steps 타입
@@ -34,6 +34,7 @@ export type InputProps = {
   register: UseFormRegister<UserOnboardingData>;
   errors?: FieldErrors<UserOnboardingData>;
   setValue: UseFormSetValue<UserOnboardingData>;
+  control: Control<UserOnboardingData>;
 };
 
 

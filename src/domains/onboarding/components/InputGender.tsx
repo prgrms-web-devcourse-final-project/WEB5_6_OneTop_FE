@@ -1,33 +1,45 @@
+import { Controller, useWatch } from "react-hook-form";
 import { InputProps } from "../types";
+import tw from "@/share/utils/tw";
+import { AiOutlineMan, AiOutlineWoman } from "react-icons/ai";
 
-function InputGender({
-  id,
-  placeholder,
-  register,
-  errors,
-  setValue,
-}: InputProps) {
+function InputGender({ id, control }: InputProps) {
   return (
-    <div>
-      <input
-        type="radio"
-        id={id}
-        value="male"
-        {...register(id)}
-        placeholder={placeholder}
-        className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
-                 placeholder:text-gray-500 text-center text-2xl outline-none"
-      />
-      <input
-        type="radio"
-        id={id}
-        value="female"
-        {...register(id)}
-        placeholder={placeholder}
-        className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
-                 placeholder:text-gray-500 text-center text-2xl outline-none"
-      />
-    </div>
+    <Controller
+      control={control}
+      name={id}
+      defaultValue="male"
+      render={({ field }) => (
+        <div className="flex gap-20 items-center justify-center w-full py-5 h-80">
+          <button
+            type="button"
+            onClick={() => field.onChange("male")}
+            className={tw(
+              "px-8 py-4 rounded-lg text-2xl font-medium transition-all duration-200 hover:opacity-80",
+              field.value === "male"
+                ? "drop-shadow-md shadow-white opacity-100 scale-115"
+                : "drop-shadow-md shadow-white opacity-50"
+            )}
+          >
+            <AiOutlineMan className="text-blue-500" size={160} />
+            <div className="text-2xl font-medium text-white">남성</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => field.onChange("female")}
+            className={tw(
+              "px-8 py-4 rounded-lg text-2xl font-medium transition-all duration-200 hover:opacity-80",
+              field.value === "female"
+                ? "drop-shadow-md shadow-white opacity-100 scale-115"
+                : "drop-shadow-md shadow-white opacity-50"
+            )}
+          >
+            <AiOutlineWoman className="text-red-500" size={160} />
+            <div className="text-2xl font-medium text-white">여성</div>
+          </button>
+        </div>
+      )}
+    />
   );
 }
 export default InputGender;

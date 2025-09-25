@@ -1,6 +1,5 @@
 "use client";
 
-import { useOnboardingStore } from "../stores/useOnboardingStore";
 import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { steps } from "../lib/steps";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -33,6 +32,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     formState: { errors },
     setValue,
     getValues,
+    control,
   } = useForm<UserOnboardingData>({
     resolver: zodResolver(FormSchema),
   });
@@ -129,6 +129,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
                       register={register}
                       errors={errors[s.key]}
                       setValue={setValue}
+                      control={control}
                     />
                   )}
 

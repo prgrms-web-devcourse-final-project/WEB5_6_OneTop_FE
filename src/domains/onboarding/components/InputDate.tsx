@@ -49,7 +49,7 @@ function InputDate({
           maxLength={4}
           className="p-6 rounded-md border-2 border-white text-white text-4xl w-35 text-center"
           placeholder={year.toString()}
-          {...register(`birthday.birthYear`, {
+          {...register(`birthday_at.birthYear`, {
             valueAsNumber: true,
           })}
           min={1}
@@ -71,7 +71,7 @@ function InputDate({
           maxLength={2}
           max={12}
           min={1}
-          {...register(`birthday.birthMonth`, {
+          {...register(`birthday_at.birthMonth`, {
             valueAsNumber: true,
           })}
         />
@@ -91,7 +91,7 @@ function InputDate({
           min={1}
           className="p-6 rounded-md border-2 border-white text-white text-4xl w-25 text-center"
           placeholder={day.toString()}
-          {...register(`birthday.birthDay`, {
+          {...register(`birthday_at.birthDay`, {
             valueAsNumber: true,
           })}
         />
@@ -139,9 +139,9 @@ function InputDate({
               selected={selectedDate}
               onSelect={(date) => {
                 setSelectedDate(date ?? new Date());
-                setValue(`birthday.birthDay`, date?.getDate() ?? 0);
-                setValue(`birthday.birthMonth`, (date?.getMonth() ?? 0) + 1);
-                setValue(`birthday.birthYear`, date?.getFullYear() ?? 0);
+                setValue(`birthday_at.birthDay`, date?.getDate() ?? 0);
+                setValue(`birthday_at.birthMonth`, (date?.getMonth() ?? 0) + 1);
+                setValue(`birthday_at.birthYear`, date?.getFullYear() ?? 0);
               }}
               required={false}
               locale={ko}

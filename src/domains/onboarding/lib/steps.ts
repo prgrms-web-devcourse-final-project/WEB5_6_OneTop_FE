@@ -1,6 +1,8 @@
 // TODO : 렌더 패턴 추가하기. (개방 - 폐쇄 원칙 : 확장을 위해 FormSlider를 수정할 필요 없이 steps만 수정하면 확장 가능)
 
 import InputDate from "../components/InputDate";
+import InputGender from "../components/InputGender";
+import InputMbti from "../components/InputMbti";
 import InputText from "../components/InputText";
 import { StepDefinition } from "../types";
 
@@ -10,9 +12,14 @@ import { StepDefinition } from "../types";
  */
 
 export const steps: StepDefinition[] = [
-  { key: "name", label: "당신의 이름은?", placeholder: "이름을 입력해주세요", component: InputText },
   {
-    key: "birthday",
+    key: "name",
+    label: "당신의 이름은?",
+    placeholder: "이름을 입력해주세요",
+    component: InputText,
+  },
+  {
+    key: "birthday_at",
     label: "당신의 생년월일은?",
     placeholder: "생년월일을 입력해주세요",
     component: InputDate,
@@ -21,11 +28,16 @@ export const steps: StepDefinition[] = [
     key: "gender",
     label: "당신의 성별은?",
     placeholder: "성별을 입력해주세요",
-    component: InputText,
+    component: InputGender,
   },
-  { key: "mbti", label: "당신의 MBTI는?", placeholder: "MBTI를 입력해주세요", component: InputText },
   {
-    key: "preference",
+    key: "mbti",
+    label: "당신의 MBTI는?",
+    placeholder: "MBTI를 입력해주세요",
+    component: InputMbti,
+  },
+  {
+    key: "beliefs",
     label: "당신의 성향은?",
     placeholder: "성향을 입력해주세요",
     component: InputText,
@@ -36,4 +48,4 @@ export const steps: StepDefinition[] = [
     placeholder: "추가 정보를 입력해주세요",
     component: InputText,
   },
-]
+];

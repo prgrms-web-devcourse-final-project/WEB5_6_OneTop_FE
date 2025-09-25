@@ -1,5 +1,3 @@
-import FormSlider from "@/domains/onboarding/components/FormSlider";
-
 function layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="w-screen h-screen bg-deep-navy relative">
