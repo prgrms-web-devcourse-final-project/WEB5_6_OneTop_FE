@@ -1,19 +1,14 @@
 "use client";
 
-
 import { useOnboardingStore } from "../stores/useOnboardingStore";
-import { DateInputProps, isValidFormKey } from "../types";
+import { InputProps, isValidFormKey } from "../types";
 
-
-
-function InputText({ id, placeholder, register, errors }: DateInputProps) {
-  const data = useOnboardingStore((s) => s.data);
-  const setData = useOnboardingStore((s) => s.setData);
-
+function InputText({ id, placeholder, register, errors }: InputProps) {
   if (!isValidFormKey(id)) {
     return <>해당 키 값에 해당하는 입력란이 없습니다.</>;
   }
 
+  // 타입 에러에 지쳐서 "name" 하드코딩했는데 추후 id로 변경할 것...
   return (
     <>
       <input
@@ -23,10 +18,8 @@ function InputText({ id, placeholder, register, errors }: DateInputProps) {
         className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
                  placeholder:text-gray-500 text-center text-2xl outline-none"
         placeholder={placeholder}
-        value={data[id as keyof typeof data] ?? ""}
-        onChange={(e) => setData({ ...data, [id]: e.target.value })}
       />
-      {errors && <p>{errors.message}</p>}
+      {errors && <p>{errors[id]?.message?.toString()}</p>}
     </>
   );
 }

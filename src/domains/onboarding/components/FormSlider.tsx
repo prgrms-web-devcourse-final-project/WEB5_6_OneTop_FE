@@ -21,14 +21,20 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   const stepFromUrl = Number(sp.get("step") ?? initialStep);
   const safeIdx = Math.min(Math.max(stepFromUrl, 0), steps.length - 1);
   // ZUSTAND 데이터 불러오기
-  const data = useOnboardingStore((s) => s.data);
+  // TODO: ZUSTAND 제거
+  // const data = useOnboardingStore((s) => s.data);
 
   // 애니메이션 훅으로 관심사 분리
   const { rootRef, trackRef, addItemRef } = useSliderAnimation(safeIdx);
 
-  const { register, handleSubmit, formState: { errors }, getValues } = useForm<UserOnboardingData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    getValues,
+  } = useForm<UserOnboardingData>({
     resolver: zodResolver(FormSchema),
-    defaultValues: data,
   });
 
   // 해당 슬라이드로 이동 이벤트 핸들러
@@ -48,7 +54,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     goto(safeIdx + 1);
   };
 
-  const onSubmit = () => {
+  const onSubmit = (data: UserOnboardingData) => {
     console.log(data);
   };
 
@@ -74,7 +80,10 @@ function FormSlider({ initialStep }: { initialStep: number }) {
         <button
           type="button"
           className="cursor-pointer absolute right-10 -translate-y-1/2 z-20"
-          onClick={onNext}
+          onClick={() => {
+            onNext();
+            console.log(getValues());
+          }}
           disabled={safeIdx === steps.length - 1}
         >
           <AiOutlineRight
@@ -89,7 +98,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
         {/* 폼 슬라이드 */}
         <div className="relative w-[80%] h-full overflow-hidden z-10">
           <form
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             ref={trackRef}
             className="absolute top-0 left-0 h-full will-change-transform"
             style={{ width: `${steps.length * 100}%` }}
@@ -113,16 +122,22 @@ function FormSlider({ initialStep }: { initialStep: number }) {
                   </label>
 
                   {/* 이곳을 커스텀 input 요소들로 교체해야 함. */}
-                  {isValidFormKey(s.key) &&  (
-                    <StepComponent id={s.key} placeholder={s.placeholder} register={register} errors={errors[s.key]} />
+                  {isValidFormKey(s.key) && (
+                    <StepComponent
+                      id={s.key}
+                      placeholder={s.placeholder}
+                      register={register}
+                      errors={errors[s.key]}
+                      setValue={setValue}
+                    />
                   )}
 
                   <button
-                    type="button"
+                    type="submit"
                     className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
                                placeholder:text-gray-500 text-center text-2xl outline-none"
                   >
-                    Next
+                    완료
                   </button>
                 </div>
               );

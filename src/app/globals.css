@@ -3,51 +3,51 @@
 
 @layer theme {
   :root {
-  --font-main: "Pretendard Variable", sans-serif;
-  --font-accent: var(--font-racing-sans-one);
-  --font-logo: var(--font-roboto-serif);
-  --background-white: #f5f5f5;
-  --background-gray: #c6c6c6;
-  --white: #ffffff;
-  --gray-10: #f5f5f5;
-  --gray-50: #f0f0f0;
-  --gray-800: #303030;
-  --black: #000000;
-  --yellow: #ffd700;
-  --deep-navy: #0f1a2b;
-  --midnight-blue: #1c2e4a;
-  --ivory: #bdc4d4;
-  --buttercream: #d1cfc9;
-  --dusty-blue: #52677d;
-  --shadow-sm: 1px 1px 5px 0 #b7b7b7;
-  --shadow-pin: 4px 10px 3px rgba(85, 85, 85, 0.9);
-  --shadow-md: 3px 3px 3px 0 #b7b7b7;
-  --shadow-book: 4px 10px 10px 0 rgba(131, 2, 2, 0.9);
-  --shadow-book-pick: 4px 10px 30px 0 #e0ab0f;
+    --font-main: "Pretendard Variable", sans-serif;
+    --font-accent: var(--font-racing-sans-one);
+    --font-logo: var(--font-roboto-serif);
+    --background-white: #f5f5f5;
+    --background-gray: #c6c6c6;
+    --white: #ffffff;
+    --gray-10: #f5f5f5;
+    --gray-50: #f0f0f0;
+    --gray-800: #303030;
+    --black: #000000;
+    --yellow: #ffd700;
+    --deep-navy: #0f1a2b;
+    --midnight-blue: #1c2e4a;
+    --ivory: #bdc4d4;
+    --buttercream: #d1cfc9;
+    --dusty-blue: #52677d;
+    --shadow-sm: 1px 1px 5px 0 #b7b7b7;
+    --shadow-pin: 4px 10px 3px rgba(85, 85, 85, 0.9);
+    --shadow-md: 3px 3px 3px 0 #b7b7b7;
+    --shadow-book: 4px 10px 10px 0 rgba(131, 2, 2, 0.9);
+    --shadow-book-pick: 4px 10px 30px 0 #e0ab0f;
   }
 
   @theme inline {
-  --color-background-white: var(--background-white);
-  --color-background-gray: var(--background-gray);
-  --color-white: var(--white);
-  --color-gray-10: var(--gray-10);
-  --color-gray-50: var(--gray-50);
-  --color-gray-800: var(--gray-800);
-  --color-black: var(--black);
-  --color-yellow: var(--yellow);
-  --color-deep-navy: var(--deep-navy);
-  --color-midnight-blue: var(--midnight-blue);
-  --color-ivory: var(--ivory);
-  --color-buttercream: var(--buttercream);
-  --color-dusty-blue: var(--dusty-blue);
-  --font-family-pretendard: var(--font-main);
-  --font-family-accent: var(--font-accent);
-  --font-family-logo: var(--font-logo);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-pin: var(--shadow-pin);
-  --shadow-md: var(--shadow-md);
-  --shadow-book: var(--shadow-book);
-  --shadow-book-pick: var(--shadow-book-pick);
+    --color-background-white: var(--background-white);
+    --color-background-gray: var(--background-gray);
+    --color-white: var(--white);
+    --color-gray-10: var(--gray-10);
+    --color-gray-50: var(--gray-50);
+    --color-gray-800: var(--gray-800);
+    --color-black: var(--black);
+    --color-yellow: var(--yellow);
+    --color-deep-navy: var(--deep-navy);
+    --color-midnight-blue: var(--midnight-blue);
+    --color-ivory: var(--ivory);
+    --color-buttercream: var(--buttercream);
+    --color-dusty-blue: var(--dusty-blue);
+    --font-family-pretendard: var(--font-main);
+    --font-family-accent: var(--font-accent);
+    --font-family-logo: var(--font-logo);
+    --shadow-sm: var(--shadow-sm);
+    --shadow-pin: var(--shadow-pin);
+    --shadow-md: var(--shadow-md);
+    --shadow-book: var(--shadow-book);
+    --shadow-book-pick: var(--shadow-book-pick);
   }
 }
 
@@ -144,23 +144,6 @@ body {
   display: none !important;
 }
 
-
-h1 {
-  @apply text-2xl;
-}
-
-h2 {
-  @apply text-xl;
-}
-
-h3 {
-  @apply text-lg;
-}
-
-p {
-  @apply text-slate-700 text-base leading-normal;
-}
-
 button {
   @apply disabled:cursor-not-allowed cursor-pointer;
 }
@@ -177,4 +160,14 @@ a:hover {
   outline: 0;
   text-decoration: none;
   color: inherit;
+}
+
+.tooltip {
+  background-color: white;
+  color: #303030;
+  font-size: 14px;
+  font-family: var(--font-main);
+  padding: 8px;
+  border-radius: 4px;
+  z-index: 10;
 }
