@@ -9,7 +9,7 @@ export interface LifeEvent {
   eventTitle: string;
   actualChoice: string;
   context?: string;
-  createdAt: Date;
+  createdAt?: Date;
 }
 
 interface BaselineState {

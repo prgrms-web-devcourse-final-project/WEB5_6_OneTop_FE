@@ -1,3 +1,5 @@
+// 명세서 확인하고 다시 정의하기
+
 export interface BaselineEvent {
   id: string;
   year: number;

@@ -1,92 +1,188 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { LifeEvent } from "@/share/stores/baselineStore";
+import { Tooltip } from "@/share/components/Tooltip";
+import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { BaselineNode } from "./BaselineNode";
-import { GoPlusCircle } from "react-icons/go";
+import { PiPlus } from "react-icons/pi";
+
+type ExtendedEvent = LifeEvent & { isTemp?: boolean };
+
+type NodeItem = {
+  id: string;
+  year: number | null;
+  age: number | null;
+  hasEvent: boolean;
+  index: number;
+  isTemp: boolean;
+};
 
 interface Props {
-  onNodeClick: (year: number, age: number) => void;
+  onNodeClick: (year: number, age: number, isEmpty?: boolean) => void;
   onAddNode: () => void;
+  onDeleteTempNode: (year: number) => void;
   selectedYear: number | null;
-  events: LifeEvent[];
+  events: ExtendedEvent[];
+  tempNodes: Array<{ year: number; age: number }>;
+  footerHeight?: number;
+  isGuest: boolean;
 }
 
 export const BaselineView = ({
   onNodeClick,
   onAddNode,
+  onDeleteTempNode,
   selectedYear,
   events,
+  tempNodes,
+  footerHeight = 80,
+  isGuest,
 }: Props) => {
-  const maxNodes = 10;
-  const canAddMore = events.length < maxNodes;
+  const maxNodes = isGuest ? 5 : 10;
 
-  // 이벤트가 있는 노드들
-  const eventNodes = events.map((event) => ({
-    year: event.year,
-    age: event.age,
-    hasEvent: true,
-  }));
+  // 실제 이벤트만 필터링
+  const realEvents = events.filter((event) => !event.isTemp);
+  const totalRealNodes = realEvents.length;
+  const totalNodes = totalRealNodes + tempNodes.length;
+  const canAddMore = totalNodes < maxNodes;
 
-  // 빈 노드들 (임시 자리)
-  const emptyNodesCount = Math.max(0, 5 - events.length);
-  const emptyNodes = Array.from({ length: emptyNodesCount }, (_, index) => ({
-    year: null, // 년도 없음
-    age: null, // 나이 없음
-    hasEvent: false,
-  }));
+  // 실제 이벤트 노드
+  const eventNodes: NodeItem[] = realEvents
+    .sort((a, b) => a.year - b.year)
+    .map((event, index) => ({
+      id: `event-${event.year}-${index}`,
+      year: event.year,
+      age: event.age,
+      hasEvent: true,
+      index: index,
+      isTemp: false,
+    }));
 
-  const allNodes = [
-    ...eventNodes.sort((a, b) => a.year - b.year),
-    ...emptyNodes,
-  ].slice(0, maxNodes);
+  // 임시 노드
+  const tempNodeItems: NodeItem[] = tempNodes
+    .sort((a, b) => a.year - b.year)
+    .map((temp, index) => ({
+      id: `temp-${temp.year}-${index}`,
+      year: temp.year,
+      age: temp.age,
+      hasEvent: false,
+      index: eventNodes.length + index,
+      isTemp: true,
+    }));
+
+  // 기본 빈 노드 (5개까지)
+  const emptyNodesCount = totalRealNodes < 5 ? 5 - totalRealNodes : 0;
+  const emptyNodes: NodeItem[] = Array.from(
+    { length: emptyNodesCount },
+    (_, index) => ({
+      id: `empty-${eventNodes.length + tempNodeItems.length + index}`,
+      year: null,
+      age: null,
+      hasEvent: false,
+      index: eventNodes.length + tempNodeItems.length + index,
+      isTemp: false,
+    })
+  );
+
+  const allNodes = [...eventNodes, ...tempNodeItems, ...emptyNodes];
+
+  const selectedRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (selectedRef.current) {
+      const rect = selectedRef.current.getBoundingClientRect();
+      const offsetTop = window.scrollY + rect.top - 162;
+      window.scrollTo({ top: offsetTop, behavior: "smooth" });
+    }
+  }, [selectedYear]);
+
+  const [bottomPosition, setBottomPosition] = useState(30);
+  const isMobile = useMobileDetection(768);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+
+      if (distanceFromBottom <= footerHeight) {
+        const adjustment =
+          ((footerHeight - distanceFromBottom) / footerHeight) * 70;
+        setBottomPosition(30 + adjustment);
+      } else {
+        setBottomPosition(30);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [footerHeight]);
 
   return (
-    <div className="relative w-[21.5vw] py-[100px] bg-black">
-      <div className="flex flex-col gap-[138px]">
-        {allNodes.map((node, index) => {
-          const isSelected = node.hasEvent && selectedYear === node.year; // 이벤트 있는 노드만 선택 가능
+    <div className="relative w-[21.5vw] py-[60px] bg-[#292929]">
+      <div className="flex flex-col gap-[120px]">
+        {allNodes.map((node) => {
+          const isSelected = node.hasEvent && selectedYear === node.year;
 
           return (
             <BaselineNode
-              key={
-                node.hasEvent && node.year
-                  ? `event-${node.year}`
-                  : `empty-${index}`
-              }
-              year={node.year ?? 0} // number는 유지하되, isSelected는 hasEvent 있을 때만 true
+              key={node.id}
+              year={node.year ?? 0}
               age={node.age ?? 0}
               isSelected={isSelected}
               hasEvent={node.hasEvent}
               event={
-                node.hasEvent ? events.find((e) => e.year === node.year) : null
+                node.hasEvent
+                  ? realEvents.find(
+                      (e, idx) => `event-${e.year}-${idx}` === node.id
+                    )
+                  : null
               }
               onClick={() =>
-                onNodeClick(
-                  node.year ?? new Date().getFullYear(),
-                  node.age ?? 0
-                )
+                onNodeClick(node.year ?? 0, node.age ?? 0, !node.hasEvent)
               }
-              showConnector={index < allNodes.length - 1}
+              onDelete={
+                node.isTemp ? () => onDeleteTempNode(node.year!) : undefined
+              }
+              showConnector={node.index < allNodes.length - 1}
+              isTemp={node.isTemp}
+              innerRef={isSelected ? selectedRef : undefined}
             />
           );
         })}
       </div>
 
-      {/* 플로팅 추가 버튼 */}
-      {canAddMore && (
-        <div className="fixed bottom-8 right-8 z-50">
-          <button
-            onClick={onAddNode}
-            className="w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 hover:scale-105"
-            title="새 분기점 추가"
+      {/* 추가 버튼 */}
+      <div
+        className={`fixed left-8 z-50 ${
+          isMobile ? "left-4" : "left-8"
+        } transition-all duration-300`}
+        style={{ bottom: `${bottomPosition}px` }}
+      >
+        <button
+          onClick={onAddNode}
+          disabled={isGuest}
+          className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
+            isGuest
+              ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+              : "bg-gray-400 text-white hover:scale-105"
+          }`}
+        >
+          <Tooltip
+            contents={
+              isGuest
+                ? "게스트 모드에서는 기본 5개 분기점만 작성 가능합니다"
+                : "5개의 분기점을 먼저 입력 후, 새 분기점을 추가합니다"
+            }
+            className="w-[180px] ml-2 text-center"
           >
-            <GoPlusCircle size={24} />
-          </button>
-          <div className="absolute -top-2 -right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-full border border-gray-600">
-            {events.length}/10
-          </div>
-        </div>
-      )}
+            <PiPlus size={24} />
+          </Tooltip>
+        </button>
+      </div>
     </div>
   );
 };
