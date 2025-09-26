@@ -15,7 +15,7 @@ import { useState } from "react";
 function LoginModal() {
   const isOpen = useLoginModalStore((s) => s.isOpen);
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
-  const [error, setError] = useState("")
+  const [error, setError] = useState("");
 
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -51,7 +51,7 @@ function LoginModal() {
 
     formData.append("email", data.email);
     formData.append("password", data.password);
-    
+
     try {
       await loginAction(formData);
       // 로그인 성공
@@ -60,7 +60,10 @@ function LoginModal() {
       reset();
     } catch (error) {
       // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
-      const errorMessage = error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "로그인 중 오류가 발생했습니다.";
       setError(errorMessage);
     }
   };
