@@ -1,5 +1,3 @@
-"use client";
-
 import { PiWarningCircleFill } from "react-icons/pi";
 import { FaLightbulb } from "react-icons/fa";
 import { Tooltip } from "@/share/components/Tooltip";
