@@ -75,10 +75,3 @@ export const signUpSchema = z
       });
     }
   })
-  // transform으로 외부 연계되는 값 변환
-  .transform((data) => {
-    return {
-      ...data,
-      birthday_at: `${data.birthday_at.year}-${data.birthday_at.month}-${data.birthday_at.day}`,
-    };
-  });

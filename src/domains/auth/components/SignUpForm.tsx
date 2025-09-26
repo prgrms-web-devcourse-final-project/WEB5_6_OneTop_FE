@@ -2,13 +2,17 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { signUpSchema as schema } from "../lib/signUpSchema";
-
-
+import { useRouter } from "next/navigation";
+import { signupAction } from "@/app/api/actions/signup";
+import { SignUpRequest } from "@/domains/types";
 
 function SignUpForm() {
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+  const [error, setError] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -24,18 +28,49 @@ function SignUpForm() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof schema>) => {
-    console.log(data);
-  };
-
   // 생년/월/일 한 필드라도 변경되면 즉시 유효성 검사
   const birthday_at = useWatch({ control, name: "birthday_at" });
   useEffect(() => {
     // 값이 입력되었을 때만 유효성 검사 실행
     if (birthday_at?.year || birthday_at?.month || birthday_at?.day) {
-      void trigger(["birthday_at.year", "birthday_at.month", "birthday_at.day"]);
+      void trigger([
+        "birthday_at.year",
+        "birthday_at.month",
+        "birthday_at.day",
+      ]);
     }
   }, [birthday_at?.year, birthday_at?.month, birthday_at?.day, trigger]);
+
+  // 회원가입 요청
+  const onSubmit = async (data: SignUpRequest) => {
+    setIsPending(true);
+    const formData = new FormData();
+
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    formData.append("name", data.name);
+    formData.append("nickname", data.nickname);
+    if (data.birthday_at) {
+      formData.append("birthday_at.year", data.birthday_at.year.toString());
+      formData.append("birthday_at.month", data.birthday_at.month.toString());
+      formData.append("birthday_at.day", data.birthday_at.day.toString());
+    }
+    formData.append("agree", data.agree.toString());
+
+    try {
+      const result = await signupAction(formData);
+      console.log(result);
+      router.push("/");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "회원가입 중 오류가 발생했습니다.";
+      setError(errorMessage);
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-10">
@@ -208,13 +243,15 @@ function SignUpForm() {
           </div>
         </div>
 
+        {error && <p className="text-red-500">{error}</p>}
+
         {/* 가입하기 버튼 */}
         <button
           type="submit"
           className="bg-deep-navy text-white rounded-sm px-4 py-3 font-semibold block w-full"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isPending}
         >
-          가입하기
+          {isPending ? "가입중..." : "가입하기"}
         </button>
       </form>
     </div>
