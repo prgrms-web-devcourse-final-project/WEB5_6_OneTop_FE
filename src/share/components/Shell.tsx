@@ -4,8 +4,8 @@ import React, { useEffect } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import ScrollTopButton from "./ScrollTopButton";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useLoginModalStore } from "../stores/loginModalStore";
+import { usePathname } from "next/navigation";
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -23,12 +23,11 @@ export default function Shell({
   headerVariant = "default",
 }: ShellProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const setLoginModalOpen = useLoginModalStore((s) => s.setIsOpen);
 
   useEffect(() => {
     setLoginModalOpen(false);
-  }, [pathname, searchParams, setLoginModalOpen]);
+  }, [pathname, setLoginModalOpen]);
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -2,12 +2,10 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useEffect, useState } from "react";
 import { signUpSchema as schema } from "../lib/signUpSchema";
-import { SignUpRequest } from "@/domains/types";
-import { signupAction } from "@/app/api/actions/signup";
 import { useRouter } from "next/navigation";
+import { signupAction } from "@/app/api/actions/signup";
 
 function SignUpForm() {
   const [isPending, setIsPending] = useState(false);

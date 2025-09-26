@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import logo from "@/public/logo_32.svg";
 import HeaderLoginButton from "@/domains/auth/components/HeaderLoginButton";
 
 interface HeaderProps {
@@ -14,7 +13,6 @@ interface HeaderProps {
 4. 하위 레이아웃에서 root css 변수를 설정하도록 함
 5. Shell을 이용해 헤더 설정 + 헤더가 존재하지 않아야 하는 페이지 (설문 히어로) 등 설정
 */
-
 
 function Header({ variant = "default" }: HeaderProps) {
   // variant에 따른 스타일 결정
@@ -55,11 +53,11 @@ function Header({ variant = "default" }: HeaderProps) {
 
   return (
     <header
-      className={`w-full h-15 ${styles.background} flex-shrink-0 px-[10%] items-center justify-between flex transition-colors duration-300 absolute top-0 left-0 right-0 z-50`}
+      className={`w-full h-15 ${styles.background} flex-shrink-0 px-[10%] items-center justify-between flex transition-colors duration-300 fixed top-0 left-0 right-0 z-50`}
     >
       <Link href="/" className="flex items-center gap-2 ">
         <Image
-          src={logo}
+          src="/logo_32.svg"
           alt="logo"
           width={32}
           height={32}

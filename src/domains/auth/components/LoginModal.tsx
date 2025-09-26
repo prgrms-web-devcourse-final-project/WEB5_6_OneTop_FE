@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useLoginModalStore } from "@/share/stores/loginModalStore";
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,7 @@ import { SignUpRequest } from "@/domains/types";
 import { loginAction } from "@/app/api/actions/login";
 import { useState } from "react";
 
+// TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
   const isOpen = useLoginModalStore((s) => s.isOpen);
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
