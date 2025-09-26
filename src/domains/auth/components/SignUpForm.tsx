@@ -2,14 +2,15 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useEffect, useState } from "react";
 import { signUpSchema as schema } from "../lib/signUpSchema";
-import { signupAction } from "@/app/api/actions/signup";
 import { SignUpRequest } from "@/domains/types";
+import { signupAction } from "@/app/api/actions/signup";
 
 function SignUpForm() {
-  const [isPending, setIsPending] = useState(false);
 
+  const [isPending, setIsPending] = useState(false);
   const {
     register,
     handleSubmit,
@@ -24,15 +25,6 @@ function SignUpForm() {
       agree: false,
     },
   });
-
-  // 생년/월/일 한 필드라도 변경되면 즉시 유효성 검사
-  const birthday_at = useWatch({ control, name: "birthday_at" });
-  useEffect(() => {
-    // 값이 입력되었을 때만 유효성 검사 실행
-    if (birthday_at?.year || birthday_at?.month || birthday_at?.day) {
-      void trigger(["birthday_at.year", "birthday_at.month", "birthday_at.day"]);
-    }
-  }, [birthday_at?.year, birthday_at?.month, birthday_at?.day, trigger]);
 
   // 회원가입 요청
   const onSubmit = async (data: SignUpRequest) => {
@@ -59,6 +51,18 @@ function SignUpForm() {
       setIsPending(false);
     }
   };
+  // 생년/월/일 한 필드라도 변경되면 즉시 유효성 검사
+  const birthday_at = useWatch({ control, name: "birthday_at" });
+  useEffect(() => {
+    // 값이 입력되었을 때만 유효성 검사 실행
+    if (birthday_at?.year || birthday_at?.month || birthday_at?.day) {
+      void trigger([
+        "birthday_at.year",
+        "birthday_at.month",
+        "birthday_at.day",
+      ]);
+    }
+  }, [birthday_at?.year, birthday_at?.month, birthday_at?.day, trigger]);
 
   return (
     <div className="flex flex-col gap-10">
@@ -71,18 +75,12 @@ function SignUpForm() {
               <span className="text-red-500">{errors.email.message}</span>
             )}
           </div>
-          <div className="flex gap-3">
-            <input
-              className="w-full border border-gray-200 rounded-sm px-4 py-3 flex-4"
-              {...register("email")}
-            />
-            <button
-              type="button"
-              className="bg-deep-navy text-white rounded-md p-4 font-semibold flex-1 px-4 py-3"
-            >
-              중복 확인
-            </button>
-          </div>
+
+          <input
+            className="w-full border border-gray-200 rounded-sm px-4 py-3 flex-4"
+            {...register("email")}
+          />
+
           <label className="text-gray-500" htmlFor="email">
             Re:Life에서는 이메일을 아이디로 사용합니다.
           </label>
@@ -145,12 +143,32 @@ function SignUpForm() {
           </label>
         </div>
 
+        {/* 이름 입력 */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 justify-between">
+            <label htmlFor="nickname">닉네임</label>
+            {errors.nickname && (
+              <span className="text-red-500">{errors.nickname.message}</span>
+            )}
+          </div>
+          <input
+            className="w-full border border-gray-200 rounded-sm px-4 py-3"
+            {...register("nickname")}
+          />
+
+          <label className="text-gray-500" htmlFor="nickname">
+            다른 사용자에게 보일 닉네임을 입력해주세요.
+          </label>
+        </div>
+
         {/* 생년월일 입력 */}
         {/* 여기 파트만 validation 타이밍이 다른데, 일단 패스. */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3 justify-between">
             <label htmlFor="birth">생년월일</label>
-            {errors.birthday_at?.day && (
+            {(errors.birthday_at?.year ||
+              errors.birthday_at?.month ||
+              errors.birthday_at?.day) && (
               <span className="text-red-500">
                 {/* 연월일 순으로 오류 메시지 표시 */}
                 {errors.birthday_at?.year?.message ||

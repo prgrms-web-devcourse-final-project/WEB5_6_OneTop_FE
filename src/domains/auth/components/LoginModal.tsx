@@ -6,6 +6,9 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { signupAction } from "@/app/api/actions/signup";
+import { SignUpRequest } from "@/domains/types";
+import { loginAction } from "@/app/api/actions/login";
 
 function LoginModal() {
   const isOpen = useLoginModalStore((s) => s.isOpen);
@@ -39,8 +42,22 @@ function LoginModal() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: z.infer<typeof schema>) => {
+  // 회원가입 요청
+  const onSubmit = async (data: SignUpRequest) => {
+    const formData = new FormData();
+
+    formData.append("email", data.email);
+    formData.append("password", data.password);
     
+
+    try {
+      const result = await loginAction(formData);
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsOpen(false);
+    }
   };
 
   const closeModal = () => {

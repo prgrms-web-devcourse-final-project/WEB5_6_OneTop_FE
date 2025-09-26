@@ -61,7 +61,7 @@ export async function signupAction(formData: FormData) {
     console.log("회원가입 실패 -Backend response:", res);
     // throw new Error("회원가입 실패");
   }
-  
+
   console.log("회원가입 성공 -Backend response:", res);
   revalidatePath("/");
 
