@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { signUpSchema as schema } from "../lib/signUpSchema";
 import { useRouter } from "next/navigation";
 import { signupAction } from "@/app/api/actions/signup";
+import { SignUpRequest } from "@/domains/types";
 
 function SignUpForm() {
   const [isPending, setIsPending] = useState(false);
