@@ -16,35 +16,29 @@ export async function loginAction(formData: FormData) {
 
   const res = await fetch(`${baseUrl}/api/v1/users-auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json",
+      "Accept": "application/json"
+     },
+    credentials: "include",
     body: JSON.stringify({ email, password }),
     cache: "no-store",
-    credentials: "include",
   });
 
   if (!res.ok) {
     const error = await res.json();
-    throw new Error(error.message);
+    // RFC 7807 Problem Details 형태의 에러 응답 처리
+    const errorMessage = error.detail || error.message || "로그인에 실패했습니다.";
+    throw new Error(errorMessage);
   }
 
   if (!res.ok) throw new Error("로그인 실패");
 
-  const  {accessToken, refreshToken} = await res.json();
+  const data = await res.json();
+  console.log("Login response data:", data);
 
-  const cookieStore = await cookies();
-
-  cookieStore.set("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 3,
-  });
-
-  cookieStore.set("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 30,
-  });
-  
+  // Set-Cookie 헤더로 자동으로 JSESSIONID가 설정됨
+  const setCookieHeaders = res.headers.get('set-cookie');
+  console.log("Set-Cookie headers:", setCookieHeaders);
 
   // 성공 시 쿼리 갱신
   revalidatePath("/");

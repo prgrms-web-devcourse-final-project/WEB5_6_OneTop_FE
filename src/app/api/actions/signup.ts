@@ -13,17 +13,17 @@ export async function signupAction(formData: FormData) {
     month: (formData.get("birthday_at.month") ?? "").toString().trim(),
     day: (formData.get("birthday_at.day") ?? "").toString().trim(),
   };
-  // toISOString 써서 변환해야 되나?
+  // ISO 8601 형식으로 변환
   const birthdayAt = `${
     birthday_rawData.year
   }-${birthday_rawData.month.padStart(2, "0")}-${birthday_rawData.day.padStart(
     2,
     "0"
-  )}T00:00:00.000Z`;
+  )}T00:00:00`;
 
   const agree = (formData.get("agree") ?? "").toString().trim();
 
-  console.log("Server Action Received:", {
+  console.log("=== 보내는 데이터 ===", {
     email,
     password,
     username,
@@ -42,9 +42,9 @@ export async function signupAction(formData: FormData) {
   const protocol = host?.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  const res = await fetch(`http://localhost:8080/api/v1/users-auth/signup`, {
+  const res = await fetch(`${baseUrl}/api/v1/users-auth/signup`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
     // 여기는 필요 없을 수도.
     credentials: "include",
     body: JSON.stringify({
@@ -58,11 +58,14 @@ export async function signupAction(formData: FormData) {
   });
 
   if (!res.ok) {
-    console.log("회원가입 실패 -Backend response:", res);
-    // throw new Error("회원가입 실패");
+    // 에러 상세 내용 확인
+    const errorData = await res.json();
+    console.log("에러 상세 내용:", errorData);
+    throw new Error(errorData.message);
   }
 
   console.log("회원가입 성공 -Backend response:", res);
+
   revalidatePath("/");
 
   // 임시로 안전한 객체 반환

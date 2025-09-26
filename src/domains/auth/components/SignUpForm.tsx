@@ -7,10 +7,13 @@ import { useEffect, useState } from "react";
 import { signUpSchema as schema } from "../lib/signUpSchema";
 import { SignUpRequest } from "@/domains/types";
 import { signupAction } from "@/app/api/actions/signup";
+import { useRouter } from "next/navigation";
 
 function SignUpForm() {
-
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+  const [error, setError] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -25,6 +28,19 @@ function SignUpForm() {
       agree: false,
     },
   });
+
+  // 생년/월/일 한 필드라도 변경되면 즉시 유효성 검사
+  const birthday_at = useWatch({ control, name: "birthday_at" });
+  useEffect(() => {
+    // 값이 입력되었을 때만 유효성 검사 실행
+    if (birthday_at?.year || birthday_at?.month || birthday_at?.day) {
+      void trigger([
+        "birthday_at.year",
+        "birthday_at.month",
+        "birthday_at.day",
+      ]);
+    }
+  }, [birthday_at?.year, birthday_at?.month, birthday_at?.day, trigger]);
 
   // 회원가입 요청
   const onSubmit = async (data: SignUpRequest) => {
@@ -45,24 +61,17 @@ function SignUpForm() {
     try {
       const result = await signupAction(formData);
       console.log(result);
+      router.push("/");
     } catch (error) {
-      console.error(error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "회원가입 중 오류가 발생했습니다.";
+      setError(errorMessage);
     } finally {
       setIsPending(false);
     }
   };
-  // 생년/월/일 한 필드라도 변경되면 즉시 유효성 검사
-  const birthday_at = useWatch({ control, name: "birthday_at" });
-  useEffect(() => {
-    // 값이 입력되었을 때만 유효성 검사 실행
-    if (birthday_at?.year || birthday_at?.month || birthday_at?.day) {
-      void trigger([
-        "birthday_at.year",
-        "birthday_at.month",
-        "birthday_at.day",
-      ]);
-    }
-  }, [birthday_at?.year, birthday_at?.month, birthday_at?.day, trigger]);
 
   return (
     <div className="flex flex-col gap-10">
@@ -234,6 +243,8 @@ function SignUpForm() {
             <label htmlFor="agree">동의하지 않습니다.</label>
           </div>
         </div>
+
+        {error && <p className="text-red-500">{error}</p>}
 
         {/* 가입하기 버튼 */}
         <button

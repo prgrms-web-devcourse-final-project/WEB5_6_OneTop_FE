@@ -9,10 +9,12 @@ import Link from "next/link";
 import { signupAction } from "@/app/api/actions/signup";
 import { SignUpRequest } from "@/domains/types";
 import { loginAction } from "@/app/api/actions/login";
+import { useState } from "react";
 
 function LoginModal() {
   const isOpen = useLoginModalStore((s) => s.isOpen);
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
+  const [error, setError] = useState("")
 
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -43,25 +45,28 @@ function LoginModal() {
   });
 
   // 회원가입 요청
-  const onSubmit = async (data: SignUpRequest) => {
+  const onSubmit = async (data: z.infer<typeof schema>) => {
     const formData = new FormData();
 
     formData.append("email", data.email);
     formData.append("password", data.password);
     
-
     try {
-      const result = await loginAction(formData);
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    } finally {
+      await loginAction(formData);
+      // 로그인 성공
+      setError("");
       setIsOpen(false);
+      reset();
+    } catch (error) {
+      // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
+      const errorMessage = error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+      setError(errorMessage);
     }
   };
 
   const closeModal = () => {
     setIsOpen(false);
+    setError("");
     reset();
   };
 
@@ -133,6 +138,8 @@ function LoginModal() {
               </Link>
             </div>
           </form>
+
+          {error && <p className="text-red-500">{error}</p>}
 
           <div className="flex gap-4 items-center">
             <hr className="w-full" />
