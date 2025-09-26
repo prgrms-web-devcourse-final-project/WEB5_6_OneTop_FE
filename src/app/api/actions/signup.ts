@@ -36,6 +36,7 @@ export async function signupAction(formData: FormData) {
     throw new Error("모든 필수 항목을 입력해주세요.");
   }
 
+  //121212a*
   const headersList = await headers();
   const host = headersList.get("host");
   const protocol = host?.includes("localhost") ? "http" : "https";
