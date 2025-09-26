@@ -1,6 +1,6 @@
 "use client";
 
-import { TimelineProps } from "../types";
+import { TimelineProps } from "../../../domains/scenarios/types";
 
 export const Timeline = ({ data }: TimelineProps) => {
   return (

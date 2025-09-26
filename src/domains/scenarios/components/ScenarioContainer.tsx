@@ -2,9 +2,9 @@
 
 import { useAuth } from "@/share/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { Analysis } from "./Analysis";
+import { Analysis } from "../../../app/components/scenarios/Analysis";
 import { RadarChart } from "./RadarChart";
-import { Timeline } from "./Timeline";
+import { Timeline } from "../../../app/components/scenarios/Timeline";
 import { ScenarioData } from "../types";
 
 // 목업 데이터
