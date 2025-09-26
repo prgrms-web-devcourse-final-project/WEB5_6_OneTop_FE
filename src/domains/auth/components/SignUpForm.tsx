@@ -26,17 +26,13 @@ function SignUpForm() {
   });
 
   // 생년/월/일 한 필드라도 변경되면 즉시 유효성 검사
-  const birth = useWatch({ control, name: "birthday_at" });
+  const birthday_at = useWatch({ control, name: "birthday_at" });
   useEffect(() => {
     // 값이 입력되었을 때만 유효성 검사 실행
-    if (birth?.year || birth?.month || birth?.day) {
-      void trigger([
-        "birthday_at.year",
-        "birthday_at.month",
-        "birthday_at.day",
-      ]);
+    if (birthday_at?.year || birthday_at?.month || birthday_at?.day) {
+      void trigger(["birthday_at.year", "birthday_at.month", "birthday_at.day"]);
     }
-  }, [birth?.year, birth?.month, birth?.day, trigger]);
+  }, [birthday_at?.year, birthday_at?.month, birthday_at?.day, trigger]);
 
   // 회원가입 요청
   const onSubmit = async (data: SignUpRequest) => {
