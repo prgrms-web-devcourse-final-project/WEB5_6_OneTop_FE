@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 export async function loginAction(formData: FormData) {
   const email = (formData.get("email") ?? "").toString().trim();
@@ -9,7 +9,16 @@ export async function loginAction(formData: FormData) {
 
   if (!email || !password) throw new Error("이메일과 비밀번호를 입력해주세요.");
 
+<<<<<<< Updated upstream:src/app/api/actions/auth.ts
   const res = await fetch(`${process.env.API_URL}/auth/login`, {
+=======
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = host?.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+
+  const res = await fetch(`${baseUrl}/api/v1/users-auth/login`, {
+>>>>>>> Stashed changes:src/app/api/actions/login.ts
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),

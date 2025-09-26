@@ -40,7 +40,7 @@ function LoginModal() {
   });
 
   const onSubmit = (data: z.infer<typeof schema>) => {
-    console.log(data);
+    
   };
 
   const closeModal = () => {
