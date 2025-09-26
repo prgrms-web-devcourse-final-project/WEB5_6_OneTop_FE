@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import logo from "@/public/logo_32.svg";
 import HeaderLoginButton from "@/domains/auth/components/HeaderLoginButton";
 import { useEffect, useState } from "react";
 
@@ -93,7 +92,7 @@ function Header({ variant = "default" }: HeaderProps) {
     >
       <Link href="/" className="flex items-center gap-2 ">
         <Image
-          src={logo}
+          src="/logo_32.svg"
           alt="logo"
           width={32}
           height={32}

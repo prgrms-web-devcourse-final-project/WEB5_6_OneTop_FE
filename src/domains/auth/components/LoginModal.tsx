@@ -1,15 +1,21 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useLoginModalStore } from "@/share/stores/loginModalStore";
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { signupAction } from "@/app/api/actions/signup";
+import { SignUpRequest } from "@/domains/types";
+import { loginAction } from "@/app/api/actions/login";
+import { useState } from "react";
 
+// TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
   const isOpen = useLoginModalStore((s) => s.isOpen);
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
+  const [error, setError] = useState("")
 
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -39,12 +45,29 @@ function LoginModal() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: z.infer<typeof schema>) => {
-    console.log(data);
+  // 회원가입 요청
+  const onSubmit = async (data: z.infer<typeof schema>) => {
+    const formData = new FormData();
+
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    
+    try {
+      await loginAction(formData);
+      // 로그인 성공
+      setError("");
+      setIsOpen(false);
+      reset();
+    } catch (error) {
+      // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
+      const errorMessage = error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+      setError(errorMessage);
+    }
   };
 
   const closeModal = () => {
     setIsOpen(false);
+    setError("");
     reset();
   };
 
@@ -116,6 +139,8 @@ function LoginModal() {
               </Link>
             </div>
           </form>
+
+          {error && <p className="text-red-500">{error}</p>}
 
           <div className="flex gap-4 items-center">
             <hr className="w-full" />

@@ -10,7 +10,7 @@ permissions:
   issues: write
 
 env:
-  PROJECT_OWNER: prgrms-be-devcourse
+  PROJECT_OWNER: prgrms-web-devcourse-final-project
   PROJECT_NUMBER: 144 
 
 concurrency:
