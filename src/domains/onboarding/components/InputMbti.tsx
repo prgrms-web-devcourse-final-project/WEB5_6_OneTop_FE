@@ -1,3 +1,4 @@
+import tw from "@/share/utils/tw";
 import { InputProps } from "../types";
 import { Controller } from "react-hook-form";
 
@@ -13,7 +14,7 @@ const mbtiObject = {
 };
 
 // TODO : FLIP 애니메이션 추가
-function InputMbti({ control }: InputProps) {
+function InputMbti({ control, className }: InputProps) {
   type mbtiTypes = keyof typeof mbtiObject;
 
   const flipMbtiString = (mbti: string, target: mbtiTypes) => {
@@ -29,7 +30,7 @@ function InputMbti({ control }: InputProps) {
       name={"mbti"}
       defaultValue="ESTJ"
       render={({ field }) => (
-        <div className="flex gap-20 items-center justify-center w-full py-5 h-80">
+        <div className={tw("flex gap-20 items-center justify-center w-full py-5", className)}>
           {field.value.split("").map((item, index) => (
             <button
               className="w-20 text-center py-12 rounded-lg text-4xl font-medium transition-all duration-200 

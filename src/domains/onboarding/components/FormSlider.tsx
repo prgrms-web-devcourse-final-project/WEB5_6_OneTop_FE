@@ -20,8 +20,6 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   const stepFromUrl = Number(sp.get("step") ?? initialStep);
   const safeIdx = Math.min(Math.max(stepFromUrl, 0), steps.length - 1);
   // ZUSTAND 데이터 불러오기
-  // TODO: ZUSTAND 제거
-  // const data = useOnboardingStore((s) => s.data);
 
   // 애니메이션 훅으로 관심사 분리
   const { rootRef, trackRef, addItemRef } = useSliderAnimation(safeIdx);
@@ -35,6 +33,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     control,
   } = useForm<UserOnboardingData>({
     resolver: zodResolver(FormSchema),
+    mode: "onChange",
   });
 
   // 해당 슬라이드로 이동 이벤트 핸들러
@@ -56,6 +55,13 @@ function FormSlider({ initialStep }: { initialStep: number }) {
 
   const onSubmit = (data: UserOnboardingData) => {
     console.log(data);
+  };
+
+  const handleFormSubmit = () => {
+    const currentValues = getValues();
+    console.log("Form submitted:", currentValues);
+    // 여기에 실제 제출 로직 추가
+    onSubmit(currentValues);
   };
 
   return (
@@ -104,7 +110,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
             style={{ width: `${steps.length * 100}%` }}
           >
             {/* 전체 폼 구성 */}
-            {steps.map((s: StepDefinition) => {
+            {steps.map((s: StepDefinition, index: number) => {
               const StepComponent = s.component;
               return (
                 <div
@@ -130,16 +136,51 @@ function FormSlider({ initialStep }: { initialStep: number }) {
                       errors={errors[s.key]}
                       setValue={setValue}
                       control={control}
+                      className={"h-80"}
                     />
                   )}
 
-                  <button
-                    type="submit"
-                    className="h-18 rounded-md border-2 border-white w-80 p-6 bg-white
-                               placeholder:text-gray-500 text-center text-2xl outline-none"
-                  >
-                    완료
-                  </button>
+                  {/* 완료 버튼 */}
+                  {index > steps.length - 3 ? (
+                    // 마지막 단계: 완료 버튼들
+                    <div className="flex items-center justify-center gap-8">
+                      <button
+                        type="submit"
+                        className="h-14 rounded-md w-40 p-2 bg-white flex items-center justify-center text-center text-2xl outline-none"
+                        disabled={!!errors[s.key]}
+                      >
+                        완료하기
+                      </button>
+                      {index === steps.length - 2 && (
+                        <button
+                          type="button"
+                          className="h-14 rounded-md w-40 bg-blue-500 text-white flex items-center justify-center text-xl p-2"
+                          onClick={() => {
+                            /* 추가 정보 입력 로직 */
+                          }}
+                        >
+                          추가 정보 입력
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    // 일반 단계: 다음 버튼
+                    <div className="flex items-center justify-center gap-8">
+                      <button
+                        type="button"
+                        className={tw(
+                          "h-14 rounded-md w-40 p-2 bg-white flex items-center justify-center",
+                          "text-center text-2xl outline-none",
+                          errors[s.key] &&
+                            "bg-midnight-blue shadow-[inset_0_4px_4px_0_rgba(0,0,0,0.25)] text-white"
+                        )}
+                        disabled={!!errors[s.key]}
+                        onClick={onNext}
+                      >
+                        {!!errors[s.key] ? "미완료" : "다음"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}

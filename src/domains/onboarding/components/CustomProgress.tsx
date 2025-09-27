@@ -4,28 +4,29 @@ import { useState } from "react";
 import { PiWarningCircleFill } from "react-icons/pi";
 
 interface CustomProgressProps {
-  initialProgress: number;
+  progress: number;
   className?: string;
   title?: string;
-  description?: string | string[];
+  hint?: string | string[];
   max?: number;
   min?: number;
   onChange?: (value: number) => void;
 }
 
 function CustomProgress({
-  initialProgress,
+  progress,
   className,
   title,
-  description,
+  hint,
   max = 10,
   min = 0,
   onChange,
 }: CustomProgressProps) {
-  const [progress, setProgress] = useState(initialProgress);
 
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProgress(Number(e.target.value));
+    if (onChange) {
+      onChange(Number(e.target.value));
+    }
   };
 
   return (
@@ -35,13 +36,14 @@ function CustomProgress({
         <div className="flex items-center gap-2">
           {title && <div className="text-lg">{title}</div>}
           {/* description이 있으면 툴팁 표출 */}
-          {description && (
+          {hint && (
             <Tooltip
               contents={
-                Array.isArray(description)
-                  ? description.join("\n")
-                  : description
+                Array.isArray(hint)
+                  ? <ul>{hint.map((item) => <li key={item}>{item}</li>)}</ul>
+                  : hint
               }
+              className="max-w-80 p-8"
             >
               <PiWarningCircleFill size={24} />
             </Tooltip>
