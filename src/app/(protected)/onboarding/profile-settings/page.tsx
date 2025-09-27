@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import FormSlider from "@/domains/onboarding/components/FormSlider";
+import Image from "next/image";
 
 // Protected 라우트라서 SEO는 간단하게
 export function generateMetadata() {
@@ -10,9 +12,9 @@ export function generateMetadata() {
 
 function Page() {
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <FormSlider initialStep={0} />
-    </>
+    </Suspense>
   );
 }
 

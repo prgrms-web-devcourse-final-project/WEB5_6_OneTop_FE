@@ -32,9 +32,10 @@ export type InputProps = {
   id: StepKeys;
   placeholder: string;
   register: UseFormRegister<UserOnboardingData>;
+  className?: string;
   errors?: FieldErrors<UserOnboardingData>;
-  setValue: UseFormSetValue<UserOnboardingData>;
-  control: Control<UserOnboardingData>;
+  setValue?: UseFormSetValue<UserOnboardingData>;
+  control?: Control<UserOnboardingData>;
 };
 
 
@@ -45,3 +46,17 @@ export const stepByIndex = (index: number) => steps[index];
 
 // 스키마에서 타입 추출
 export type UserOnboardingData = z.infer<typeof FormSchema>;
+
+
+export type CustomProgressListType = {
+  key: "life_satis" | "relationships" | "work_life_bal" | "lisk_avoid";
+  title: string;
+  description: string[];
+};
+
+export type AdditionalValues = {
+  life_satis: number;
+  relationships: number;
+  work_life_bal: number;
+  lisk_avoid: number;
+};

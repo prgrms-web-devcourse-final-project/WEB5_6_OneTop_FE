@@ -110,7 +110,7 @@ function Header({ variant = "default" }: HeaderProps) {
 
       <div className={`flex items-center gap-12 ${styles.text}`}>
         <Link
-          href="/life-record"
+          href="/onboarding"
           className={`text-md group relative pb-1 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 ${styles.underlineColor} after:transition-all after:duration-300 hover:after:w-full`}
         >
           인생 기록

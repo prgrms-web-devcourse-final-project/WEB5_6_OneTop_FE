@@ -6,6 +6,7 @@ import { BiCalendarAlt } from "react-icons/bi";
 import { ko } from "react-day-picker/locale";
 import { InputProps } from "../types";
 import CustomDropDown from "./CustomDropDown";
+import tw from "@/share/utils/tw";
 
 const today = new Date().getTime();
 const thisYear = new Date(today).getFullYear();
@@ -15,8 +16,8 @@ const thisDay = new Date(today).getDate();
 function InputDate({
   id,
   register,
-  errors,
   setValue,
+  className,
 }: InputProps) {
   // TODO: id와 placeholder를 실제로 사용하도록 구현 필요
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -38,7 +39,8 @@ function InputDate({
   return (
     <div
       id={id}
-      className="flex gap-8 items-center justify-center w-full h-80"
+      className={tw("flex gap-8 items-center justify-center w-full", className)}
+      onClick={() => setCalendarOpen(!calendarOpen)}
     >
       <div>
         <input
@@ -139,9 +141,9 @@ function InputDate({
               selected={selectedDate}
               onSelect={(date) => {
                 setSelectedDate(date ?? new Date());
-                setValue(`birthday_at.birthDay`, date?.getDate() ?? 0);
-                setValue(`birthday_at.birthMonth`, (date?.getMonth() ?? 0) + 1);
-                setValue(`birthday_at.birthYear`, date?.getFullYear() ?? 0);
+                setValue?.(`birthday_at.birthDay`, date?.getDate() ?? 0);
+                setValue?.(`birthday_at.birthMonth`, (date?.getMonth() ?? 0) + 1);
+                setValue?.(`birthday_at.birthYear`, date?.getFullYear() ?? 0);
               }}
               required={false}
               locale={ko}
