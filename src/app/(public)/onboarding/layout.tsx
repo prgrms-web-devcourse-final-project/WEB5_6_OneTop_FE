@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-static";
 
 function Layout({ children }: { children: React.ReactNode }) {
+  // TODO: 로그인 상태라면 redirect 처리
   return <div>{children}</div>;
 }
 

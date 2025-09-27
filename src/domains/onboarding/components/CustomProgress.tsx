@@ -1,6 +1,5 @@
 import { Tooltip } from "@/share/components/Tooltip";
 import tw from "@/share/utils/tw";
-import { useState } from "react";
 import { PiWarningCircleFill } from "react-icons/pi";
 
 interface CustomProgressProps {

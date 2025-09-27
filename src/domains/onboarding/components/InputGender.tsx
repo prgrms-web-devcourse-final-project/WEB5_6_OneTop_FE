@@ -1,4 +1,6 @@
-import { Controller, useWatch } from "react-hook-form";
+"use client";
+
+import { Controller } from "react-hook-form";
 import { InputProps } from "../types";
 import tw from "@/share/utils/tw";
 import { AiOutlineMan, AiOutlineWoman } from "react-icons/ai";

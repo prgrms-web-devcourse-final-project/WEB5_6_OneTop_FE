@@ -1,3 +1,6 @@
+"use client";
+
+
 import { Controller } from "react-hook-form";
 import { CustomProgressListType, InputProps } from "../types";
 import CustomProgress from "./CustomProgress";

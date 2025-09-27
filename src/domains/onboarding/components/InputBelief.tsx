@@ -1,3 +1,5 @@
+"use client";
+
 import tw from "@/share/utils/tw";
 import { InputProps } from "../types";
 import { Controller } from "react-hook-form";
