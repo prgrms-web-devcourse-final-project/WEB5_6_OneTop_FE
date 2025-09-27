@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 export async function loginAction(formData: FormData) {
   const email = (formData.get("email") ?? "").toString().trim();
@@ -9,46 +9,37 @@ export async function loginAction(formData: FormData) {
 
   if (!email || !password) throw new Error("이메일과 비밀번호를 입력해주세요.");
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = host?.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
 
-  const res = await fetch(`${apiUrl}/api/auth/login`, {
+  const res = await fetch(`${baseUrl}/api/v1/users-auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json",
+      "Accept": "application/json"
+     },
+    credentials: "include",
     body: JSON.stringify({ email, password }),
     cache: "no-store",
-    credentials: "include",
-    next: {
-      revalidate: 10,
-      tags: ["auth", "login"],
-    },
   });
 
   if (!res.ok) {
     const error = await res.json();
-    throw new Error(error.message);
+    // RFC 7807 Problem Details 형태의 에러 응답 처리
+    const errorMessage = error.detail || error.message || "로그인에 실패했습니다.";
+    throw new Error(errorMessage);
   }
 
   if (!res.ok) throw new Error("로그인 실패");
 
-  const { accessToken, refreshToken } = await res.json();
+  const data = await res.json();
+  console.log("Login response data:", data);
 
-  const cookieStore = await cookies();
-
-  cookieStore.set("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 3,
-  });
-
-  cookieStore.set("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  // Set-Cookie 헤더로 자동으로 JSESSIONID가 설정됨
+  const setCookieHeaders = res.headers.get('set-cookie');
+  console.log("Set-Cookie headers:", setCookieHeaders);
 
   // 성공 시 쿼리 갱신
   revalidatePath("/");
-  const result = await res.json();
-  
-  return result;
 }

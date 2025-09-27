@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import HeaderLoginButton from "@/domains/auth/components/HeaderLoginButton";
+import { useEffect, useState } from "react";
 
 interface HeaderProps {
   variant?: "default" | "transparent" | "light" | "primary";
@@ -15,8 +16,39 @@ interface HeaderProps {
 */
 
 function Header({ variant = "default" }: HeaderProps) {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // 스크롤 이벤트 처리
+  useEffect(() => {
+    // transparent 모드일 때만 스크롤 이벤트 추가
+    if (variant !== "transparent") return;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 10);
+    };
+
+    // 스크롤 이벤트 리스너 추가
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // cleanup 함수
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [variant]);
+
   // variant에 따른 스타일 결정
   const getHeaderStyles = () => {
+    // transparent 모드이고 스크롤된 경우
+    if (variant === "transparent" && isScrolled) {
+      return {
+        background: "bg-deep-navy",
+        text: "text-white",
+        logoFilter: "brightness(0) invert(1)",
+        underlineColor: "after:bg-deep-navy",
+      };
+    }
+
     switch (variant) {
       case "transparent":
         return {
@@ -50,6 +82,9 @@ function Header({ variant = "default" }: HeaderProps) {
   };
 
   const styles = getHeaderStyles();
+
+  const loginButtonVariant: "default" | "transparent" | "light" | "primary" =
+    variant === "transparent" && isScrolled ? "primary" : variant;
 
   return (
     <header
@@ -100,7 +135,7 @@ function Header({ variant = "default" }: HeaderProps) {
         </Link>
       </div>
 
-      <HeaderLoginButton variant={variant} />
+      <HeaderLoginButton variant={loginButtonVariant} />
     </header>
   );
 }

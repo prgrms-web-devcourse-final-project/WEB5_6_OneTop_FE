@@ -5,7 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Swal from "sweetalert2";
-import { LifeEvent, useBaselineStore } from "@/share/stores/baselineStore";
+import {
+  LifeEvent,
+  useBaselineStore,
+} from "@/domains/auth/stores/baselineStore";
 
 const eventSchema = z.object({
   category: z.enum(["교육", "직업", "관계", "경제", "기타"]),
