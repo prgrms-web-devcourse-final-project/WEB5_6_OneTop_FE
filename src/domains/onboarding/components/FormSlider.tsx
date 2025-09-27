@@ -5,7 +5,7 @@ import { steps } from "../lib/steps";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import tw from "@/share/utils/tw";
 import { useSliderAnimation } from "../hooks/useSliderAnimation";
-import { FieldError, FieldErrors, useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { FormSchema } from "../lib/schemas";
 import { isValidFormKey, StepDefinition, UserOnboardingData } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,19 +63,27 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   };
 
   const onError = (errors: FieldErrors<UserOnboardingData>) => {
-    // 모든 에러 메시지를 수집
-    const errorMessages = Object.entries(errors)
-      .filter(([_, error]) => {
-        const fieldError = error as FieldError;
-        if (fieldError.message) {
-          return true;
+    // 모든 에러 메시지를 재귀적으로 수집하는 함수
+    const collectErrorMessages = (errorObj: Record<string, unknown>, prefix = ""): string[] => {
+      const messages: string[] = [];
+      
+      Object.entries(errorObj).forEach(([key, error]) => {
+        if (error && typeof error === 'object') {
+          if ('message' in error && error.message) {
+            // 직접적인 에러 메시지
+            messages.push(`${error.message}`);
+          } else {
+            // 중첩된 객체 (예: birthday_at)
+            const nestedMessages = collectErrorMessages(error as Record<string, unknown>, prefix ? `${prefix}.${key}` : key);
+            messages.push(...nestedMessages);
+          }
         }
-        return false;
-      })
-      .map(([, error]) => {
-        const fieldError = error as FieldError;
-        return `${fieldError.message}`;
       });
+      
+      return messages;
+    };
+
+    const errorMessages = collectErrorMessages(errors);
 
     // SweetAlert2로 에러 메시지 표시
     Swal.fire({
