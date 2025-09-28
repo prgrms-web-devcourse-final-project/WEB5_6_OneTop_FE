@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LifeEvent } from "@/share/stores/baselineStore";
+
 import { Tooltip } from "@/share/components/Tooltip";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { BaselineNode } from "./BaselineNode";
 import { PiPlus } from "react-icons/pi";
+import { LifeEvent } from "../types";
 
 type ExtendedEvent = LifeEvent & { isTemp?: boolean };
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { LifeEvent } from "@/share/stores/baselineStore";
 import { IoCloseOutline } from "react-icons/io5";
 import { PiPlus } from "react-icons/pi";
+import { LifeEvent } from "../types";
 
 interface Props {
   year: number;

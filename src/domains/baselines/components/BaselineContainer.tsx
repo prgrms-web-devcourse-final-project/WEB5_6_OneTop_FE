@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useBaselineStore } from "@/share/stores/baselineStore";
+
 import { useAuth } from "@/share/hooks/useAuth";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
+
 import Swal from "sweetalert2";
 import { BaselineView } from "./BaselineView";
 import { BaselineSetupForm } from "./BaselineSetupForm";
@@ -12,26 +13,70 @@ import { PiNumberCircleTwoLight } from "react-icons/pi";
 import { PiNumberCircleThreeLight } from "react-icons/pi";
 import { PiNumberCircleFourLight } from "react-icons/pi";
 import { PiWarningFill } from "react-icons/pi";
+import { useBaselineStore } from "../stores/baselineStore";
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 
 interface Props {
   footerHeight?: number;
 }
 
 export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
-  const { isGuest, isLoading } = useAuth();
+  const { user, isGuest, isLoading: authLoading } = useAuth();
+  const { setIsOpen: setLoginModalOpen } = useLoginModalStore();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [tempNodes, setTempNodes] = useState<
     Array<{ year: number; age: number }>
   >([]);
 
-  const { events, getEventByYear } = useBaselineStore();
+  const {
+    events,
+    isLoading: storeLoading,
+    error,
+    loadEvents,
+    getEventByYear,
+    setError,
+  } = useBaselineStore();
+
+  // 컴포넌트 마운트 시 이벤트 로드
+  useEffect(() => {
+    if (!authLoading && user) {
+      loadEvents().catch((error) => {
+        console.error("이벤트 로드 실패:", error);
+        // 로그인이 필요한 경우 로그인 모달 표시
+        if (error.message?.includes("로그인")) {
+          setLoginModalOpen(true);
+        }
+      });
+    }
+  }, [authLoading, user, loadEvents, setLoginModalOpen]);
+
+  // 에러 처리
+  useEffect(() => {
+    if (error) {
+      Swal.fire({
+        title: "오류 발생",
+        text: error,
+        icon: "error",
+        confirmButtonColor: "#E76F51",
+        confirmButtonText: "확인",
+      }).then(() => {
+        setError(null);
+      });
+    }
+  }, [error, setError]);
 
   const handleNodeClick = (
     year: number,
     age: number,
     isEmpty: boolean = false
   ) => {
+    // 로그인이 필요한 경우 로그인 모달 표시
+    if (!user) {
+      setLoginModalOpen(true);
+      return;
+    }
+
     if (isEmpty) {
       // 빈 노드 클릭 시 새로운 년도 생성
       const currentYear = new Date().getFullYear();
@@ -51,21 +96,26 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   };
 
   const handleAddNode = () => {
+    // 로그인이 필요한 경우 로그인 모달 표시
+    if (!user) {
+      setLoginModalOpen(true);
+      return;
+    }
+
     // 게스트 모드에서는 추가 버튼 비활성화
     if (isGuest) {
       Swal.fire({
         title: "게스트 모드 제한",
-        text: "게스트 모드에서는 기본 5개 분기점만 작성할 수 있습니다. 더 많은 분기점을 추가하려면 로그인해 주세요.",
+        text: "게스트 모드에서는 기본 5개 분기점만 작성할 수 있습니다. 더 많은 분기점을 추가하려면 회원가입해 주세요.",
         icon: "info",
         confirmButtonColor: "#6366f1",
         confirmButtonText: "확인",
         showCancelButton: true,
-        cancelButtonText: "로그인하기",
+        cancelButtonText: "회원가입하기",
         cancelButtonColor: "#10B981",
       }).then((result) => {
         if (result.dismiss === Swal.DismissReason.cancel) {
-          // 로그인 페이지로 이동 (실제 라우터에 맞게 수정)
-          window.location.href = "/login";
+          setLoginModalOpen(true);
         }
       });
       return;
@@ -105,7 +155,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       allYears.length > 0 ? Math.max(...allYears) : currentYear - 1;
 
     const newYear = Math.max(lastYear + 1, currentYear);
-    const newAge = newYear - 2000; // 임시 나이정보(추후 연결필요)
+    const newAge = newYear - 2000; // 임시 나이 계산
 
     // 임시 노드 추가, 폼 열기
     setTempNodes((prev) => [...prev, { year: newYear, age: newAge }]);
@@ -162,8 +212,13 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   // 년도순 정렬
   const sortedEvents = events.sort((a, b) => a.year - b.year);
 
-  // 제출 처리 함수
+  // 제출 처리 함수 - Server Action 사용
   const handleSubmit = async () => {
+    if (!user) {
+      setLoginModalOpen(true);
+      return;
+    }
+
     if (sortedEvents.length === 0) {
       Swal.fire({
         title: "분기점이 없습니다",
@@ -188,9 +243,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
     if (result.isConfirmed) {
       try {
-        // 실제 API 호출이나 저장 로직 추가
-        // await submitBaseline(sortedEvents);
-
         Swal.fire({
           title: "제출 완료!",
           text: "베이스라인이 성공적으로 제출되었습니다.",
@@ -199,9 +251,10 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           confirmButtonText: "확인",
         });
       } catch (error) {
+        console.error("제출 오류:", error);
         Swal.fire({
           title: "제출 실패",
-          text: "제출 중 오류가 발생했습니다. 다시 시도해주세요.",
+          text: "제출 중 오류가 발생했습니다.",
           icon: "error",
           confirmButtonColor: "#E76F51",
           confirmButtonText: "확인",
@@ -234,12 +287,16 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [footerHeight]);
 
+  const isLoading = authLoading || storeLoading;
+
   if (isLoading) {
     return (
       <div className="min-h-[calc(100vh-140px)] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <div className="text-white text-xl">인증 확인 중...</div>
+          <div className="text-white text-xl">
+            {authLoading ? "인증 확인 중..." : "데이터 로딩 중..."}
+          </div>
         </div>
       </div>
     );
@@ -255,11 +312,11 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           selectedYear={selectedYear}
           events={allEventsForView}
           tempNodes={tempNodes}
-          isGuest={isGuest} // 게스트 모드 전달
+          isGuest={isGuest || !user}
         />
 
         {/* 폼이 열려있을 때만 폼 표시 */}
-        {isFormOpen && selectedYear && (
+        {isFormOpen && selectedYear && user && (
           <BaselineSetupForm
             isOpen={isFormOpen}
             selectedYear={selectedYear}
@@ -300,11 +357,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                           <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
                             노드를 클릭해 분기를 입력해 주세요
                           </h4>
-                          {/* {isGuest && i === 4 - sortedEvents.length && (
-                          <p className="text-sm">
-                            (게스트 모드에서는 5개까지만 가능)
-                          </p>
-                        )} */}
                         </li>
                       )
                     )}
@@ -318,9 +370,10 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                   >
                     <button
                       onClick={handleSubmit}
-                      className="right-[50px] bg-white font-medium text-gray-800 px-6 py-4 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg"
+                      disabled={isLoading}
+                      className="right-[50px] bg-white font-medium text-gray-800 px-6 py-4 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      마무리하고 제출
+                      {isLoading ? "처리 중..." : "마무리하고 제출"}
                     </button>
                   </div>
                 </div>
@@ -352,11 +405,13 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         저장하면 타임라인에 반영됩니다
                       </li>
                     </ol>
-                    {isGuest && (
+                    {(isGuest || !user) && (
                       <div className="mt-5">
                         <p className="flex items-center justify-center gap-2 text-base">
                           <PiWarningFill size={32} />
-                          게스트 모드에서는 기본 5개 분기점만 작성 가능합니다
+                          {!user
+                            ? "로그인 후 이용 가능합니다"
+                            : "게스트 모드에서는 기본 5개 분기점만 작성 가능합니다"}
                         </p>
                       </div>
                     )}

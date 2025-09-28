@@ -29,7 +29,7 @@ export const useAuth = (): UseAuthReturn => {
   const initializeAuth = async () => {
     try {
       // 먼저 현재 사용자 정보 확인
-      const userResponse = await fetch("/api/users-auth/me", {
+      const userResponse = await fetch("/api/v1/users-auth/me", {
         credentials: "include", // 쿠키 포함
       });
 
@@ -54,7 +54,7 @@ export const useAuth = (): UseAuthReturn => {
   };
 
   const requestGuestToken = async () => {
-    const response = await fetch("/api/users-auth/guest", {
+    const response = await fetch("/api/v1/users-auth/guest", {
       method: "POST",
       credentials: "include", // 쿠키 포함
     });
