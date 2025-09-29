@@ -1,122 +1,146 @@
 "use client";
 
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ReactFlow, Node, Edge, useReactFlow } from "@xyflow/react";
+
+import { MOCK_TREE_DATA as treeData } from "../data/mockData";
 import { useTreeLayout } from "../hooks/useTreeLayout";
-import { TreeNode as TreeNodeType } from "../types";
-import { TreeData } from "../data/mockData";
+import { useNodeEvents } from "../hooks/useNodeEvents";
+import { useTreeData } from "../hooks/useTreeData";
+import { TreeData } from "../types";
 
 import CustomEdge from "./CustomEdge";
 import CustomNode from "./CustomNode";
+import Sidebar from "./sidebar/Sidebar";
+import LoadingSpinner from "./LoadingSpinner";
 
-const nodeTypes = { customNode: CustomNode };
-const edgeTypes = { customEdge: CustomEdge };
+const NODE_TYPES = { customNode: CustomNode };
+const EDGE_TYPES = { customEdge: CustomEdge };
+const DEFAULT_VIEWPORT = { x: 10, y: 50, zoom: 0.4 };
 
-const TreeFlowContent = () => {
+interface TreeFlowContentProps {
+  baselineId?: string;
+}
+
+const TreeFlowContent = ({ baselineId = "101" }: TreeFlowContentProps) => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isLayouting, setIsLayouting] = useState(false);
 
+  // ===== 훅 =====
   const { fitView } = useReactFlow();
   const { calculateLayout } = useTreeLayout();
-  const baselineNodes: TreeNodeType[] = useMemo(() => TreeData, []);
+  const { treeStructure, findNodeById, getChildNodes, isBaselineNode } =
+    useTreeData(treeData);
+  const { handleNodeClick, navigateToNode } = useNodeEvents({
+    treeData,
+    expandedNodeId,
+    selectedNodeId,
+    setExpandedNodeId,
+    setSelectedNodeId,
+    setNodes,
+    fitView,
+  });
 
-  const onNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      const isBaselineNode = node.data.isBaselineNode;
+  // ===== 파생 상태 =====
+  const selectedNode = selectedNodeId ? findNodeById(selectedNodeId) : null;
+  const parentNode = selectedNode?.parentId
+    ? findNodeById(selectedNode.parentId.toString())
+    : null;
+  const childNodes = selectedNodeId ? getChildNodes(selectedNodeId) : [];
+  const isAtMaxDepth =
+    nodes.find((n) => n.id === selectedNodeId)?.data?.isAtMaxDepth === true;
 
-      setSelectedNodeId(node.id);
+  // ===== 레이아웃 업데이트 =====
+  const updateLayout = async () => {
+    if (!treeData || !treeStructure || isLayouting) return;
 
-      if (isBaselineNode) {
-        const isCurrentlyExpanded = expandedNodeId === node.id;
+    setIsLayouting(true);
 
-        if (isCurrentlyExpanded) {
-          setExpandedNodeId(null);
-        } else {
-          setExpandedNodeId(node.id);
-        }
-      } else {
-        fitView({
-          nodes: [{ id: node.id }],
-          duration: 800,
-          maxZoom: 1.2,
-        });
-      }
-    },
-    [baselineNodes, expandedNodeId, fitView]
-  );
+    try {
+      const { nodes: layoutNodes, edges: layoutEdges } = calculateLayout(
+        treeStructure,
+        treeData.baseNodes,
+        expandedNodeId
+      );
 
-  useEffect(() => {
-    const updateLayout = async () => {
-      setIsLayouting(true);
-
-      try {
-        const { nodes: layoutNodes, edges: layoutEdges } =
-          await calculateLayout(baselineNodes, expandedNodeId);
-
-        const baselineNodeIds = new Set(baselineNodes.map((node) => node.id));
-
-        const flowNodes: Node[] = layoutNodes.map((layoutNode) => ({
+      const flowNodes: Node[] = layoutNodes.map((layoutNode) => {
+        const nodeData = treeStructure.nodeMap.get(layoutNode.id)!;
+        return {
           id: layoutNode.id,
           type: "customNode",
           position: { x: layoutNode.x, y: layoutNode.y },
           data: {
-            label: layoutNode.label,
-            isSelected: selectedNodeId === layoutNode.id,
+            ...nodeData,
+            isBaselineNode: treeStructure.baseNodeIds.has(layoutNode.id),
             isAtMaxDepth: layoutNode.isAtMaxDepth,
-            isBaselineNode: baselineNodeIds.has(layoutNode.id),
           },
-        }));
+          selected: selectedNodeId === layoutNode.id,
+        };
+      });
 
-        const flowEdges: Edge[] = layoutEdges.map((layoutEdge) => ({
-          id: layoutEdge.id,
-          source: layoutEdge.source,
-          target: layoutEdge.target,
-          type: "customEdge",
-          animated: false,
-        }));
+      const flowEdges: Edge[] = layoutEdges.map((layoutEdge) => ({
+        id: layoutEdge.id,
+        source: layoutEdge.source,
+        target: layoutEdge.target,
+        type: "customEdge",
+        animated: false,
+      }));
 
-        setNodes(flowNodes);
-        setEdges(flowEdges);
-      } catch (error) {
-        console.error("레이아웃 계산 실패", error);
-      } finally {
-        setIsLayouting(false);
-      }
-    };
+      setNodes(flowNodes);
+      setEdges(flowEdges);
+    } catch (error) {
+      console.error("레이아웃 계산 실패:", error);
+    } finally {
+      setIsLayouting(false);
+    }
+  };
 
+  useEffect(() => {
     updateLayout();
-  }, [baselineNodes, expandedNodeId]);
+  }, [expandedNodeId, treeData]);
 
   return (
     <div className="relative w-full h-full">
-      {/* 로딩 상태 표시 */}
-      {isLayouting && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-white flex items-center gap-3">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            <span>계산 중...</span>
-          </div>
-        </div>
-      )}
+      {/* 데이터 로딩 */}
+      {/* {isLoading && <LoadingSpinner message="트리 데이터 로딩 중..." />} */}
 
+      {/* 레이아웃 로딩 */}
+      {isLayouting && <LoadingSpinner message="레이아웃 계산 중..." />}
+
+      {/* 사이드바 */}
+      <Sidebar
+        isOpen={!!selectedNode}
+        onClose={() => setSelectedNodeId(null)}
+        selectedNode={selectedNode}
+        parentNode={parentNode}
+        childNodes={childNodes}
+        onNavigateToParent={() =>
+          parentNode && navigateToNode(parentNode.id.toString())
+        }
+        onNavigateToChild={(childId) => navigateToNode(childId)}
+        isBaselineNode={selectedNodeId ? isBaselineNode(selectedNodeId) : false}
+        isAtMaxDepth={isAtMaxDepth}
+      />
+
+      {/* 트리 */}
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodeClick={onNodeClick}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView={true}
-        defaultViewport={{ x: 10, y: 50, zoom: 0.4 }}
+        onNodeClick={handleNodeClick}
+        nodeTypes={NODE_TYPES}
+        edgeTypes={EDGE_TYPES}
+        fitView
+        defaultViewport={DEFAULT_VIEWPORT}
         minZoom={0.2}
         maxZoom={1.5}
         className="w-full h-screen relative bg-[linear-gradient(270deg,var(--Deep-Navy,#0F1A2B)_0%,#111_100%)]"
         proOptions={{ hideAttribution: true }}
         nodesDraggable={false}
         nodesConnectable={false}
-        elementsSelectable={true}
+        elementsSelectable={false}
         selectNodesOnDrag={false}
       />
     </div>
