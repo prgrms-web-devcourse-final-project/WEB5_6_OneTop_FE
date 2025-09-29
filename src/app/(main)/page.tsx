@@ -1,10 +1,16 @@
 import { Metadata } from "next";
+import MainContainer from "@/domains/main/components/MainContainer";
 
 export const metadata: Metadata = {
-  title: "홈페이지",
-  description: "홈페이지입니다.",
+  title: "Re:Life",
+  description:
+    "만약 그때 다른 선택을 했다면? AI와 실제 통계로 확인하는 나만의 평행우주",
 };
 
 export default function Home() {
-  return <div className="w-full flex-1">홈페이지입니다.</div>;
+  return (
+    <div className="w-full min-h-[calc(100vh-80px) bg-deep-navy">
+      <MainContainer />
+    </div>
+  );
 }

@@ -8,7 +8,7 @@ export default function MainLayout({
 }) {
   return (
     <ScrollSmootherProvider>
-      <Shell>{children}</Shell>
+      <Shell headerVariant="transparent">{children}</Shell>
     </ScrollSmootherProvider>
   );
 }
