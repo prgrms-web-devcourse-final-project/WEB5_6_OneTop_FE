@@ -10,7 +10,7 @@ function CustomDropDown({
   ...rest
 }: DropdownProps) {
   return (
-    <div className={`relative w-20 ${className ?? ""}`}>
+    <div className={`relative w-20 ${className ?? ""}`} onClick={(e) => e.stopPropagation()}>
       <select
         {...rest}
         name={name}

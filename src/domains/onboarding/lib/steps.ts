@@ -1,5 +1,6 @@
 // TODO : 렌더 패턴 추가하기. (개방 - 폐쇄 원칙 : 확장을 위해 FormSlider를 수정할 필요 없이 steps만 수정하면 확장 가능)
 
+import InputAdditional from "../components/InputAdditional";
 import InputBelief from "../components/InputBelief";
 import InputDate from "../components/InputDate";
 import InputGender from "../components/InputGender";
@@ -39,14 +40,14 @@ export const steps: StepDefinition[] = [
   },
   {
     key: "beliefs",
-    label: "당신이 가장 중요하게 여기는 것은?",
-    placeholder: "가장 중요하게 여기는 신념을 입력해주세요",
+    label: "당신의 성향은?",
+    placeholder: "성향을 입력해주세요",
     component: InputBelief,
   },
   {
     key: "additional",
     label: "추가 정보를 입력해주세요",
     placeholder: "추가 정보를 입력해주세요",
-    component: InputText,
+    component: InputAdditional,
   },
 ];
