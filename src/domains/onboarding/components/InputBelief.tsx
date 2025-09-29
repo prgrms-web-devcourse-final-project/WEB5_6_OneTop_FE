@@ -1,3 +1,5 @@
+"use client";
+
 import tw from "@/share/utils/tw";
 import { InputProps } from "../types";
 import { Controller } from "react-hook-form";
@@ -15,14 +17,14 @@ const NORMAL_BELIEFS = [
   "즐거움",
 ];
 
-function InputBelief({ control }: InputProps) {
+function InputBelief({ control, className }: InputProps) {
   return (
     <Controller
       control={control}
       name={"beliefs"}
       render={({ field }) => (
         <>
-          <div className="flex flex-col items-center justify-center h-80">
+          <div className={tw("flex flex-col items-center justify-center", className)}>
             <div className="grid grid-cols-5 gap-x-8 gap-y-10">
               {NORMAL_BELIEFS.map((belief) => (
                 <button
