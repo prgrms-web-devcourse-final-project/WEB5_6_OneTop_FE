@@ -102,7 +102,7 @@ export async function createBaseLineAction(
     );
 
     // 성공 시 관련 페이지 재검증
-    revalidatePath("/baseline");
+    revalidatePath("/baselines");
 
     return {
       success: true,
