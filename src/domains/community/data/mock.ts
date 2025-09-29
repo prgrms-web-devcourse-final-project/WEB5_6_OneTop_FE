@@ -27,7 +27,7 @@ const mockPosts: Post[] = [
     title: "면접 후기 - IT 대기업",
     content: "어제 대기업 면접을 보고 왔습니다. 기술 면접에서 나온 질문들과 느낀 점들을 공유해드릴게요. 준비하시는 분들께 도움이 되길 바랍니다.",
     author: "면접왕",
-    category: "VOTE",
+    category: "POLL",
     hide: false,
     likeCount: 23,
     createdDate: "2024-01-13T16:45:00Z"
@@ -67,7 +67,7 @@ const mockPosts: Post[] = [
     title: "이력서 작성 가이드",
     content: "HR 담당자 경험을 바탕으로 이력서 작성 시 주의사항과 팁을 정리해봤습니다. 특히 신입 개발자분들께 도움이 될 것 같아요.",
     author: "HR전문가",
-    category: "VOTE",
+    category: "POLL",
     hide: false,
     likeCount: 31,
     createdDate: "2024-01-09T15:20:00Z"

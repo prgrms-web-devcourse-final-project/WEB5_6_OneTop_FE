@@ -10,14 +10,14 @@ interface PostItemProps {
 const categoryColor = {
   CHAT: "bg-blue-500",
   NOTICE: "bg-green-500",
-  VOTE: "bg-yellow-500",
+  POLL: "bg-yellow-500",
   SCENARIO: "bg-purple-500",
 };
 
 const categoryText = {
   CHAT: "채팅",
   NOTICE: "공지",
-  VOTE: "투표",
+  POLL: "투표",
   SCENARIO: "시나리오",
 };
 

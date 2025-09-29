@@ -16,5 +16,5 @@ export type postListResponse = {
 
 export type Post = z.infer<typeof postsSchema>;
 
-export type PostFilterType = "ALL" | "CHAT" | "NOTICE" | "VOTE" | "SCENARIO";
+export type PostFilterType = "ALL" | "CHAT" | "NOTICE" | "POLL" | "SCENARIO";
 

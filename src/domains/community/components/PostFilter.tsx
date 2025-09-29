@@ -10,7 +10,7 @@ interface PostFilterProps {
 const categoryOptions = [
   { label: "전체", value: "ALL" },
   { label: "잡담", value: "CHAT" },
-  { label: "투표", value: "VOTE" },
+  { label: "투표", value: "POLL" },
   { label: "시나리오", value: "SCENARIO" },
 ] as const;
 
