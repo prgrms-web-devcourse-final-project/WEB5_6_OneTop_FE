@@ -15,8 +15,8 @@ export async function nextFetcher(url: string, options?: RequestInit) {
   // 기존 헤더와 새 헤더를 병합
   const mergedHeaders = {
     ...defaultHeaders,
-    ...options?.headers, // 기존 헤더 병합
     ...(allCookies && { Cookie: allCookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ") }),
+    ...options?.headers,
   };
 
   const newOptions: RequestInit = {
