@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Swal from "sweetalert2";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useBaselineStore } from "../stores/baselineStore";
 import { LifeEvent } from "../types";
 
@@ -28,8 +28,9 @@ const eventSchema = z.object({
     .min(1900, "년도는 1900년 이상이어야 합니다")
     .max(2100, "년도는 2100년 이하여야 합니다"),
 });
-
+// 폼의 원시 입력 타입(전부 문자열 기반)
 type FormInput = z.input<typeof eventSchema>;
+// 파싱 이후 타입(나이: number)
 type FormData = z.output<typeof eventSchema>;
 
 interface Props {
@@ -46,9 +47,15 @@ export const BaselineSetupForm = ({
   existingEvent,
   onClose,
 }: Props) => {
-  const { addEvent, updateEvent, deleteEvent, isLoading, events } =
-    useBaselineStore();
+  const {
+    addEventLocal,
+    updateEventLocal,
+    deleteEventLocal,
+    events,
+    isSubmitted,
+  } = useBaselineStore();
 
+  // 자동 높이 조절 함수
   const adjustTextareaHeight = (element: HTMLTextAreaElement) => {
     element.style.height = "auto";
     element.style.height = Math.min(element.scrollHeight, 120) + "px";
@@ -91,20 +98,22 @@ export const BaselineSetupForm = ({
     }
   }, [isOpen, selectedYear, existingEvent, reset]);
 
+  // 나이 입력 시 자동으로 년도 계산 (입력은 문자열)
   const watchAge = watch("ageAtEvent");
   useEffect(() => {
     if (watchAge && /^\d+$/.test(watchAge)) {
       const ageNum = Number(watchAge);
       if (ageNum >= 1 && ageNum <= 100) {
-        const calculatedYear = 2000 + ageNum; // 실제 계산 로직은 사용자 생년월일 기반으로 수정 필요
+        const calculatedYear = 2000 + ageNum; // 임시 나이(추후 연결필요)
         setValue("yearOfEvent", calculatedYear, { shouldValidate: true });
       }
     }
   }, [watchAge, setValue]);
 
+  // 로컬 저장 (백엔드 호출 없음)
   const onSubmit = async (data: FormData) => {
     try {
-      const calculatedYear = 2000 + data.ageAtEvent;
+      const calculatedYear = 2000 + data.ageAtEvent; // 임시 나이(추후 연결필요)
 
       const eventData = {
         year: calculatedYear,
@@ -116,22 +125,24 @@ export const BaselineSetupForm = ({
       };
 
       if (existingEvent) {
-        await updateEvent(existingEvent.id, eventData);
+        // 로컬 수정
+        updateEventLocal(existingEvent.id, eventData);
 
         Swal.fire({
           title: "수정 완료",
-          text: "분기점이 성공적으로 수정되었습니다. 전체 베이스라인이 재생성되었습니다.",
+          html: "분기점이 수정되었습니다. <br/>'마무리하고 제출' 버튼을 클릭하여 최종 저장하세요.",
           icon: "success",
           confirmButtonColor: "#6366f1",
           timer: 2000,
           showConfirmButton: false,
         });
       } else {
-        await addEvent(eventData);
+        // 로컬 추가
+        addEventLocal(eventData);
 
         Swal.fire({
           title: "저장 완료",
-          text: "분기점이 성공적으로 저장되었습니다.",
+          html: "분기점이 임시 저장되었습니다. <br/>''마무리하고 제출' 버튼을 클릭하여 최종 저장하세요.",
           icon: "success",
           confirmButtonColor: "#6366f1",
           timer: 2000,
@@ -142,18 +153,24 @@ export const BaselineSetupForm = ({
       onClose();
     } catch (error) {
       console.error("저장 실패:", error);
-      // 에러는 스토어에서 처리되므로 여기서는 폼만 닫지 않음
+      Swal.fire({
+        title: "저장 실패",
+        text: "저장 중 오류가 발생했습니다.",
+        icon: "error",
+        confirmButtonColor: "#E76F51",
+        confirmButtonText: "확인",
+      });
     }
   };
 
   const handleDelete = async () => {
     if (!existingEvent) return;
 
-    // 최소 2개 노드 검증
-    if (events.length <= 2) {
+    // 제출된 상태에서는 삭제 불가
+    if (isSubmitted) {
       Swal.fire({
         title: "삭제 불가",
-        text: "베이스라인에는 최소 2개의 분기점이 필요합니다.",
+        text: "이미 제출된 베이스라인은 수정할 수 없습니다.",
         icon: "warning",
         confirmButtonColor: "#6366f1",
         confirmButtonText: "확인",
@@ -163,7 +180,7 @@ export const BaselineSetupForm = ({
 
     const result = await Swal.fire({
       title: "분기점 삭제",
-      text: "정말로 이 분기점을 삭제하시겠습니까? 전체 베이스라인이 재생성됩니다.",
+      text: "정말로 이 분기점을 삭제하시겠습니까?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#E76F51",
@@ -174,7 +191,8 @@ export const BaselineSetupForm = ({
 
     if (result.isConfirmed) {
       try {
-        await deleteEvent(existingEvent.id);
+        // 로컬 삭제
+        deleteEventLocal(existingEvent.id);
         onClose();
 
         Swal.fire({
@@ -187,7 +205,13 @@ export const BaselineSetupForm = ({
         });
       } catch (error) {
         console.error("삭제 실패:", error);
-        // 에러는 스토어에서 처리됨
+        Swal.fire({
+          title: "삭제 실패",
+          text: "삭제 중 오류가 발생했습니다.",
+          icon: "error",
+          confirmButtonColor: "#E76F51",
+          confirmButtonText: "확인",
+        });
       }
     }
   };
@@ -205,18 +229,26 @@ export const BaselineSetupForm = ({
             </span>
           </div>
 
-          {existingEvent && (
+          {existingEvent && !isSubmitted && (
             <button
               type="button"
               onClick={handleDelete}
-              disabled={isLoading || events.length <= 2}
-              className="bg-[#E76F51] text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              title={events.length <= 2 ? "최소 2개의 분기점이 필요합니다" : ""}
+              className="bg-[#E76F51] text-white px-4 py-2 rounded"
             >
-              {isLoading ? "처리 중..." : "분기점 삭제"}
+              분기점 삭제
             </button>
           )}
         </div>
+
+        {/* 제출 상태 알림 */}
+        {isSubmitted && (
+          <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-lg">
+            <p className="text-blue-800 text-sm">
+              이미 제출된 베이스라인입니다. 수정하려면 새로운 베이스라인을
+              작성해주세요.
+            </p>
+          </div>
+        )}
 
         {/* 폼 */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -234,11 +266,11 @@ export const BaselineSetupForm = ({
                       type="radio"
                       value={category}
                       className="sr-only"
-                      disabled={isLoading}
+                      disabled={isSubmitted}
                     />
                     <div
                       className={`flex items-center justify-center w-[90px] h-[40px] rounded-lg border text-white text-base cursor-pointer transition-colors ${
-                        isLoading ? "opacity-50 cursor-not-allowed" : ""
+                        isSubmitted ? "opacity-50 cursor-not-allowed" : ""
                       } ${
                         watch("category") === category
                           ? "bg-dusty-blue border-dusty-blue"
@@ -271,9 +303,10 @@ export const BaselineSetupForm = ({
                   className="min-h-11 w-[90px] px-3 text-gray-800 bg-white rounded-lg disabled:opacity-50"
                   placeholder="나이 입력"
                   inputMode="numeric"
-                  disabled={isLoading}
+                  disabled={isSubmitted}
                 />
                 <span className="inline-block ml-2 mr-4">세</span>
+                {/* 계산된 년도 표시 */}
                 <span className="text-gray-300 text-sm">
                   {watchAge && /^\d+$/.test(watchAge) && Number(watchAge) > 0
                     ? `(${2000 + Number(watchAge)}년)`
@@ -290,6 +323,7 @@ export const BaselineSetupForm = ({
 
           {/* 선택 상황 + 실제 선택 */}
           <div className="relative border border-white rounded-lg py-3 pl-7 pr-5">
+            {/* 선택 상황 */}
             <div className="flex items-start text-white mb-3">
               <label className="block w-[115px] text-lg pt-2 mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
                 선택 상황
@@ -303,7 +337,7 @@ export const BaselineSetupForm = ({
                   })}
                   className="w-full bg-white rounded-lg text-gray-800 p-3 resize-none overflow-hidden min-h-12 max-h-[120px] disabled:opacity-50"
                   onInput={(e) => adjustTextareaHeight(e.currentTarget)}
-                  disabled={isLoading}
+                  disabled={isSubmitted}
                 />
                 {errors.eventTitle && (
                   <p className="text-[#E76F51] text-sm mt-1">
@@ -313,6 +347,7 @@ export const BaselineSetupForm = ({
               </div>
             </div>
 
+            {/* 실제 선택 */}
             <div className="flex items-center text-white">
               <label className="block w-[115px] text-lg mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
                 실제 선택
@@ -323,7 +358,7 @@ export const BaselineSetupForm = ({
                   placeholder="실제로 어떤 선택을 했는지 입력해주세요 (ex. 이과를 선택했습니다)"
                   {...register("actualChoice")}
                   className="w-full bg-white h-12 rounded-lg text-gray-800 p-3 disabled:opacity-50"
-                  disabled={isLoading}
+                  disabled={isSubmitted}
                 />
                 {errors.actualChoice && (
                   <p className="text-[#E76F51] text-sm mt-1">
@@ -346,7 +381,7 @@ export const BaselineSetupForm = ({
               {...register("context")}
               className="flex-1 bg-white rounded-lg text-gray-800 p-3 resize-none overflow-hidden min-h-12 max-h-[120px] disabled:opacity-50"
               onInput={(e) => adjustTextareaHeight(e.currentTarget)}
-              disabled={isLoading}
+              disabled={isSubmitted}
             />
           </div>
 
@@ -355,21 +390,22 @@ export const BaselineSetupForm = ({
             <button
               type="button"
               onClick={onClose}
-              disabled={isLoading}
-              className="w-[130px] h-12 text-white text-lg bg-dusty-blue rounded-lg hover:bg-opacity-80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[130px] h-12 text-white text-lg bg-dusty-blue rounded-lg hover:bg-opacity-80 transition-colors"
             >
               취소
             </button>
-            <button
-              type="submit"
-              className={`w-[130px] h-12 text-lg rounded-lg transition-colors ${
-                isValid && !isLoading
-                  ? "bg-white text-gray-800 hover:bg-gray-100"
-                  : "bg-gray-500 text-gray-300"
-              }`}
-            >
-              {isLoading ? "처리 중..." : existingEvent ? "수정" : "저장"}
-            </button>
+            {!isSubmitted && (
+              <button
+                type="submit"
+                className={`w-[130px] h-12 text-lg rounded-lg transition-colors ${
+                  isValid
+                    ? "bg-white text-gray-800 hover:bg-gray-100"
+                    : "bg-gray-500 text-gray-300"
+                }`}
+              >
+                {existingEvent ? "수정" : "저장"}
+              </button>
+            )}
           </div>
         </form>
       </div>

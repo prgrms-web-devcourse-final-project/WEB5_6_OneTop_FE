@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@/share/components/Tooltip";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { BaselineNode } from "./BaselineNode";
-import { PiPlus } from "react-icons/pi";
 import { LifeEvent } from "../types";
+import { PiPlus } from "react-icons/pi";
 
 type ExtendedEvent = LifeEvent & { isTemp?: boolean };
 
@@ -17,6 +17,7 @@ type NodeItem = {
   hasEvent: boolean;
   index: number;
   isTemp: boolean;
+  event?: ExtendedEvent | null;
 };
 
 interface Props {
@@ -45,7 +46,9 @@ export const BaselineView = ({
   // 실제 이벤트만 필터링
   const realEvents = events.filter((event) => !event.isTemp);
   const totalRealNodes = realEvents.length;
-  const totalNodes = totalRealNodes + tempNodes.length;
+  const totalTempNodes = tempNodes.length;
+  const totalNodes = totalRealNodes + totalTempNodes;
+
   const canAddMore = totalNodes < maxNodes;
 
   // 실제 이벤트 노드
@@ -58,6 +61,7 @@ export const BaselineView = ({
       hasEvent: true,
       index: index,
       isTemp: false,
+      event: event,
     }));
 
   // 임시 노드
@@ -70,22 +74,27 @@ export const BaselineView = ({
       hasEvent: false,
       index: eventNodes.length + index,
       isTemp: true,
+      event: null,
     }));
 
   // 기본 빈 노드 (5개까지)
-  const emptyNodesCount = totalRealNodes < 5 ? 5 - totalRealNodes : 0;
+  const currentFilledNodes = totalRealNodes + totalTempNodes;
+  const emptyNodesCount = Math.max(0, 5 - currentFilledNodes);
+
   const emptyNodes: NodeItem[] = Array.from(
     { length: emptyNodesCount },
     (_, index) => ({
-      id: `empty-${eventNodes.length + tempNodeItems.length + index}`,
+      id: `empty-${index}`,
       year: null,
       age: null,
       hasEvent: false,
       index: eventNodes.length + tempNodeItems.length + index,
       isTemp: false,
+      event: null,
     })
   );
 
+  // 전체 노드 = 실제 이벤트 + 임시 노드 + 빈 노드
   const allNodes = [...eventNodes, ...tempNodeItems, ...emptyNodes];
 
   const selectedRef = useRef<HTMLDivElement | null>(null);
@@ -106,7 +115,6 @@ export const BaselineView = ({
       const scrollTop = window.pageYOffset;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-
       const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
 
       if (distanceFromBottom <= footerHeight) {
@@ -125,8 +133,9 @@ export const BaselineView = ({
   return (
     <div className="relative w-[21.5vw] py-[60px] bg-[#292929]">
       <div className="flex flex-col gap-[120px]">
-        {allNodes.map((node) => {
-          const isSelected = node.hasEvent && selectedYear === node.year;
+        {allNodes.map((node, idx) => {
+          const isSelected = node.year !== null && selectedYear === node.year;
+          const isLastNode = idx === allNodes.length - 1;
 
           return (
             <BaselineNode
@@ -135,20 +144,18 @@ export const BaselineView = ({
               age={node.age ?? 0}
               isSelected={isSelected}
               hasEvent={node.hasEvent}
-              event={
-                node.hasEvent
-                  ? realEvents.find(
-                      (e, idx) => `event-${e.year}-${idx}` === node.id
-                    )
-                  : null
-              }
-              onClick={() =>
-                onNodeClick(node.year ?? 0, node.age ?? 0, !node.hasEvent)
-              }
+              event={node.event}
+              onClick={() => {
+                if (node.year !== null && node.age !== null) {
+                  onNodeClick(node.year, node.age, !node.hasEvent);
+                } else {
+                  onNodeClick(0, 0, true);
+                }
+              }}
               onDelete={
                 node.isTemp ? () => onDeleteTempNode(node.year!) : undefined
               }
-              showConnector={node.index < allNodes.length - 1}
+              showConnector={!isLastNode}
               isTemp={node.isTemp}
               innerRef={isSelected ? selectedRef : undefined}
             />
@@ -165,18 +172,22 @@ export const BaselineView = ({
       >
         <button
           onClick={onAddNode}
-          disabled={isGuest}
+          disabled={!isGuest && !canAddMore}
           className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
-            isGuest
+            !isGuest && !canAddMore
               ? "bg-gray-600 text-gray-400 cursor-not-allowed"
               : "bg-gray-400 text-white hover:scale-105"
           }`}
         >
           <Tooltip
             contents={
-              isGuest
+              totalRealNodes < 5
                 ? "게스트 모드에서는 기본 5개 분기점만 작성 가능합니다"
-                : "5개의 분기점을 먼저 입력 후, 새 분기점을 추가합니다"
+                : isGuest
+                ? "로그인하면 최대 10개까지 작성 가능합니다"
+                : !canAddMore
+                ? "최대 10개까지만 작성 가능합니다"
+                : "새 분기점을 추가합니다 (최대 10개)"
             }
             className="w-[180px] ml-2 text-center"
           >

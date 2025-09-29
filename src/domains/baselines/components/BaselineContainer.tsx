@@ -4,17 +4,16 @@ import { useState, useEffect } from "react";
 
 import { useAuth } from "@/share/hooks/useAuth";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
-
+import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import Swal from "sweetalert2";
 import { BaselineView } from "./BaselineView";
 import { BaselineSetupForm } from "./BaselineSetupForm";
+import { useBaselineStore } from "../stores/baselineStore";
 import { PiNumberCircleOneLight } from "react-icons/pi";
 import { PiNumberCircleTwoLight } from "react-icons/pi";
 import { PiNumberCircleThreeLight } from "react-icons/pi";
 import { PiNumberCircleFourLight } from "react-icons/pi";
 import { PiWarningFill } from "react-icons/pi";
-import { useBaselineStore } from "../stores/baselineStore";
-import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 
 interface Props {
   footerHeight?: number;
@@ -33,9 +32,11 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     events,
     isLoading: storeLoading,
     error,
+    isSubmitted,
     loadEvents,
     getEventByYear,
     setError,
+    submitBaseline,
   } = useBaselineStore();
 
   // 컴포넌트 마운트 시 이벤트 로드
@@ -43,13 +44,9 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     if (!authLoading && user) {
       loadEvents().catch((error) => {
         console.error("이벤트 로드 실패:", error);
-        // 로그인이 필요한 경우 로그인 모달 표시
-        if (error.message?.includes("로그인")) {
-          setLoginModalOpen(true);
-        }
       });
     }
-  }, [authLoading, user, loadEvents, setLoginModalOpen]);
+  }, [authLoading, user, loadEvents]);
 
   // 에러 처리
   useEffect(() => {
@@ -71,9 +68,19 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     age: number,
     isEmpty: boolean = false
   ) => {
-    // 로그인이 필요한 경우 로그인 모달 표시
     if (!user) {
-      setLoginModalOpen(true);
+      console.log("사용자 인증 대기 중...");
+      return;
+    }
+
+    if (isSubmitted) {
+      Swal.fire({
+        title: "편집 불가",
+        text: "이미 제출된 베이스라인은 수정할 수 없습니다.",
+        icon: "info",
+        confirmButtonColor: "#6366f1",
+        confirmButtonText: "확인",
+      });
       return;
     }
 
@@ -95,46 +102,75 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     setIsFormOpen(true);
   };
 
-  const handleAddNode = () => {
-    // 로그인이 필요한 경우 로그인 모달 표시
+  const handleAddNode = async () => {
+    console.log("=== handleAddNode 디버깅 ===");
+    console.log("user:", user);
+    console.log("user?.type:", user?.type);
+    console.log("isGuest:", isGuest);
+    console.log("events.length:", events.length);
+
     if (!user) {
-      setLoginModalOpen(true);
+      console.log("사용자 인증 대기 중...");
       return;
     }
 
-    // 게스트 모드에서는 추가 버튼 비활성화
-    if (isGuest) {
-      Swal.fire({
-        title: "게스트 모드 제한",
-        text: "게스트 모드에서는 기본 5개 분기점만 작성할 수 있습니다. 더 많은 분기점을 추가하려면 회원가입해 주세요.",
+    const totalRealNodes = events.length;
+
+    // user 객체가 백엔드 응답 형태인지 확인
+    const hasMessageProperty = "message" in user;
+    const isAnonymous =
+      (hasMessageProperty &&
+        (user as { message: string }).message === "anonymous") ||
+      !("type" in user);
+
+    // 게스트 체크
+    if (isAnonymous || ("type" in user && user.type === "guest") || isGuest) {
+      console.log("게스트/익명 사용자 감지 - 로그인 유도");
+      const result = await Swal.fire({
+        title: "로그인이 필요합니다",
+        html: "게스트 모드에서는 최대 5개까지만 작성할 수 있습니다.<br/>로그인하면 최대 10개까지 작성할 수 있습니다.",
         icon: "info",
-        confirmButtonColor: "#6366f1",
-        confirmButtonText: "확인",
         showCancelButton: true,
-        cancelButtonText: "회원가입하기",
-        cancelButtonColor: "#10B981",
-      }).then((result) => {
-        if (result.dismiss === Swal.DismissReason.cancel) {
-          setLoginModalOpen(true);
-        }
+        confirmButtonColor: "#6366f1",
+        cancelButtonColor: "#6B7280",
+        confirmButtonText: "로그인하기",
+        cancelButtonText: "취소",
       });
+
+      if (result.isConfirmed) {
+        setLoginModalOpen(true);
+      }
       return;
     }
 
-    // 전체 노드 개수 확인 (실제 이벤트 + 임시 노드)
-    const totalNodes = events.length + tempNodes.length;
-
-    if (totalNodes < 5) {
+    console.log("로그인 사용자 - 5개 체크");
+    // 로그인 사용자: 5개 미만일 때는 기본 노드부터 채우도록 안내
+    if (totalRealNodes < 5) {
       Swal.fire({
-        title: "분기점 입력 필요",
-        text: "5개의 분기점을 먼저 입력한 후 추가할 수 있습니다.",
+        title: "기본 노드를 먼저 채워주세요",
+        text: "기본 5개 노드를 먼저 작성한 후 추가할 수 있습니다.",
         icon: "info",
         confirmButtonColor: "#6366f1",
         confirmButtonText: "확인",
       });
       return;
     }
-    if (totalNodes >= 10) {
+
+    if (isSubmitted) {
+      Swal.fire({
+        title: "추가 불가",
+        text: "이미 제출된 베이스라인은 수정할 수 없습니다.",
+        icon: "info",
+        confirmButtonColor: "#6366f1",
+        confirmButtonText: "확인",
+      });
+      return;
+    }
+
+    const totalNodes = events.length + tempNodes.length;
+    const maxNodes = 10;
+
+    if (totalNodes >= maxNodes) {
       Swal.fire({
         title: "최대 개수 초과",
         text: "최대 10개까지만 분기점을 추가할 수 있습니다.",
@@ -153,10 +189,8 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     ];
     const lastYear =
       allYears.length > 0 ? Math.max(...allYears) : currentYear - 1;
-
     const newYear = Math.max(lastYear + 1, currentYear);
-    const newAge = newYear - 2000; // 임시 나이 계산
-
+    const newAge = newYear - 2000; // 임시 나이정보(추후 연결필요)
     // 임시 노드 추가, 폼 열기
     setTempNodes((prev) => [...prev, { year: newYear, age: newAge }]);
     setSelectedYear(newYear);
@@ -212,18 +246,29 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   // 년도순 정렬
   const sortedEvents = events.sort((a, b) => a.year - b.year);
 
-  // 제출 처리 함수 - Server Action 사용
+  // 제출 처리 함수
   const handleSubmit = async () => {
     if (!user) {
-      setLoginModalOpen(true);
+      console.log("사용자 인증 대기 중...");
       return;
     }
 
-    if (sortedEvents.length === 0) {
+    if (sortedEvents.length < 2) {
       Swal.fire({
-        title: "분기점이 없습니다",
-        text: "최소 1개 이상의 분기점을 입력한 후 제출해주세요.",
+        title: "분기점이 부족합니다",
+        text: "최소 2개 이상의 분기점을 작성한 후 제출해주세요.",
         icon: "warning",
+        confirmButtonColor: "#6366f1",
+        confirmButtonText: "확인",
+      });
+      return;
+    }
+
+    if (isSubmitted) {
+      Swal.fire({
+        title: "이미 제출됨",
+        text: "이미 제출된 베이스라인입니다.",
+        icon: "info",
         confirmButtonColor: "#6366f1",
         confirmButtonText: "확인",
       });
@@ -232,7 +277,11 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
     const result = await Swal.fire({
       title: "베이스라인 제출",
-      html: `총 ${sortedEvents.length}개의 분기점을 제출하시겠습니까? <br>제출 후에는 수정이 불가능합니다.`,
+      html: `총 ${sortedEvents.length}개의 분기점을 제출하시겠습니까? <br>${
+        isGuest
+          ? "게스트 모드에서는 로컬에만 저장됩니다."
+          : "제출 후에는 수정이 불가능합니다."
+      }`,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#6366f1",
@@ -243,22 +292,21 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
     if (result.isConfirmed) {
       try {
+        await submitBaseline(isGuest);
+
         Swal.fire({
           title: "제출 완료!",
-          text: "베이스라인이 성공적으로 제출되었습니다.",
+          text: isGuest
+            ? "게스트 모드에서 베이스라인이 로컬에 저장되었습니다."
+            : "베이스라인이 성공적으로 제출되었습니다.",
           icon: "success",
           confirmButtonColor: "#10B981",
           confirmButtonText: "확인",
+        }).then(() => {
+          window.location.href = "/multiverse/123";
         });
       } catch (error) {
         console.error("제출 오류:", error);
-        Swal.fire({
-          title: "제출 실패",
-          text: "제출 중 오류가 발생했습니다.",
-          icon: "error",
-          confirmButtonColor: "#E76F51",
-          confirmButtonText: "확인",
-        });
       }
     }
   };
@@ -271,7 +319,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       const scrollTop = window.pageYOffset;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-
       const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
 
       if (distanceFromBottom <= footerHeight) {
@@ -304,7 +351,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
   return (
     <div className="min-h-[calc(100vh-140px)]">
-      <div className="w-full min-h-[calc(100vh-140px)] flex">
+      <div className="w-full min-h-[calc(100vh-140px)] flex overflow-hidden">
         <BaselineView
           onNodeClick={handleNodeClick}
           onAddNode={handleAddNode}
@@ -314,7 +361,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           tempNodes={tempNodes}
           isGuest={isGuest || !user}
         />
-
         {/* 폼이 열려있을 때만 폼 표시 */}
         {isFormOpen && selectedYear && user && (
           <BaselineSetupForm
@@ -324,7 +370,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
             onClose={handleFormClose}
           />
         )}
-
         {/* 폼이 열려있지 않을 때 콘텐츠 표시 */}
         {!isFormOpen && (
           <div className="flex flex-col flex-1 justify-start pl-[16.15vw] bg-[linear-gradient(246deg,_rgba(217,217,217,0)_41.66%,_rgba(130,79,147,0.15)_98.25%)]">
@@ -345,37 +390,39 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         </p>
                       </li>
                     ))}
-
                     {/* 빈 자리 표시 (게스트: 5개, 로그인: 10개까지) */}
-                    {Array.from(
-                      { length: Math.max(0, 5 - sortedEvents.length) },
-                      (_, i) => (
-                        <li
-                          key={`empty-${i}`}
-                          className="flex items-center gap-[6.8vw] text-gray-500"
-                        >
-                          <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
-                            노드를 클릭해 분기를 입력해 주세요
-                          </h4>
-                        </li>
-                      )
-                    )}
+                    {!isSubmitted &&
+                      Array.from(
+                        { length: Math.max(0, 5 - sortedEvents.length) },
+                        (_, i) => (
+                          <li
+                            key={`empty-${i}`}
+                            className="flex items-center gap-[6.8vw] text-gray-500"
+                          >
+                            <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
+                              노드를 클릭해 분기를 입력해 주세요
+                            </h4>
+                          </li>
+                        )
+                      )}
                   </ul>
-                  {/* 제출 버튼 */}
-                  <div
-                    className={`flex justify-end fixed right-[130px] bottom-[50px] ${
-                      isMobile ? "left-4" : "left-8"
-                    } transition-all duration-300`}
-                    style={{ bottom: `${bottomPosition}px` }}
-                  >
-                    <button
-                      onClick={handleSubmit}
-                      disabled={isLoading}
-                      className="right-[50px] bg-white font-medium text-gray-800 px-6 py-4 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+
+                  {!isSubmitted && (
+                    <div
+                      className={`flex justify-end fixed right-[130px] ${
+                        isMobile ? "left-4" : "left-8"
+                      } transition-all duration-300`}
+                      style={{ bottom: `${bottomPosition}px` }}
                     >
-                      {isLoading ? "처리 중..." : "마무리하고 제출"}
-                    </button>
-                  </div>
+                      <button
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                        className="bg-white font-medium text-gray-800 px-6 py-4 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? "처리 중..." : "마무리하고 제출"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="fixed left-[45%] top-[23%] text-center">
@@ -410,7 +457,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         <p className="flex items-center justify-center gap-2 text-base">
                           <PiWarningFill size={32} />
                           {!user
-                            ? "로그인 후 이용 가능합니다"
+                            ? "인증 확인 중입니다"
                             : "게스트 모드에서는 기본 5개 분기점만 작성 가능합니다"}
                         </p>
                       </div>
