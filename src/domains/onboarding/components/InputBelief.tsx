@@ -29,6 +29,7 @@ function InputBelief({ control, className }: InputProps) {
               {NORMAL_BELIEFS.map((belief) => (
                 <button
                   key={belief}
+                  type="button"
                   onClick={() => field.onChange(belief)}
                   className={tw(
                     "text-center p-4 rounded-lg text-3xl font-medium transition-all duration-200",
