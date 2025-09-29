@@ -1,23 +1,23 @@
-
-
 import { z } from "zod";
 
 export const postCategorySchema = z.enum([
-  "CHAT", 
+  "CHAT",
   "NOTICE",
   "POLL",
-  "SCENARIO"
+  "SCENARIO",
 ]);
 
 export const postsSchema = z.object({
-  id: z.number(),
+  postId: z.number(),
   title: z.string(),
-  content: z.string(),
+  content: z.string().optional(),
   author: z.string(),
-  category: postCategorySchema,
-  hide: z.boolean(),
+  boardType: postCategorySchema,
+  hide: z.boolean().optional(),
   likeCount: z.number(),
   createdDate: z.string(),
+  commentCount: z.number().optional(),
+  liked: z.boolean().optional(),
 });
 
 // 검색 조건 스키마
