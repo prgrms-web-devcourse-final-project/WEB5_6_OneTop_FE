@@ -3,6 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 
+// csrf 토큰 처리
+// 어떻게 부여되는가. httpOnly 쿠키로 부여되는가? <- 아닌 것 같음. 읽을 수 있는 형태
+// 읽을 수 있다면 헤더에 명시적으로 싣어줘야 하는지
+// 읽을 수 없다면 credentials: "include" 옵션으로 보내줘야 함.
+// 지금은 쿠키를 로그인 시점에 받고 있는데, 분리된다면 로그인 시에 안 받는 거겠지?
+
 export async function loginAction(formData: FormData) {
   const email = (formData.get("email") ?? "").toString().trim();
   const password = (formData.get("password") ?? "").toString().trim();
@@ -16,9 +22,7 @@ export async function loginAction(formData: FormData) {
 
   const res = await fetch(`${baseUrl}/api/v1/users-auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json",
-      "Accept": "application/json"
-     },
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
     credentials: "include",
     body: JSON.stringify({ email, password }),
     cache: "no-store",
@@ -27,7 +31,8 @@ export async function loginAction(formData: FormData) {
   if (!res.ok) {
     const error = await res.json();
     // RFC 7807 Problem Details 형태의 에러 응답 처리
-    const errorMessage = error.detail || error.message || "로그인에 실패했습니다.";
+    const errorMessage =
+      error.detail || error.message || "로그인에 실패했습니다.";
     throw new Error(errorMessage);
   }
 
@@ -37,8 +42,21 @@ export async function loginAction(formData: FormData) {
   console.log("Login response data:", data);
 
   // Set-Cookie 헤더로 자동으로 JSESSIONID가 설정됨
-  const setCookieHeaders = res.headers.get('set-cookie');
+  const setCookieHeaders = res.headers.get("set-cookie");
   console.log("Set-Cookie headers:", setCookieHeaders);
+
+  if (setCookieHeaders) {
+    const jsessionid = setCookieHeaders.match(/JSESSIONID=([^;]+)/)?.[1];
+    const cookieStore = await cookies();
+    cookieStore.set("JSESSIONID", jsessionid || "", {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    console.log("Cookie:", jsessionid);
+  }
 
   // 성공 시 쿼리 갱신
   revalidatePath("/");
