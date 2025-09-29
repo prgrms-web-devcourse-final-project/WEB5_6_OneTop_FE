@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import MainContainer from "@/domains/multiverse/components/MainContainer";
+import MainContainer from "@/domains/main/components/MainContainer";
 
 export const metadata: Metadata = {
   title: "Re:Life",
