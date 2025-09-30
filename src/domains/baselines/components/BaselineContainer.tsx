@@ -364,7 +364,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
               }
             });
           } else {
-            router.push("/baselines/list");
+            router.push("/scenarios-list");
           }
         });
       } catch (error) {
