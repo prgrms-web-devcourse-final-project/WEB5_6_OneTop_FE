@@ -13,15 +13,19 @@ export const metadata: Metadata = {
 
 // 정적 렌더링에서는 쿠키 조회가 불가능하다.
 
-async function Layout({ children }: { children: React.ReactNode }) {
+
+async function Layout({ children, params }: { children: React.ReactNode, params: { redirectTo: string | null } }) {
   // TODO: 로그인 상태라면 redirect 처리
-  const cookieStore = await cookies();
-  const jsessionid = cookieStore.get("JSESSIONID");
-  console.log(jsessionid);
 
-  const userInfo = await getAuthUser();
+  const authUser = await getAuthUser();
+  const parsedAuthUser = userResponseSchema.safeParse(authUser);
+  const isLogin = parsedAuthUser.data?.message === "authenticated";
 
-  console.log(userInfo);
+  if (isLogin && params.redirectTo) {
+    redirect(params.redirectTo);
+  } else if (isLogin) {
+    redirect("/");
+  }
 
   return <div>{children}</div>;
 }
