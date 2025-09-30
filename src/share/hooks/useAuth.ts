@@ -1,14 +1,20 @@
-// 추후 api 확인 후 해당 부분 맞게 수정 필요 - 임시용
-
 "use client";
 
 import { useState, useEffect } from "react";
+import axios from "axios";
+import { useAuthStore } from "../stores/authStore";
+import { axiosInstance } from "../utils/axios";
+import { useBaselineStore } from "@/domains/baselines/stores/baselineStore";
 
 interface User {
-  id: string;
+  id: number;
   email?: string;
-  name: string;
-  type: "guest" | "member";
+  username?: string;
+  role: "USER" | "GUEST" | "ADMIN";
+  birthdayAt: string;
+  gender?: "F" | "M";
+  mbti?: string;
+  createdAt?: string;
 }
 
 interface UseAuthReturn {
@@ -19,7 +25,7 @@ interface UseAuthReturn {
 }
 
 export const useAuth = (): UseAuthReturn => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser, isGuest: isGuestFromStore } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -28,32 +34,44 @@ export const useAuth = (): UseAuthReturn => {
 
   const initializeAuth = async () => {
     try {
-      // 먼저 현재 사용자 정보 확인
-      const userResponse = await fetch("/api/v1/users-auth/me", {
-        credentials: "include", // 쿠키 포함
-      });
+      console.log("🔍 인증 상태 확인 중...");
 
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
+      const response = await axiosInstance.get("/users-auth/me");
 
-        // 백엔드가 {message: 'anonymous'} 형태로 반환하는 경우 처리
-        if (userData.message === "anonymous" || !userData.type) {
-          console.log("익명 사용자 감지 - 게스트 토큰 요청");
-          await requestGuestToken();
-        } else {
-          setUser(userData);
-        }
-      } else {
+      console.log("인증 응답:", response.data);
+
+      // 백엔드 응답 구조: {data: {...}, message: '...', status: 200}
+      const userData = response.data.data; // data 안의 data를 확인
+
+      // 익명 사용자 체크 (data가 없거나 id가 없는 경우)
+      if (!userData || !userData.id || response.data.message === "anonymous") {
+        console.log("👤 익명 사용자 - 게스트 토큰 요청");
         await requestGuestToken();
+      } else {
+        // 정상 사용자 정보 저장
+        console.log("로그인된 사용자:", userData);
+        // 로그인 사용자로 전환 시 게스트 데이터 초기화
+        const { hasGuestSubmitted } = useBaselineStore.getState();
+        if (hasGuestSubmitted) {
+          console.log("🔄 게스트 데이터 초기화");
+          useBaselineStore.getState().clearEvents();
+        }
+
+        setUser(userData);
       }
-    } catch (error) {
-      console.error("인증 초기화 실패:", error);
-      // 에러 시 게스트로 처리
-      setUser({
-        id: "offline-guest",
-        name: "게스트 사용자",
-        type: "guest",
-      });
+    } catch (error: unknown) {
+      console.error("인증 확인 실패:", error);
+
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        await requestGuestToken();
+      } else {
+        setUser({
+          id: Date.now(),
+          role: "GUEST",
+          birthdayAt: "2000-01-01",
+          username: "게스트 사용자",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -61,46 +79,41 @@ export const useAuth = (): UseAuthReturn => {
 
   const requestGuestToken = async () => {
     try {
-      const response = await fetch("/api/v1/users-auth/guest", {
-        method: "POST",
-        credentials: "include", // 쿠키 포함
-      });
+      console.log("게스트 토큰 발급 요청...");
 
-      if (response.ok) {
-        const data = await response.json();
+      const response = await axiosInstance.post("/users-auth/guest");
 
-        // 게스트 토큰 발급 성공
-        if (data.user) {
-          setUser(data.user);
-        } else {
-          // user 객체가 없으면 기본 게스트 설정
-          setUser({
-            id: data.id || "guest",
-            name: data.name || "게스트 사용자",
-            type: "guest",
-          });
-        }
+      console.log("게스트 토큰 발급 성공:", response.data);
+
+      // 백엔드 응답 구조 확인
+      const guestData = response.data.data;
+
+      if (guestData && guestData.id) {
+        setUser(guestData);
       } else {
-        // 게스트 토큰 발급 실패 시 오프라인 게스트
+        // data가 없으면 기본 게스트 설정
         setUser({
-          id: "offline-guest",
-          name: "게스트 사용자",
-          type: "guest",
+          id: response.data.userId || Date.now(),
+          role: "GUEST",
+          birthdayAt: "2000-01-01",
+          username: "게스트 사용자",
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("게스트 토큰 발급 실패:", error);
+
       setUser({
-        id: "offline-guest",
-        name: "게스트 사용자",
-        type: "guest",
+        id: Date.now(),
+        role: "GUEST",
+        birthdayAt: "2000-01-01",
+        username: "오프라인 게스트",
       });
     }
   };
 
   return {
-    user,
-    isGuest: user?.type === "guest",
+    user: user as User | null,
+    isGuest: isGuestFromStore,
     isLoading,
     requestGuestToken,
   };
