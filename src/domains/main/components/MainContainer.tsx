@@ -2,7 +2,7 @@
 
 const MainContainer = () => {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] bg-[url('/main_bg.png')] bg-cover bg-center">
+    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] bg-[url('/main_bg.png')] bg-cover bg-center bg-fixed">
       <button
         type="button"
         onClick={() => (window.location.href = "/onboarding")}
