@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { BiCalendarAlt } from "react-icons/bi";
 import { ko } from "react-day-picker/locale";
@@ -13,14 +13,10 @@ const thisYear = new Date(today).getFullYear();
 const thisMonth = new Date(today).getMonth() + 1;
 const thisDay = new Date(today).getDate();
 
-function InputDate({
-  id,
-  register,
-  setValue,
-  className,
-}: InputProps) {
+function InputDate({ id, register, setValue, className }: InputProps) {
   // TODO: id와 placeholder를 실제로 사용하도록 구현 필요
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   // 어차피 zustand로 전환할 예정. 아닌가? 일단 디바운스로 추적하려면 관리해야겠는데.
   const [selectedDate, setSelectedDate] = useState<Date>(
@@ -36,11 +32,29 @@ function InputDate({
   const month = selectedDate.getMonth() + 1;
   const day = selectedDate.getDate();
 
+  // 캘린더 외부 클릭 시 닫기
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+      setCalendarOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (calendarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [calendarOpen, handleClickOutside]);
+
   return (
     <div
       id={id}
       className={tw("flex gap-8 items-center justify-center w-full", className)}
-      onClick={() => setCalendarOpen(!calendarOpen)}
     >
       <div>
         <input
@@ -105,23 +119,25 @@ function InputDate({
       <label htmlFor="date" className="invisible">
         날짜
       </label>
-      <div className="relative flex gap-4 items-center -ml-10">
+      <div className="relative flex gap-4 items-center -ml-10" ref={calendarRef}>
         <button
           type="button"
           id="date"
-          onClick={() => setCalendarOpen(!calendarOpen)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setCalendarOpen((prev) => !prev);
+          }}
         >
           <BiCalendarAlt size={64} style={{ color: "white" }} />
         </button>
         <div
-          className={`absolute top-0 left-0 translate-y-[-45%] transform transition-all duration-200 ease-in-out ${
+          className={`absolute top-0 left-0 translate-y-[-45%] transform transition-all duration-200 ease-in-out z-50 ${
             calendarOpen
               ? "opacity-100 translate-y-0 scale-100 translate-x-[64px]"
               : "opacity-0 -translate-y-2 scale-80 pointer-events-none translate-x-[0]"
           }`}
         >
-          {calendarOpen && (
-            <DayPicker
+          <DayPicker
               classNames={{
                 today: "border-1 border-red-500",
                 selected: "bg-deep-navy text-white rounded-md",
@@ -142,13 +158,16 @@ function InputDate({
               onSelect={(date) => {
                 setSelectedDate(date ?? new Date());
                 setValue?.(`birthday_at.birthDay`, date?.getDate() ?? 0);
-                setValue?.(`birthday_at.birthMonth`, (date?.getMonth() ?? 0) + 1);
+                setValue?.(
+                  `birthday_at.birthMonth`,
+                  (date?.getMonth() ?? 0) + 1
+                );
                 setValue?.(`birthday_at.birthYear`, date?.getFullYear() ?? 0);
+                setCalendarOpen(false);
               }}
               required={false}
               locale={ko}
             />
-          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,8 @@
+// src/domains/baselines/components/BaselineContainer.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/share/hooks/useAuth";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
+  const router = useRouter();
   const { user, isGuest, isLoading: authLoading } = useAuth();
   const { setIsOpen: setLoginModalOpen } = useLoginModalStore();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -33,11 +35,81 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     isLoading: storeLoading,
     error,
     isSubmitted,
+    hasGuestSubmitted,
     loadEvents,
     getEventByYear,
     setError,
     submitBaseline,
+    startNewBaseline,
   } = useBaselineStore();
+
+  // 1. 3개 작성 완료 시 자동 알림 (useEffect 추가)
+  useEffect(() => {
+    // 게스트가 정확히 3개를 작성했고, 아직 제출 안 했고, 폼이 닫혀있을 때만 실행
+    if (isGuest && events.length === 3 && !isSubmitted && !isFormOpen) {
+      const hasShownModal = sessionStorage.getItem("guestLimitModalShown");
+
+      // 세션 동안 한 번만 표시
+      if (!hasShownModal) {
+        sessionStorage.setItem("guestLimitModalShown", "true");
+
+        Swal.fire({
+          title: "게스트 모드 제한",
+          html: "게스트 모드에서는 최대 3개까지만 작성할 수 있습니다.<br/>더 많은 베이스라인을 만들려면 로그인하세요.",
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonColor: "#6366f1",
+          cancelButtonColor: "#6B7280",
+          confirmButtonText: "로그인하기",
+          cancelButtonText: "나중에",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setLoginModalOpen(true);
+          }
+        });
+      }
+    }
+  }, [isGuest, events.length, isSubmitted, isFormOpen, setLoginModalOpen]);
+
+  // 게스트 제한: 3개, 로그인: 10개
+  const maxNodes = isGuest ? 3 : 10;
+
+  //   // 2. BaselineView에 전달하는 props 수정 (canAddMore 추가)
+  //   const baseNodeCount = 3; // 기본 3개 노드 보장
+  // const totalNodes = events.length + tempNodes.length; // 현재 입력된 노드(실제+임시)
+  // const emptyNodesCount = Math.max(0, baseNodeCount - totalNodes);
+
+  //const totalNodes = events.length + tempNodes.length;
+
+  // 컴포넌트 마운트 시 게스트가 이미 제출했는지 체크
+  useEffect(() => {
+    if (!authLoading && isGuest && hasGuestSubmitted && events.length === 0) {
+      Swal.fire({
+        title: "게스트 모드 제한",
+        html: "게스트 모드에서는 1개의 베이스라인만 생성할 수 있습니다.<br/>로그인하면 무제한으로 만들 수 있습니다.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#6366f1",
+        cancelButtonColor: "#6B7280",
+        confirmButtonText: "로그인하기",
+        cancelButtonText: "뒤로가기",
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setLoginModalOpen(true);
+        } else {
+          router.push("/");
+        }
+      });
+    }
+  }, [
+    authLoading,
+    isGuest,
+    hasGuestSubmitted,
+    events.length,
+    router,
+    setLoginModalOpen,
+  ]);
 
   // 컴포넌트 마운트 시 이벤트 로드
   useEffect(() => {
@@ -85,7 +157,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     }
 
     if (isEmpty) {
-      // 빈 노드 클릭 시 새로운 년도 생성
       const currentYear = new Date().getFullYear();
       const allYears = [
         ...events.map((e) => e.year),
@@ -105,30 +176,20 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   const handleAddNode = async () => {
     console.log("=== handleAddNode 디버깅 ===");
     console.log("user:", user);
-    console.log("user?.type:", user?.type);
     console.log("isGuest:", isGuest);
     console.log("events.length:", events.length);
+    console.log("maxNodes:", maxNodes);
 
     if (!user) {
       console.log("사용자 인증 대기 중...");
       return;
     }
 
-    const totalRealNodes = events.length;
-
-    // user 객체가 백엔드 응답 형태인지 확인
-    const hasMessageProperty = "message" in user;
-    const isAnonymous =
-      (hasMessageProperty &&
-        (user as { message: string }).message === "anonymous") ||
-      !("type" in user);
-
-    // 게스트 체크
-    if (isAnonymous || ("type" in user && user.type === "guest") || isGuest) {
-      console.log("게스트/익명 사용자 감지 - 로그인 유도");
+    // 게스트는 alert + 로그인 유도
+    if (isGuest) {
       const result = await Swal.fire({
-        title: "로그인이 필요합니다",
-        html: "게스트 모드에서는 최대 5개까지만 작성할 수 있습니다.<br/>로그인하면 최대 10개까지 작성할 수 있습니다.",
+        title: "게스트 모드 제한",
+        html: "게스트 모드에서는 분기점 추가가 불가능합니다.<br/>로그인하면 최대 10개까지 작성할 수 있습니다.",
         icon: "info",
         showCancelButton: true,
         confirmButtonColor: "#6366f1",
@@ -140,19 +201,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       if (result.isConfirmed) {
         setLoginModalOpen(true);
       }
-      return;
-    }
-
-    console.log("로그인 사용자 - 5개 체크");
-    // 로그인 사용자: 5개 미만일 때는 기본 노드부터 채우도록 안내
-    if (totalRealNodes < 5) {
-      Swal.fire({
-        title: "기본 노드를 먼저 채워주세요",
-        text: "기본 5개 노드를 먼저 작성한 후 추가할 수 있습니다.",
-        icon: "info",
-        confirmButtonColor: "#6366f1",
-        confirmButtonText: "확인",
-      });
       return;
     }
 
@@ -168,12 +216,12 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     }
 
     const totalNodes = events.length + tempNodes.length;
-    const maxNodes = 10;
 
+    // 최대 개수 체크
     if (totalNodes >= maxNodes) {
       Swal.fire({
         title: "최대 개수 초과",
-        text: "최대 10개까지만 분기점을 추가할 수 있습니다.",
+        text: `최대 ${maxNodes}개까지만 분기점을 추가할 수 있습니다.`,
         icon: "warning",
         confirmButtonColor: "#E76F51",
         confirmButtonText: "확인",
@@ -181,7 +229,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       return;
     }
 
-    // 새 임시 노드 생성
+    // 새 임시 노드 생성 (마지막 노드 아래에 추가)
     const currentYear = new Date().getFullYear();
     const allYears = [
       ...events.map((e) => e.year),
@@ -190,8 +238,9 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     const lastYear =
       allYears.length > 0 ? Math.max(...allYears) : currentYear - 1;
     const newYear = Math.max(lastYear + 1, currentYear);
-    const newAge = newYear - 2000; // 임시 나이정보(추후 연결필요)
-    // 임시 노드 추가, 폼 열기
+    const newAge = newYear - 2000;
+
+    // 임시 노드를 마지막에 추가
     setTempNodes((prev) => [...prev, { year: newYear, age: newAge }]);
     setSelectedYear(newYear);
     setIsFormOpen(true);
@@ -200,7 +249,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   const handleFormClose = () => {
     setIsFormOpen(false);
 
-    // 저장되지 않은 임시 노드 제거
     if (selectedYear && !getEventByYear(selectedYear)) {
       setTempNodes((prev) => prev.filter((node) => node.year !== selectedYear));
     }
@@ -211,14 +259,12 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
   const handleDeleteTempNode = (year: number) => {
     setTempNodes((prev) => prev.filter((node) => node.year !== year));
-    // 현재 선택된 노드가 삭제되는 노드라면 폼도 닫기
     if (selectedYear === year) {
       setIsFormOpen(false);
       setSelectedYear(null);
     }
   };
 
-  // 이벤트가 저장되면 해당 임시 노드 제거
   useEffect(() => {
     if (selectedYear && getEventByYear(selectedYear)) {
       setTempNodes((prev) => prev.filter((node) => node.year !== selectedYear));
@@ -227,7 +273,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
   const selectedEvent = selectedYear ? getEventByYear(selectedYear) : null;
 
-  // 모든 노드 정보 (실제 이벤트 + 임시 노드)
   const allEventsForView = [
     ...events,
     ...tempNodes.map((temp) => ({
@@ -243,10 +288,8 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     })),
   ];
 
-  // 년도순 정렬
   const sortedEvents = events.sort((a, b) => a.year - b.year);
 
-  // 제출 처리 함수
   const handleSubmit = async () => {
     if (!user) {
       console.log("사용자 인증 대기 중...");
@@ -279,7 +322,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       title: "베이스라인 제출",
       html: `총 ${sortedEvents.length}개의 분기점을 제출하시겠습니까? <br>${
         isGuest
-          ? "게스트 모드에서는 로컬에만 저장됩니다."
+          ? "<strong>게스트는 1개의 베이스라인만 생성 가능합니다.</strong>"
           : "제출 후에는 수정이 불가능합니다."
       }`,
       icon: "question",
@@ -294,16 +337,35 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       try {
         await submitBaseline(isGuest);
 
+        const { currentBaseLineId } = useBaselineStore.getState();
+
         Swal.fire({
           title: "제출 완료!",
-          text: isGuest
-            ? "게스트 모드에서 베이스라인이 로컬에 저장되었습니다."
+          html: isGuest
+            ? "게스트 모드에서 베이스라인이 저장되었습니다.<br/>더 많은 기능을 사용하려면 로그인하세요."
             : "베이스라인이 성공적으로 제출되었습니다.",
           icon: "success",
           confirmButtonColor: "#10B981",
           confirmButtonText: "확인",
         }).then(() => {
-          window.location.href = "/multiverse/123";
+          if (isGuest) {
+            Swal.fire({
+              title: "로그인하시겠습니까?",
+              text: "로그인하면 여러 베이스라인을 만들 수 있습니다.",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonColor: "#6366f1",
+              cancelButtonColor: "#6B7280",
+              confirmButtonText: "로그인하기",
+              cancelButtonText: "나중에",
+            }).then((loginResult) => {
+              if (loginResult.isConfirmed) {
+                setLoginModalOpen(true);
+              }
+            });
+          } else {
+            router.push("/scenarios-list");
+          }
         });
       } catch (error) {
         console.error("제출 오류:", error);
@@ -349,6 +411,11 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     );
   }
 
+  const baseNodeCount = 3;
+  const totalNodes = events.length + tempNodes.length; // 실제+임시노드 갯수
+  const emptyNodesCount = Math.max(0, baseNodeCount - totalNodes);
+
+  const canAddMore = totalNodes < maxNodes;
   return (
     <div className="min-h-[calc(100vh-140px)]">
       <div className="w-full min-h-[calc(100vh-140px)] flex overflow-hidden">
@@ -360,8 +427,10 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           events={allEventsForView}
           tempNodes={tempNodes}
           isGuest={isGuest || !user}
+          canAddMore={canAddMore} // 추가
+          maxNodes={maxNodes}
+          emptyNodesCount={emptyNodesCount}
         />
-        {/* 폼이 열려있을 때만 폼 표시 */}
         {isFormOpen && selectedYear && user && (
           <BaselineSetupForm
             isOpen={isFormOpen}
@@ -370,7 +439,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
             onClose={handleFormClose}
           />
         )}
-        {/* 폼이 열려있지 않을 때 콘텐츠 표시 */}
         {!isFormOpen && (
           <div className="flex flex-col flex-1 justify-start pl-[16.15vw] bg-[linear-gradient(246deg,_rgba(217,217,217,0)_41.66%,_rgba(130,79,147,0.15)_98.25%)]">
             <div className="text-white pt-[116px]">
@@ -390,21 +458,17 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         </p>
                       </li>
                     ))}
-                    {/* 빈 자리 표시 (게스트: 5개, 로그인: 10개까지) */}
                     {!isSubmitted &&
-                      Array.from(
-                        { length: Math.max(0, 5 - sortedEvents.length) },
-                        (_, i) => (
-                          <li
-                            key={`empty-${i}`}
-                            className="flex items-center gap-[6.8vw] text-gray-500"
-                          >
-                            <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
-                              노드를 클릭해 분기를 입력해 주세요
-                            </h4>
-                          </li>
-                        )
-                      )}
+                      Array.from({ length: emptyNodesCount }, (_, i) => (
+                        <li
+                          key={`empty-${i}`}
+                          className="flex items-center gap-[6.8vw] text-gray-500"
+                        >
+                          <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
+                            노드를 클릭해 분기를 입력해 주세요
+                          </h4>
+                        </li>
+                      ))}
                   </ul>
 
                   {!isSubmitted && (
@@ -458,7 +522,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                           <PiWarningFill size={32} />
                           {!user
                             ? "인증 확인 중입니다"
-                            : "게스트 모드에서는 기본 5개 분기점만 작성 가능합니다"}
+                            : `게스트 모드에서는 최대 ${maxNodes}개 분기점만 작성 가능합니다`}
                         </p>
                       </div>
                     )}

@@ -6,33 +6,21 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { signupAction } from "@/app/api/actions/signup";
-import { SignUpRequest } from "@/domains/types";
 import { loginAction } from "@/app/api/actions/login";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/share/config/queryKeys";
+import { loginSchema } from "../schemas/loginSchema";
+import { useRouter } from "next/navigation";
 
 // TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
   const isOpen = useLoginModalStore((s) => s.isOpen);
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
-  const [error, setError] = useState("")
-
-  const passwordRegex =
-    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-  const schema = z.object({
-    email: z
-      .email("이메일 형식이 올바르지 않습니다.")
-      .min(1, "이메일은 필수 입력 항목입니다."),
-    password: z
-      .string()
-      .min(8, "비밀번호는 8자 이상이어야 합니다.")
-      .max(16, "비밀번호는 16자 이하이어야 합니다.")
-      .refine(
-        (password) => passwordRegex.test(password),
-        "비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다."
-      ),
-  });
+  const qc = useQueryClient();
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const schema = loginSchema;
 
   const {
     register,
@@ -51,16 +39,29 @@ function LoginModal() {
 
     formData.append("email", data.email);
     formData.append("password", data.password);
-    
+
     try {
       await loginAction(formData);
       // 로그인 성공
-      setError("");
-      setIsOpen(false);
-      reset();
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get("redirectTo");
+
+      closeModal();
+
+      qc.invalidateQueries({ queryKey: queryKeys.auth.all() });
+
+      router.refresh();
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
-      const errorMessage = error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "로그인 중 오류가 발생했습니다.";
       setError(errorMessage);
     }
   };

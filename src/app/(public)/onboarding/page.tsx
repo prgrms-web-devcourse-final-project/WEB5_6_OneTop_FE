@@ -1,18 +1,20 @@
 "use client";
 
-import { useRef, useLayoutEffect } from "react";
+import { useRef, useLayoutEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
+import { guestLoginAction } from "@/app/api/actions/guest-login";
 import { useRouter } from "next/navigation";
 
 function Page() {
-  const leftPannelRef = useRef<HTMLDivElement>(null);
-  const rightPannelRef = useRef<HTMLDivElement>(null);
+  const leftPannelRef = useRef<HTMLButtonElement>(null);
+  const rightPannelRef = useRef<HTMLButtonElement>(null);
   const leftDetailRef = useRef<HTMLDivElement>(null);
   const rightDetailRef = useRef<HTMLDivElement>(null);
   const setLoginModalOpen = useLoginModalStore((s) => s.setIsOpen);
+  const [guestLoginLoading, setGuestLoginLoading] = useState(false);
   const router = useRouter();
 
   const open = (e: HTMLElement) => {
@@ -22,6 +24,25 @@ function Page() {
       duration: 0.5,
       ease: "power3.inOut",
     });
+  };
+
+  const onGuestLogin = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTo = urlParams.get("redirectTo");
+
+    try {
+      setGuestLoginLoading(true);
+      await guestLoginAction();
+      router.refresh();
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push("/");
+      }
+    } catch (error) {
+      setGuestLoginLoading(false);
+      console.error(error);
+    }
   };
 
   const close = (e: HTMLElement) => {
@@ -44,7 +65,6 @@ function Page() {
     });
 
     // 애니메이션 멈추고 1초 뒤 시작 ( 설명 보이도록 )
-
     const tl = gsap.timeline({
       defaults: {
         ease: "power3.out",
@@ -86,12 +106,13 @@ function Page() {
       </Link>
 
       {/* 왼쪽 패널 */}
-      <div
+      <button
         ref={leftPannelRef}
         className="absolute top-0 left-0 w-1/2 h-full bg-deep-navy z-20 overflow-hidden cursor-pointer 
         -translate-x-full will-change-transform"
         // 나중에 토큰 발급 로직으로 변경하고 router.push로 이동.
-        onClick={() => router.push("/onboarding/profile-settings")}
+        onClick={onGuestLogin}
+        disabled={guestLoginLoading}
         onMouseEnter={() =>
           leftDetailRef.current
             ? open(leftDetailRef.current)
@@ -122,10 +143,10 @@ function Page() {
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
       {/* 오른쪽 패널 */}
-      <div
+      <button
         ref={rightPannelRef}
         className="absolute top-0 right-0 w-1/2 h-full bg-white z-20 overflow-hidden cursor-pointer 
         translate-x-full will-change-transform"
@@ -166,7 +187,7 @@ function Page() {
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
       {/* 중앙 카피 */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">

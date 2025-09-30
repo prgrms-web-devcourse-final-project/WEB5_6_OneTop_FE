@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     let posts = mockPostListResponse.data.items;
 
     if (category !== "ALL") {
-      posts = posts.filter((post) => post.category === category);
+      posts = posts.filter((post) => post.boardType === category);
     }
 
     const startIndex = page * size;
