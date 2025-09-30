@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
 import { loginSchema } from "../schemas/loginSchema";
+import { useRouter } from "next/navigation";
 
 // TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
@@ -18,7 +19,7 @@ function LoginModal() {
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
   const qc = useQueryClient();
   const [error, setError] = useState("");
-
+  const router = useRouter();
   const schema = loginSchema;
 
   const {
@@ -42,10 +43,19 @@ function LoginModal() {
     try {
       await loginAction(formData);
       // 로그인 성공
-      setError("");
-      setIsOpen(false);
-      qc.invalidateQueries({ queryKey: queryKeys.auth.me() });
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get("redirectTo");
+
+      qc.invalidateQueries({ queryKey: queryKeys.auth.all() });
+
       reset();
+      
+      router.refresh();
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
       const errorMessage =

@@ -10,7 +10,7 @@ export const userProfileSchema = z.object({
   authProvider: z.string(),
 });
 
-export const loginResponseSchema = z.object({
+export const userResponseSchema = z.object({
   data: userProfileSchema,
   message: z.string(),
   status: z.number(),
