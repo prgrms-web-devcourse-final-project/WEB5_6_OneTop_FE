@@ -24,7 +24,6 @@ async function Page({
 }) {
   // 실제 서버 조회로 변경
   const arrivedSearchParams = await searchParams;
-
   const category = arrivedSearchParams.category || "ALL";
   const page = arrivedSearchParams.page || 0;
 
@@ -34,10 +33,13 @@ async function Page({
   apiUrl.searchParams.set("page", page.toString());
   apiUrl.searchParams.set("size", "10");
   apiUrl.searchParams.set("searchType", "TITLE");
-  // apiUrl.searchParams.set("keyword", "");
+  apiUrl.searchParams.set("keyword", "");
   apiUrl.searchParams.set("sort", "createdDate");
 
+  let posts = [];
+
   try {
+    // 내부적으로 content-type, accept 헤더를 추가해줌, cookie도 추가해줌
     const response = await nextFetcher(apiUrl.toString(), {
       cache: "no-store",
     });
@@ -48,35 +50,31 @@ async function Page({
 
     const data = await response.json();
     console.log("API Response:", data);
-    const posts = data.data?.items || [];
+    posts = data.items || [];
   } catch (error) {
     console.error("API 호출 에러:", error);
-    const posts = []; // 에러 시 빈 배열
+    posts = []; // 에러 시 빈 배열
   }
-
-  const data = {
-    data: {
-      items: [],
-    },
-  };
-
-  const posts = data.data?.items || [];
 
   return (
     <>
       <div className="w-full flex flex-col items-center min-h-[calc(100vh-140px)]">
-        <BannerSection
-          title="커뮤니티"
-          description="커뮤니티를 통해 다양한 사람들과 소통해보세요."
-        />
-        <div className="w-[80%]">
-          {/* 헤더 영역 */}
-          <div className="flex w-full justify-between items-center bg-deep-navy px-4">
+        <BannerSection>
+          <input
+            type="text"
+            className="w-[80%] rounded-full px-4 py-2 bg-white placeholder:text-gray-500"
+            placeholder="검색어를 입력해주세요."
+          />
+          <div className="flex w-full justify-between items-center px-4 absolute bottom-4">
             <PostFilter category={category} />
             <button className="bg-deep-navy text-gray-200 border border-gray-200 rounded-md px-4 py-2">
               글쓰기
             </button>
           </div>
+        </BannerSection>
+        <div className="w-[80%]">
+          {/* 헤더 영역 */}
+
           {/* 게시글 영역 */}
           <PostList posts={posts} />
         </div>

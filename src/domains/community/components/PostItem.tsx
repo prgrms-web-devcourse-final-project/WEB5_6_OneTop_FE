@@ -15,7 +15,7 @@ const categoryColor = {
 };
 
 const categoryText = {
-  CHAT: "채팅",
+  CHAT: "잡담",
   NOTICE: "공지",
   POLL: "투표",
   SCENARIO: "시나리오",
@@ -24,25 +24,26 @@ const categoryText = {
 function PostItem({ post }: PostItemProps) {
   const parsedPost = postsSchema.parse(post);
 
-  const { id, title, author, category, createdDate, likeCount, hide } = parsedPost;
+  const { postId, title, author, boardType, createdDate, likeCount, hide } =
+    parsedPost;
 
   return (
     <li
       className="flex flex-col gap-2 bg-gray-200 p-6 border-b border-gray-300"
-      id={`post-${id}`}
+      id={`post-${postId}`}
     >
       {/* 계층 1 : 카테고리 */}
       <div className="flex items-center gap-2">
         <div
           className={`w-20 h-8 rounded-full text-white flex items-center justify-center bg-dusty-blue`}
         >
-          {categoryText[category]}
+          {categoryText[boardType]}
         </div>
       </div>
 
       {/* 계층 2 : 제목 */}
       <div className="flex items-center gap-2">
-        <Link href={`/community/detail/${id}`}>
+        <Link href={`/community/detail/${postId}`}>
           <span className="font-semibold text-lg">{title}</span>
         </Link>
       </div>
@@ -50,8 +51,10 @@ function PostItem({ post }: PostItemProps) {
       {/* 계층 3 : 작성자, 작성일, 좋아요, 코멘트수*/}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm">{ hide ? "익명" : author}</span>
-          <span className="text-sm">{createdDate.split("T")[0].replace(/-/g, ".")}</span>
+          <span className="text-sm">{hide ? "익명" : author}</span>
+          <span className="text-sm">
+            {createdDate.split("T")[0].replace(/-/g, ".")}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <AiOutlineLike size={18} />
