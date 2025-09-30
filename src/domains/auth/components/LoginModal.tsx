@@ -46,10 +46,10 @@ function LoginModal() {
       const urlParams = new URLSearchParams(window.location.search);
       const redirectTo = urlParams.get("redirectTo");
 
+      closeModal();
+
       qc.invalidateQueries({ queryKey: queryKeys.auth.all() });
 
-      reset();
-      
       router.refresh();
       if (redirectTo) {
         router.push(redirectTo);
