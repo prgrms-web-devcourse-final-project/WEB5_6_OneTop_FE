@@ -64,10 +64,8 @@ export async function signupAction(formData: FormData) {
     throw new Error(errorData.message);
   }
 
-  console.log("회원가입 성공 -Backend response:", res);
-
   revalidatePath("/");
 
   // 임시로 안전한 객체 반환
-  return { success: true };
+  return res.json()
 }

@@ -3,7 +3,7 @@
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { signUpSchema as schema } from "../lib/signUpSchema";
+import { signUpSchema as schema } from "../schemas/signUpSchema";
 import { useRouter } from "next/navigation";
 import { signupAction } from "@/app/api/actions/signup";
 import { SignUpRequest } from "@/domains/types";
