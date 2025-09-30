@@ -1,8 +1,9 @@
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { getAuthUser } from "@/domains/auth/api/getAuthUser";
 import { userResponseSchema } from "@/domains/auth/schemas/loginResponseSchema";
-import { Metadata } from "next";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Re:Life | 로그인/게스트 선택",
@@ -12,10 +13,12 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-static";
+// 정적 렌더링에서는 쿠키 조회가 불가능하다.
+
 
 async function Layout({ children, params }: { children: React.ReactNode, params: { redirectTo: string | null } }) {
   // TODO: 로그인 상태라면 redirect 처리
+
 
   const authUser = await getAuthUser();
   const parsedAuthUser = userResponseSchema.safeParse(authUser);
