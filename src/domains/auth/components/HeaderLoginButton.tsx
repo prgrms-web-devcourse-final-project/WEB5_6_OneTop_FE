@@ -2,6 +2,9 @@
 
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import tw from "@/share/utils/tw";
+import { useAuthUser } from "../api/useAuthUser";
+import { useLogout } from "../hooks/useLogout";
+import { loginResponseSchema } from "../schemas/loginResponseSchema";
 
 interface Props {
   variant?: "default" | "transparent" | "light" | "primary";
@@ -9,7 +12,11 @@ interface Props {
 
 function HeaderLoginButton({ variant = "default" }: Props) {
   const setIsOpen = useLoginModalStore((s) => s.setIsOpen);
-  const isLogin = false;
+  const { data: authUser } = useAuthUser();
+  // safeParse를 이용해 오류 방지
+  const parsedAuthUser = loginResponseSchema.safeParse(authUser);
+  const { logout } = useLogout();
+  const isLogin = parsedAuthUser.data?.message === "authenticated";
 
   const getLoginButtonStyles = () => {
     switch (variant) {
@@ -33,7 +40,7 @@ function HeaderLoginButton({ variant = "default" }: Props) {
             `w-25 h-10 text-white rounded-full border border-white hover:bg-white hover:text-black transition-all duration-300`,
             loginButtonStyles
           )}
-          onClick={() => setIsOpen(true)}
+          onClick={() => logout()}
         >
           로그아웃
         </button>
