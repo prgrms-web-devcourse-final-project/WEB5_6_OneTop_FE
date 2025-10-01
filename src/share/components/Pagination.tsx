@@ -23,9 +23,17 @@ export default function Pagination({
     return `${pathname}?${params.toString()}`;
   };
 
-  const getPageNumbers = () => {
-    const pages = [];
+  const getPageNumbers = (): number[] => {
+    const pages: number[] = [];
     const showPages = 3;
+
+    // totalPages가 showPages 이하면 모든 페이지 표시
+    if (totalPages <= showPages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
 
     let start = Math.max(1, currentPage - 1);
     const end = Math.min(totalPages, start + showPages - 1);
