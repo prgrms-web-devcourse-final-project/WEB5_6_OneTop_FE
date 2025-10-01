@@ -7,7 +7,6 @@ import gsap from "gsap";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import { guestLoginAction } from "@/app/api/actions/guest-login";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 
 function Page() {
   const leftPannelRef = useRef<HTMLButtonElement>(null);
@@ -17,10 +16,8 @@ function Page() {
   const setLoginModalOpen = useLoginModalStore((s) => s.setIsOpen);
   const [guestLoginLoading, setGuestLoginLoading] = useState(false);
   const router = useRouter();
-  const { data: authUser } = useAuthUser();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
-  const hasRedirectedRef = useRef(false);
 
   const open = (e: HTMLElement) => {
     gsap.to(e, {

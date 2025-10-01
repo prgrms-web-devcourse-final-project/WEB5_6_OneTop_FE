@@ -60,7 +60,6 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   };
 
   const onSubmit = (data: UserOnboardingData) => {
-    console.log(data);
     mutate(data);
   };
 
