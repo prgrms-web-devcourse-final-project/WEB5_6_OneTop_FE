@@ -32,7 +32,7 @@ const CustomProgressList: CustomProgressListType[] = [
     ],
   },
   {
-    key: "lisk_avoid",
+    key: "risk_avoid",
     title: "위험 회피 성향",
     description: [
       "-선택에서 리스크를 감내하는 정도를 1~10으로 입력해주세요.",
@@ -56,7 +56,7 @@ function InputAdditional({ control, className }: InputProps) {
             life_satis: 5,
             relationships: 5,
             work_life_bal: 5,
-            lisk_avoid: 5,
+            risk_avoid: 5,
           }}
           render={({ field }) => (
             <>

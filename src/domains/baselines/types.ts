@@ -92,3 +92,9 @@ export interface ApiResponse<T> {
   message: string;
   status: number;
 }
+
+export interface BaselineListResponse {
+  data: BaseLineListItemDto[];
+  message: string;
+  status: number;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/share/hooks/useAuth";
+import { useAuth } from "@/domains/auth/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { Analysis } from "../../../app/components/scenarios/Analysis";
 import { RadarChart } from "./RadarChart";

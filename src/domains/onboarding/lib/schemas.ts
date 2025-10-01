@@ -28,7 +28,7 @@ export const FormSchema = z.object({
     work_life_bal: z
       .number("자유 중시성을 입력해주세요.")
       .min(1, "자유 중시성은 1보다 작을 수 없습니다."),
-    lisk_avoid: z
+    risk_avoid: z
       .number("위험 회피 성향을 입력해주세요.")
       .min(1, "위험 회피 성향은 1보다 작을 수 없습니다."),
   }),
