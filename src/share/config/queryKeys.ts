@@ -9,5 +9,10 @@ export const queryKeys = {
     all: () => ['profile'],
     get: () => ['profile', 'get'],
     set: () => ['profile', 'set'],
+  },
+  post: {
+    all: () => ['post'],
+    id: (id: string) => ['post', id],
+    like: () => ['post', 'like'],
   }
 }
