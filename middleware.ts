@@ -26,10 +26,12 @@ export async function middleware(req: NextRequest) {
 
     if (meRes.ok) {
       // When unauthenticated, backend returns 200 with empty body (content-length: 0)
+      // When authenticated, it returns JSON (often chunked)
       const contentLength = meRes.headers.get("content-length");
       const contentType = meRes.headers.get("content-type") || "";
 
       if (contentType.includes("application/json") || contentLength === null) {
+        // Try to parse; if it fails it's likely empty
         try {
           const data = await meRes.json();
           if (data) isLoggedIn = true;

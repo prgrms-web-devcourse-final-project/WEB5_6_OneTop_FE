@@ -2,19 +2,20 @@ import { NodeProps, Handle, Position } from "@xyflow/react";
 import tw from "@/share/utils/tw";
 
 const CustomNode = ({ data, selected }: NodeProps) => {
-  const isSelected = selected || data.isSelected;
-
+  if (!data || typeof data.ageYear !== "number") {
+    return;
+  }
   return (
     <div
       className={tw(
         "flex items-center justify-center rounded-full text-center text-sm font-semibold transition-all -translate-x-1/2 -translate-y-1/2",
-        isSelected
-          ? "w-24 h-24 bg-[#C4DDF4] text-gray-900 shadow-[0_0_12px_rgba(197, 197, 197, 0.16))] scale-110"
-          : "w-10 h-10 bg-white text-gray-900 shadow-[0_0_12px_rgba(197, 197, 197, 0.25] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-100"
+        selected
+          ? "w-24 h-24 bg-[#C4DDF4] text-gray-900 scale-110 shadow-[0_0_20px_rgba(196,221,244,0.8)] hover:shadow-[0_0_30px_rgba(196,221,244,1)]"
+          : "w-10 h-10 bg-white text-gray-900 scale-100 shadow-[0_0_12px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(255,255,255,0.6)]"
       )}
       style={{ transformOrigin: "center" }}
     >
-      {typeof data.label === "string" ? data.label : ""}
+      {data.ageYear}
       <Handle
         type="target"
         position={Position.Left}
