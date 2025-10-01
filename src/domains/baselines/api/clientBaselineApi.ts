@@ -112,7 +112,7 @@ export const clientBaselineApi = {
     }>
   > => {
     try {
-      const response = await api.get<BaselineListResponse>("/scenarios-list");
+      const response = await api.get<BaselineListResponse>("/scenario-list");
 
       console.log("베이스라인 목록 조회:", response.data);
 
