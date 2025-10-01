@@ -49,7 +49,7 @@ export type UserOnboardingData = z.infer<typeof FormSchema>;
 
 
 export type CustomProgressListType = {
-  key: "life_satis" | "relationships" | "work_life_bal" | "lisk_avoid";
+  key: "life_satis" | "relationships" | "work_life_bal" | "risk_avoid";
   title: string;
   description: string[];
 };
@@ -58,5 +58,5 @@ export type AdditionalValues = {
   life_satis: number;
   relationships: number;
   work_life_bal: number;
-  lisk_avoid: number;
+  risk_avoid: number;
 };

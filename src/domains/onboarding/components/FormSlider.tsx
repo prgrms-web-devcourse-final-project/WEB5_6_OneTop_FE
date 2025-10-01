@@ -11,6 +11,7 @@ import { isValidFormKey, StepDefinition, UserOnboardingData } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Swal from "sweetalert2";
+import { setUserProfile } from "../api/setUserProfile";
 
 function FormSlider({ initialStep }: { initialStep: number }) {
   // URL 정보 처리 HOOK
@@ -55,10 +56,16 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     goto(safeIdx + 1);
   };
 
-  const onSubmit = (data: UserOnboardingData) => {
+  const onSubmit = async (data: UserOnboardingData) => {
     console.log(data);
 
     // TODO : 서버 API 호출 후에 REDIRECT
+    try{
+      await setUserProfile(data);
+    } catch (error) {
+      console.error(error);
+    }
+
     router.push("/baselines")
   };
 
