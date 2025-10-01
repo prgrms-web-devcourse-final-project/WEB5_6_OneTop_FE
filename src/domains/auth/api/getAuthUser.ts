@@ -16,21 +16,18 @@ export async function getAuthUser() {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText);
+      const errorText = await response.json();
+      throw new Error(errorText.message);
     }
 
-    // 먼저 text로 읽어보기
-    const responseText = await response.text();
-    console.log("responseText:", responseText);
-
-    if (!responseText || responseText.trim() === "") {
+    if (!response || response.status === 401) {
       return null;
     }
 
     // JSON 파싱 시도
     try {
-      const data = JSON.parse(responseText);
+      const data = await response.json();
+      console.log("data", data);
       return data;
     } catch (parseError) {
       console.error("JSON parse error:", parseError);

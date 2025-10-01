@@ -32,7 +32,7 @@ export async function loginAction(formData: FormData) {
     // RFC 7807 Problem Details 형태의 에러 응답 처리
     console.log(error);
     throw new Error(error);
-  }
+  } 
 
   const data = await res.json();
   console.log("Login response data:", data);

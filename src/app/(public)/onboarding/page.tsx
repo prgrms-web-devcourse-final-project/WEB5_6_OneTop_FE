@@ -31,13 +31,13 @@ function Page() {
     });
   };
 
-  useEffect(() => {
-    if (authUser && !hasRedirectedRef.current) {
-      hasRedirectedRef.current = true;
-      router.replace(redirectTo || "/");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUser]);
+  // useEffect(() => {
+  //   if (authUser && !hasRedirectedRef.current) {
+  //     hasRedirectedRef.current = true;
+  //     router.replace(redirectTo || "/");
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [authUser]);
 
   const onGuestLogin = async () => {
     try {
