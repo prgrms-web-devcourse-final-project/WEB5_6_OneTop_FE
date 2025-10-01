@@ -1,4 +1,3 @@
-// src/domains/baselines/components/BaselineView.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";

@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-// import { useAuthStore } from "@/share/stores/authStore";
 import { LifeEvent } from "../types";
 import { clientBaselineApi } from "../api/clientBaselineApi";
 
