@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/share/utils/axios";
+import { api } from "@/share/config/api";
 import {
   LifeEvent,
   BaseNodeDto,
@@ -7,14 +7,13 @@ import {
   categoryToBackend,
   categoryToFrontend,
   BaseLineListItemDto,
-  ApiResponse,
+  BaselineListResponse,
 } from "../types";
 
-// BaseNodeDto → LifeEvent 변환
 const convertNodeToEvent = (node: BaseNodeDto): LifeEvent => {
   return {
     id: node.id.toString(),
-    year: 0, // 사용자 생년월일 기반 계산 필요 (추후 보완)
+    year: 0,
     age: node.ageYear,
     category: categoryToFrontend[node.category],
     eventTitle: node.situation,
@@ -27,7 +26,6 @@ const convertNodeToEvent = (node: BaseNodeDto): LifeEvent => {
 };
 
 export const clientBaselineApi = {
-  // 베이스라인 일괄 생성
   createBaseLine: async (
     events: Array<{
       year: number;
@@ -39,7 +37,7 @@ export const clientBaselineApi = {
     }>,
     title?: string,
     userId: number = 1
-  ): Promise<LifeEvent[]> => {
+  ): Promise<{ baseLineId: number; events: LifeEvent[] }> => {
     try {
       console.log("베이스라인 생성 시작:", { events, title, userId });
 
@@ -56,8 +54,8 @@ export const clientBaselineApi = {
 
       console.log("백엔드 요청 데이터:", request);
 
-      const response = await axiosInstance.post<BaseLineBulkCreateResponse>(
-        "/base-lines/bulk",
+      const response = await api.post<BaseLineBulkCreateResponse>(
+        "/api/v1/base-lines/bulk",
         request
       );
 
@@ -67,8 +65,19 @@ export const clientBaselineApi = {
         const nodes = await clientBaselineApi.getBaseLineNodes(
           response.data.baseLineId
         );
-        console.log("조회된 노드들:", nodes);
-        return nodes;
+
+        // baseLineId를 각 노드에 추가
+        const eventsWithBaseLineId = nodes.map((node) => ({
+          ...node,
+          baseLineId: response.data.baseLineId,
+        }));
+
+        console.log("조회된 노드들:", eventsWithBaseLineId);
+
+        return {
+          baseLineId: response.data.baseLineId,
+          events: eventsWithBaseLineId,
+        };
       }
 
       throw new Error("베이스라인 응답에서 baseLineId를 찾을 수 없습니다");
@@ -78,11 +87,10 @@ export const clientBaselineApi = {
     }
   },
 
-  // 특정 베이스라인의 노드 목록 조회
   getBaseLineNodes: async (baseLineId: number): Promise<LifeEvent[]> => {
     try {
-      const response = await axiosInstance.get<BaseNodeDto[]>(
-        `/base-lines/${baseLineId}/nodes`
+      const response = await api.get<BaseNodeDto[]>(
+        `/api/v1/base-lines/${baseLineId}/nodes`
       );
 
       if (Array.isArray(response.data)) {
@@ -95,11 +103,37 @@ export const clientBaselineApi = {
     }
   },
 
-  // 사용자의 첫 번째 베이스라인 조회
-  getBaseLine: async (userId: number = 1): Promise<LifeEvent[]> => {
+  getBaseLineList: async (): Promise<
+    Array<{
+      id: number;
+      title: string;
+      tags?: string[];
+      createdAt: string;
+    }>
+  > => {
     try {
-      // 현재는 임시로 baseLineId 1을 사용
-      const baseLineId = 1; // 실제로는 사용자의 첫 번째 베이스라인 ID를 가져와야 함
+      const response = await api.get<BaselineListResponse>("/scenario-list");
+
+      console.log("베이스라인 목록 조회:", response.data);
+
+      if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data.map((item: BaseLineListItemDto) => ({
+          id: item.baselineId,
+          title: item.title || `베이스라인 ${item.baselineId}`,
+          tags: item.tags || [],
+          createdAt: item.createdDate,
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error("베이스라인 목록 조회 실패:", error);
+      return [];
+    }
+  },
+  getBaseLine: async (): Promise<LifeEvent[]> => {
+    try {
+      const baseLineId = 1;
       return await clientBaselineApi.getBaseLineNodes(baseLineId);
     } catch (error) {
       console.error("베이스라인 조회 실패:", error);
@@ -107,11 +141,10 @@ export const clientBaselineApi = {
     }
   },
 
-  // 단일 노드 조회
   getNode: async (nodeId: number): Promise<LifeEvent> => {
     try {
-      const response = await axiosInstance.get<BaseNodeDto>(
-        `/base-lines/nodes/${nodeId}`
+      const response = await api.get<BaseNodeDto>(
+        `/api/v1/base-lines/nodes/${nodeId}`
       );
 
       if (response.data) {
@@ -121,38 +154,6 @@ export const clientBaselineApi = {
     } catch (error) {
       console.error("노드 조회 실패:", error);
       throw new Error("분기점을 불러오는데 실패했습니다.");
-    }
-  },
-
-  // 사용자의 베이스라인 목록 조회
-  getBaseLineList: async (): Promise<
-    Array<{
-      id: number;
-      title: string;
-      tags: string[];
-      createdAt: string;
-    }>
-  > => {
-    try {
-      const response = await axiosInstance.get<
-        ApiResponse<BaseLineListItemDto[]>
-      >("scenarios/baselines");
-
-      console.log("베이스라인 목록 조회:", response.data);
-
-      if (response.data && Array.isArray(response.data.data)) {
-        return response.data.data.map((item) => ({
-          id: item.baselineId,
-          title: item.title,
-          tags: item.tags,
-          createdAt: item.createdDate,
-        }));
-      }
-
-      return [];
-    } catch (error) {
-      console.error("베이스라인 목록 조회 실패:", error);
-      return [];
     }
   },
 };
