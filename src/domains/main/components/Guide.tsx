@@ -48,26 +48,17 @@ const Step = ({ number, title, description, isActive = false }: Props) => {
 const Guide = () => {
   return (
     <section className="w-full h-screen relative">
-      {/* Dark Overlay */}
       <div className="absolute inset-0" />
-
-      {/* Content Container */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-        {/* Header */}
         <div className="text-center mb-20">
           <h2 className="text-white text-4xl font-bold mb-3">Re:Life 가이드</h2>
           <p className="text-gray-300 text-base">쉽고 간단한 시작 가이드</p>
         </div>
-
-        {/* Steps Container */}
         <div className="max-w-7xl w-full relative">
-          {/* Connection Line */}
           <div
             className="absolute top-6 left-0 right-0 h-0.5 bg-white/30 hidden lg:block"
             style={{ width: "calc(100% - 100px)", left: "50px" }}
           />
-
-          {/* Steps Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
             <Step
               number="01"
@@ -75,13 +66,11 @@ const Guide = () => {
               description="인생의 중요한 순간 기록"
               isActive={true}
             />
-
             <Step
               number="02"
               title="평행우주"
               description="다른 선택 AI 시뮬레이션"
             />
-
             <Step number="03" title="비교 분석" description="현재와 비교" />
 
             <Step number="04" title="함께 고민하기" description="커뮤니티" />

@@ -129,7 +129,7 @@ export const Hero = () => {
         </h2>
         <p className="text-2xl">AI와 실제 통계로 확인하는 나만의 평행우주 </p>
       </div>
-      <div className="absolute inset-0 pointer-events-none w-screen h-screen -z-10">
+      <div className="absolute inset-0 pointer-events-none w-screen h-screen -z-1">
         <Image
           src="/hero_bg.png"
           alt=""
