@@ -1,12 +1,11 @@
 import { getPostList } from "@/domains/community/api/getPostList";
-import Pagenation from "@/domains/community/components/Pagenation";
 import PostFilter from "@/domains/community/components/PostFilter";
 import PostList from "@/domains/community/components/PostList";
 import { PostFilterType } from "@/domains/community/types";
 import { BannerSection } from "@/share/components/BannerSection";
-import { nextFetcher } from "@/share/utils/nextFetcher";
+import Pagination from "@/share/components/Pagination";
 import { Metadata } from "next";
-import { cookies, headers } from "next/headers";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "커뮤니티 | Re:Life",
@@ -30,11 +29,13 @@ async function Page({
   const page = arrivedSearchParams.page || 0;
 
   let posts = [];
+  let totalPages = 0;
 
   try {
     const response = await getPostList(page, 10, "", category, "TITLE", "createdDate");
     const data = response;
     posts = data.items || [];
+    totalPages = data.totalPages || 0;
   } catch (error) {
     console.error("API 호출 에러:", error);
     posts = []; // 에러 시 빈 배열
@@ -57,12 +58,14 @@ async function Page({
             </button>
           </div>
         </BannerSection>
-        <div className="w-[80%]">
+        <div className="w-[80%] py-4">
           {/* 게시글 영역 */}
-          <PostList posts={posts} />
+          <Suspense fallback={<div>목록을 불러오는 중입니다.....</div>}>
+            <PostList posts={posts} />
+          </Suspense>
 
           {/* 페이지네이션 영역 */}
-          {/* <Pagenation page={page} totalPages={totalPages} /> */}
+          <Pagination currentPage={page} totalPages={totalPages} />
         </div>
       </div>
     </>

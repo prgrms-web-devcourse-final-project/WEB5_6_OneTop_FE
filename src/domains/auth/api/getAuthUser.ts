@@ -2,11 +2,18 @@
 
 import { queryKeys } from "@/share/config/queryKeys";
 import { nextFetcher } from "@/share/utils/nextFetcher";
+import { headers } from "next/headers";
 
 // src/domains/auth/api/getAuthUser.ts 수정
 export async function getAuthUser() {
+
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = host?.includes("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+
   try {
-    const response = await nextFetcher("http://localhost:3000/api/v1/users-auth/me", {
+    const response = await nextFetcher(`${baseUrl}/api/v1/users-auth/me`, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
