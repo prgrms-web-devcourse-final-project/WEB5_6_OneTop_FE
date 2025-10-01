@@ -27,11 +27,11 @@ export default function Pagination({
     const pages = [];
     const showPages = 3;
 
-    let start = Math.max(0, currentPage - 1);
-    let end = Math.min(totalPages - 1, start + showPages - 1);
+    let start = Math.max(1, currentPage - 1);
+    let end = Math.min(totalPages, start + showPages - 1);
 
-    if (end === totalPages - 1 && end - start + 1 < showPages) {
-      start = Math.max(0, end - showPages + 1);
+    if (end === totalPages && end - start + 1 < showPages) {
+      start = Math.max(1, end - showPages + 1);
     }
 
     for (let i = start; i <= end; i++) {
@@ -48,7 +48,7 @@ export default function Pagination({
   return (
     <div className="py-10 flex justify-center items-center gap-2">
       {/* 이전 버튼 */}
-      {currentPage === 0 ? (
+      {currentPage === 1 ? (
         <button
           disabled
           className={tw(
@@ -71,10 +71,10 @@ export default function Pagination({
       )}
 
       {/* 첫 페이지 */}
-      {!pageNumbers.includes(0) && (
+      {!pageNumbers.includes(1) && (
         <>
           <Link
-            href={createPageUrl(0)}
+            href={createPageUrl(1)}
             className="w-10 h-10 hover:bg-gray-50 rounded-md flex items-center justify-center"
           >
             1
@@ -95,16 +95,16 @@ export default function Pagination({
               : "hover:bg-gray-50"
           )}
         >
-          {page + 1}
+          {page}
         </Link>
       ))}
 
       {/* 마지막 페이지 */}
-      {!pageNumbers.includes(totalPages - 1) && (
+      {!pageNumbers.includes(totalPages) && (
         <>
           <span className="px-2">...</span>
           <Link
-            href={createPageUrl(totalPages - 1)}
+            href={createPageUrl(totalPages)}
             className="w-10 h-10 hover:bg-gray-50 rounded-md flex items-center justify-center"
           >
             {totalPages}
@@ -113,7 +113,7 @@ export default function Pagination({
       )}
 
       {/* 다음 버튼 */}
-      {currentPage === totalPages - 1 ? (
+      {currentPage === totalPages ? (
         <button
           disabled
           className={tw(

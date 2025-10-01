@@ -20,7 +20,7 @@ interface PageProps {
 
 export default async function Page({ searchParams }: PageProps) {
   const queryParams = await searchParams;
-  const page = Number(queryParams.page) || 0;
+  const page = Number(queryParams.page) || 1;
   const size = 10;
 
   let baselines = [];
@@ -29,7 +29,7 @@ export default async function Page({ searchParams }: PageProps) {
     totalPages: 0,
   };
 
-  // API 호출
+  // API 호출 (1-based)
   const apiUrl = new URL(`http://localhost:8080/api/v1/scenarios/baselines`);
   apiUrl.searchParams.set("page", page.toString());
   apiUrl.searchParams.set("size", size.toString());
