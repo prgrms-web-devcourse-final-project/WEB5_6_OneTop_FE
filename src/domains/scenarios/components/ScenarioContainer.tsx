@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/domains/auth/hooks/useAuth";
 import { useEffect, useState } from "react";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { Analysis } from "../../../app/components/scenarios/Analysis";
 import { RadarChart } from "./RadarChart";
 import { Timeline } from "../../../app/components/scenarios/Timeline";
@@ -27,12 +27,6 @@ const mockScenarioData: ScenarioData = {
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
       },
-      // {
-      //   label: "평행우주",
-      //   data: [80, 80, 70, 60, 80],
-      //   backgroundColor: "rgba(255, 99, 132, 0.2)",
-      //   borderColor: "rgba(255, 99, 132, 1)",
-      // },
     ],
   },
   timeline: [
@@ -75,7 +69,9 @@ const mockScenarioData: ScenarioData = {
 };
 
 export const ScenarioContainer = () => {
-  const { user, isLoading } = useAuth();
+  // useAuth 대신 useAuthUser 사용
+  const { data: user, isLoading, error: authError } = useAuthUser();
+
   const [scenarioData, setScenarioData] = useState<ScenarioData | null>(null);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +91,7 @@ export const ScenarioContainer = () => {
       // const response = await api.get("/scenarios/analysis");
       // setScenarioData(response.data);
 
-      // 목업 데이터로 테스트 (2초 지연으로 로딩 시뮬레이션) 로딩 임시 추후 페이지 작업 따로 필요
+      // 목업 데이터로 테스트 (2초 지연으로 로딩 시뮬레이션)
       await new Promise((resolve) => setTimeout(resolve, 2000));
       setScenarioData(mockScenarioData);
     } catch (error: unknown) {
@@ -129,19 +125,41 @@ export const ScenarioContainer = () => {
     window.location.href = "/baselines";
   };
 
-  // 인증 로딩 중
-  if (isLoading) {
+  // 인증 에러 처리
+  if (authError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <div className="text-white text-xl">인증 확인 중...</div>
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            인증 오류
+          </h2>
+          <p className="text-gray-600 mb-6">
+            사용자 정보를 불러오는 중 오류가 발생했습니다.
+          </p>
+          <button
+            onClick={() => (window.location.href = "/login")}
+            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            로그인 페이지로 이동
+          </button>
         </div>
       </div>
     );
   }
 
-  // 임시 데이터 로딩 중, 추후 로딩 페이지 작업 따로 필요
+  // 인증 로딩 중
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-700 text-xl">인증 확인 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 데이터 로딩 중
   if (dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -208,7 +226,7 @@ export const ScenarioContainer = () => {
           </p>
           <button
             onClick={navigateToBaselines}
-            className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
+            className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
           >
             베이스라인 입력하러 가기
           </button>
