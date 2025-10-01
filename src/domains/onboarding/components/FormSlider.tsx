@@ -59,6 +59,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     console.log(data);
 
     // TODO : 서버 API 호출 후에 REDIRECT
+
     router.push("/baselines")
   };
 

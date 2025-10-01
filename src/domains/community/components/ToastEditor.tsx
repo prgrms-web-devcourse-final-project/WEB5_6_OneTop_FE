@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import ToastuiEditor, { EditorOptions, EventMap, PreviewStyle } from "@toast-ui/editor";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import ToastuiEditor, {
+  EditorOptions,
+  EventMap,
+  PreviewStyle,
+} from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+import "@toast-ui/editor/dist/toastui-editor-viewer.css";
+
 
 export interface EventMapping {
   onLoad: EventMap["load"];
@@ -16,23 +22,76 @@ export interface EventMapping {
   onBeforeConvertWysiwygToMarkdown: EventMap["beforeConvertWysiwygToMarkdown"];
 }
 
+export interface TuiEditorRef {
+  getHTML: () => string;
+  getMarkdown: () => string;
+  setMarkdown: (markdown: string) => void;
+  setHTML: (html: string) => void;
+  reset: () => void;
+}
+
 export type EventNames = keyof EventMapping;
 
-export type TuiEditorProps = Omit<EditorOptions, "el"> & Partial<EventMapping>;
+export type TuiEditorProps = Omit<EditorOptions, "el"> & Partial<EventMapping> & { viewer?: boolean };
 
-export default function TuiEditor(props: TuiEditorProps) {
+const TuiEditor = forwardRef<TuiEditorRef, TuiEditorProps>((props, ref) => {
   const divRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<ToastuiEditor | null>(null);
+  const defaultOptions = {
+    initialEditType: "wysiwyg",
+    usageStatistics: false,
+    hideModeSwitch: true,
+    placeholder: "내용을 입력하세요.",
+    toolbarItems: [
+      ["heading", "bold", "italic", "strike"],
+      ["hr", "quote"],
+      ["ul", "ol", "task", "indent", "outdent"],
+      ["table", "link"],
+      ["code", "codeblock"],
+    ],
+  }
+
+  useImperativeHandle(ref, () => ({
+    getHTML: () => {
+      return editorRef.current?.getHTML?.() || "";
+    },
+    getMarkdown: () => {
+      return editorRef.current?.getMarkdown?.() || "";
+    },
+    setMarkdown: (markdown: string) => {
+      editorRef.current?.setMarkdown?.(markdown);
+    },
+    setHTML: (html: string) => {
+      editorRef.current?.setHTML?.(html);
+    },
+    reset: () => {
+      editorRef.current?.reset?.();
+    },
+  }));
 
   useEffect(() => {
     if (divRef.current) {
+      if (props.viewer) {
+        editorRef.current = ToastuiEditor.factory({
+            el: divRef.current,
+            viewer: true,
+            usageStatistics: false,
+            ...props,
+          }) as ToastuiEditor;
+      } else {
       editorRef.current = new ToastuiEditor({
+        ...defaultOptions,
         ...props,
         el: divRef.current,
-        usageStatistics: false,
+
         events: getInitEvents(props),
-      });
+      }) as ToastuiEditor;
+      }
     }
+
+    return () => {
+      editorRef.current?.destroy?.();
+    };
   }, []);
 
   useEffect(() => {
@@ -45,11 +104,14 @@ export default function TuiEditor(props: TuiEditorProps) {
     }
 
     if (editorRef.current) {
-      bindEventHandlers(editorRef.current, props);
+      bindEventHandlers(editorRef.current as ToastuiEditor, props);
     }
   }, [props]);
+
   return <div ref={divRef}></div>;
-}
+});
+
+TuiEditor.displayName = "TuiEditor";
 
 function getBindingEventNames(props: TuiEditorProps) {
   return Object.keys(props)
@@ -62,7 +124,10 @@ function bindEventHandlers(editor: ToastuiEditor, props: TuiEditorProps) {
     const eventName = key[2].toLowerCase() + key.slice(3);
 
     editor.off(eventName);
-    editor.on(eventName, props[key as EventNames]! as (...args: unknown[]) => void);
+    editor.on(
+      eventName,
+      props[key as EventNames]! as (...args: unknown[]) => void
+    );
   });
 }
 
@@ -81,3 +146,5 @@ function getInitEvents(props: TuiEditorProps) {
     {}
   );
 }
+
+export default TuiEditor;
