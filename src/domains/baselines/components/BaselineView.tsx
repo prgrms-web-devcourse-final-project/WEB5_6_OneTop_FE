@@ -29,6 +29,9 @@ interface Props {
   tempNodes: Array<{ year: number; age: number }>;
   footerHeight?: number;
   isGuest: boolean;
+  canAddMore: boolean;
+  maxNodes: number;
+  emptyNodesCount: number;
 }
 
 export const BaselineView = ({
@@ -40,16 +43,13 @@ export const BaselineView = ({
   tempNodes,
   footerHeight = 80,
   isGuest,
+  canAddMore,
+  maxNodes,
 }: Props) => {
-  const maxNodes = isGuest ? 5 : 10;
-
   // 실제 이벤트만 필터링
   const realEvents = events.filter((event) => !event.isTemp);
   const totalRealNodes = realEvents.length;
   const totalTempNodes = tempNodes.length;
-  const totalNodes = totalRealNodes + totalTempNodes;
-
-  const canAddMore = totalNodes < maxNodes;
 
   // 실제 이벤트 노드
   const eventNodes: NodeItem[] = realEvents
@@ -77,9 +77,10 @@ export const BaselineView = ({
       event: null,
     }));
 
-  // 기본 빈 노드 (5개까지)
+  // 기본 빈 노드: 3개만 표시
+  const baseNodeCount = 3;
   const currentFilledNodes = totalRealNodes + totalTempNodes;
-  const emptyNodesCount = Math.max(0, 5 - currentFilledNodes);
+  const emptyNodesCount = Math.max(0, baseNodeCount - currentFilledNodes);
 
   const emptyNodes: NodeItem[] = Array.from(
     { length: emptyNodesCount },
@@ -98,6 +99,7 @@ export const BaselineView = ({
   const allNodes = [...eventNodes, ...tempNodeItems, ...emptyNodes];
 
   const selectedRef = useRef<HTMLDivElement | null>(null);
+  const lastNodeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (selectedRef.current) {
@@ -157,7 +159,9 @@ export const BaselineView = ({
               }
               showConnector={!isLastNode}
               isTemp={node.isTemp}
-              innerRef={isSelected ? selectedRef : undefined}
+              innerRef={
+                isSelected ? selectedRef : isLastNode ? lastNodeRef : undefined
+              }
             />
           );
         })}
@@ -172,24 +176,17 @@ export const BaselineView = ({
       >
         <button
           onClick={onAddNode}
-          disabled={!isGuest && !canAddMore}
-          className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
-            !isGuest && !canAddMore
-              ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-              : "bg-gray-400 text-white hover:scale-105"
-          }`}
+          className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 bg-gray-400 text-white hover:scale-105"
         >
           <Tooltip
             contents={
-              totalRealNodes < 5
-                ? "게스트 모드에서는 기본 5개 분기점만 작성 가능합니다"
-                : isGuest
-                ? "로그인하면 최대 10개까지 작성 가능합니다"
+              isGuest
+                ? "게스트는 분기점 추가가 불가능합니다. 로그인하면 최대 10개까지 작성할 수 있습니다."
                 : !canAddMore
-                ? "최대 10개까지만 작성 가능합니다"
-                : "새 분기점을 추가합니다 (최대 10개)"
+                ? `최대 ${maxNodes}개까지만 작성 가능합니다`
+                : `새 분기점을 추가합니다 (최대 ${maxNodes}개)`
             }
-            className="w-[180px] ml-2 text-center"
+            className="w-[220px] ml-2 text-center"
           >
             <PiPlus size={24} />
           </Tooltip>

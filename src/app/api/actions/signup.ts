@@ -1,5 +1,6 @@
 "use server";
 
+import { nextFetcher } from "@/share/utils/nextFetcher";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -42,7 +43,7 @@ export async function signupAction(formData: FormData) {
   const protocol = host?.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  const res = await fetch(`${baseUrl}/api/v1/users-auth/signup`, {
+  const res = await nextFetcher(`${baseUrl}/api/v1/users-auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     // 여기는 필요 없을 수도.
@@ -59,9 +60,10 @@ export async function signupAction(formData: FormData) {
 
   if (!res.ok) {
     // 에러 상세 내용 확인
-    const errorData = await res.json();
-    console.log("에러 상세 내용:", errorData);
-    throw new Error(errorData.message);
+    const errorData = await res.text();
+    console.log("에러 상세 내용:", res);
+    return null;
+    throw new Error(errorData);
   }
 
   revalidatePath("/");

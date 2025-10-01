@@ -42,7 +42,7 @@ export const BaselineNode = ({
   };
 
   return (
-    <div className="relative -right-10">
+    <div className="relative -right-10" data-node>
       <div
         className={`flex items-center justify-end gap-5 h-[162px] ${
           showConnector
@@ -58,7 +58,11 @@ export const BaselineNode = ({
               hasEvent ? "text-white" : "text-gray-400"
             }`}
           >
-            {displayYear}
+            {hasEvent && event?.year
+              ? `${event.year}`
+              : isTemp
+              ? "년도 입력"
+              : "년도 입력"}
           </div>
 
           {/* 이벤트 제목 또는 기본 안내 텍스트 */}
@@ -67,7 +71,9 @@ export const BaselineNode = ({
               <span className="text-white">{event.eventTitle}</span>
             ) : (
               <span className="text-gray-400 text-sm">
-                {isTemp ? "작성 중..." : "노드를 클릭해 분기점을 입력해 주세요"}
+                {isTemp
+                  ? "노드를 클릭해 분기점을 입력해 주세요"
+                  : "노드를 클릭해 분기점을 입력해 주세요"}
               </span>
             )}
           </div>

@@ -1,7 +1,7 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { LifeEvent } from "../types";
 import { clientBaselineApi } from "../api/clientBaselineApi";
-import { persist } from "zustand/middleware";
 
 export interface EventData {
   year: number;
@@ -18,7 +18,14 @@ export interface BaselineStore {
   isLoading: boolean;
   error: string | null;
   isSubmitted: boolean;
-
+  submittedBaseLines: Array<{
+    id: string;
+    createdAt: Date;
+    nodeCount: number;
+  }>;
+  hasGuestSubmitted: boolean;
+  lastUserId: number | null;
+  initializeForUser: (userId: number, role: string) => void;
   // 로컬 저장 액션들
   addEventLocal: (eventData: EventData) => void;
   updateEventLocal: (eventId: string, eventData: EventData) => void;
@@ -26,7 +33,10 @@ export interface BaselineStore {
 
   // 백엔드 연동 액션들
   loadEvents: () => Promise<void>;
-  submitBaseline: (isGuest?: boolean) => Promise<void>; // 게스트 여부 파라미터 추가
+  submitBaseline: (isGuest?: boolean, userId?: number) => Promise<void>;
+
+  // 새 베이스라인 시작
+  startNewBaseline: () => boolean;
 
   // 유틸리티 함수들
   getEventByYear: (year: number) => LifeEvent | null;
@@ -35,7 +45,6 @@ export interface BaselineStore {
   setError: (error: string | null) => void;
 }
 
-// 로컬 ID 생성 함수
 const generateLocalId = () =>
   `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -47,22 +56,55 @@ export const useBaselineStore = create<BaselineStore>()(
       isLoading: false,
       error: null,
       isSubmitted: false,
+      submittedBaseLines: [],
+      hasGuestSubmitted: false,
+      lastUserId: null,
 
-      // 백엔드에서 이벤트 로드 (게스트 모드에서는 스킵)
+      // 사용자 변경 시 초기화 함수 추가
+      initializeForUser: (userId: number, role: string) => {
+        const { lastUserId, hasGuestSubmitted, events } = get();
+
+        // 다른 사용자로 로그인한 경우
+        if (lastUserId && lastUserId !== userId) {
+          set({
+            events: [],
+            hasGuestSubmitted: false,
+            submittedBaseLines: [],
+            isSubmitted: false,
+            currentBaseLineId: null,
+            lastUserId: userId,
+          });
+          return;
+        }
+
+        // 게스트에서 로그인으로 전환
+        if (role === "USER" && hasGuestSubmitted && events.length > 0) {
+          set({
+            events: [],
+            hasGuestSubmitted: false,
+            submittedBaseLines: [],
+            isSubmitted: false,
+            currentBaseLineId: null,
+            lastUserId: userId,
+          });
+          return;
+        }
+
+        // 첫 로그인이거나 같은 사용자
+        if (!lastUserId) {
+          set({ lastUserId: userId });
+        }
+      },
+
       loadEvents: async () => {
         try {
           set({ isLoading: true, error: null });
-
-          // 게스트 모드에서는 백엔드 호출하지 않고 로컬 데이터만 사용
-          console.log("게스트 모드: 백엔드 호출 없이 로컬 데이터만 사용");
           set({ isLoading: false });
         } catch (error) {
-          console.log("로드 과정에서 오류 발생, 로컬 데이터 유지");
           set({ isLoading: false });
         }
       },
 
-      // 로컬에만 이벤트 추가 (백엔드 호출 없음)
       addEventLocal: (eventData) => {
         const currentEvents = get().events;
 
@@ -79,11 +121,10 @@ export const useBaselineStore = create<BaselineStore>()(
 
         set({
           events: [...currentEvents, newEvent].sort((a, b) => a.year - b.year),
-          isSubmitted: false, // 새로 추가하면 미제출 상태
+          isSubmitted: false,
         });
       },
 
-      // 로컬에만 이벤트 수정 (백엔드 호출 없음)
       updateEventLocal: (eventId, eventData) => {
         const currentEvents = get().events;
 
@@ -104,11 +145,10 @@ export const useBaselineStore = create<BaselineStore>()(
 
         set({
           events: updatedEvents.sort((a, b) => a.year - b.year),
-          isSubmitted: false, // 수정하면 미제출 상태
+          isSubmitted: false,
         });
       },
 
-      // 로컬에만 이벤트 삭제 (백엔드 호출 없음)
       deleteEventLocal: (eventId) => {
         const currentEvents = get().events;
         const filteredEvents = currentEvents.filter(
@@ -117,57 +157,65 @@ export const useBaselineStore = create<BaselineStore>()(
 
         set({
           events: filteredEvents,
-          isSubmitted: false, // 삭제하면 미제출 상태
+          isSubmitted: false,
         });
       },
 
-      // 최종 베이스라인 제출 (게스트 모드에서는 로컬에서만 처리 - 임시)
-      submitBaseline: async (isGuest = true) => {
-        // 기본값을 true로 변경
+      submitBaseline: async (isGuest = false, userId?: number) => {
         try {
+          console.log("submitBaseline 시작", { isGuest, userId });
           set({ isLoading: true, error: null });
 
           const currentEvents = get().events;
 
-          // 최소 2개 검증
           if (currentEvents.length < 2) {
             set({ isLoading: false });
             throw new Error("최소 2개 이상의 분기점을 작성해주세요.");
           }
 
-          // 게스트 모드에서는 항상 로컬에서만 제출 완료 처리
-          console.log("게스트 모드: 로컬에서만 제출 처리");
-          set({
+          if (!userId) {
+            set({ isLoading: false });
+            throw new Error("사용자 ID가 필요합니다.");
+          }
+
+          console.log("서버로 데이터 전송");
+
+          const eventsToSubmit = currentEvents.map((event) => ({
+            year: event.year,
+            age: event.age,
+            category: event.category,
+            eventTitle: event.eventTitle,
+            actualChoice: event.actualChoice,
+            context: event.context,
+          }));
+
+          // 게스트든 로그인이든 서버에 제출
+          const { baseLineId, events: newEvents } =
+            await clientBaselineApi.createBaseLine(eventsToSubmit, "", userId);
+
+          console.log("받은 baseLineId:", baseLineId);
+          console.log("받은 이벤트:", newEvents);
+
+          set((state) => ({
+            events: newEvents,
             isLoading: false,
             isSubmitted: true,
-            currentBaseLineId: "guest-mode-" + Date.now(),
-          });
+            hasGuestSubmitted: isGuest, // 게스트일 때만 true
+            currentBaseLineId: baseLineId.toString(),
+            submittedBaseLines: [
+              ...state.submittedBaseLines,
+              {
+                id: baseLineId.toString(),
+                createdAt: new Date(),
+                nodeCount: newEvents.length,
+              },
+            ],
+            lastUserId: userId,
+          }));
 
-          // 나중에 소셜 로그인이 구현되면 아래 코드 활성화
-          /*
-          if (!isGuest) {
-            // 로그인 모드: 실제 서버 전송
-            console.log("로그인 모드: 서버로 데이터 전송");
-            const eventsToSubmit: EventData[] = currentEvents.map(event => ({
-              year: event.year,
-              age: event.age,
-              category: event.category,
-              eventTitle: event.eventTitle,
-              actualChoice: event.actualChoice,
-              context: event.context,
-            }));
-
-            const newEvents = await clientBaselineApi.createBaseLine(eventsToSubmit);
-            
-            set({ 
-              events: newEvents, 
-              isLoading: false, 
-              isSubmitted: true,
-              currentBaseLineId: newEvents[0]?.baseLineId?.toString() || null
-            });
-          }
-          */
+          console.log("베이스라인 제출 완료");
         } catch (error) {
+          console.error("submitBaseline 에러:", error);
           const errorMessage =
             error instanceof Error ? error.message : "베이스라인 제출 실패";
           set({ error: errorMessage, isLoading: false });
@@ -175,39 +223,52 @@ export const useBaselineStore = create<BaselineStore>()(
         }
       },
 
-      // 년도로 이벤트 찾기
-      getEventByYear: (year) => {
-        const events = get().events;
-        return events.find((event) => event.year === year) || null;
-      },
+      startNewBaseline: () => {
+        const { hasGuestSubmitted } = get();
+        console.log("새 베이스라인 시작");
 
-      // 이벤트 초기화
-      clearEvents: () => {
         set({
           events: [],
           currentBaseLineId: null,
           error: null,
           isSubmitted: false,
         });
+
+        return true;
+      },
+      getEventByYear: (year) => {
+        const events = get().events;
+        return events.find((event) => event.year === year) || null;
       },
 
-      // 로딩 상태 설정
+      clearEvents: () => {
+        set({
+          events: [],
+          currentBaseLineId: null,
+          error: null,
+          isSubmitted: false,
+          hasGuestSubmitted: false,
+          submittedBaseLines: [],
+        });
+      },
+
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
 
-      // 에러 상태 설정
       setError: (error) => {
         set({ error });
       },
     }),
     {
-      name: "baseline-storage", // 로컬스토리지 키 이름
-      // 로딩 상태나 에러는 저장하지 않음 (세션별로 관리)
+      name: "baseline-storage",
       partialize: (state) => ({
         events: state.events,
         currentBaseLineId: state.currentBaseLineId,
         isSubmitted: state.isSubmitted,
+        submittedBaseLines: state.submittedBaseLines,
+        hasGuestSubmitted: state.hasGuestSubmitted,
+        lastUserId: state.lastUserId,
       }),
     }
   )
