@@ -46,9 +46,9 @@ export default async function Page({ searchParams }: PageProps) {
 
     const data = await response.json();
 
-    baselines = data.content || [];
+    baselines = data.items || [];
     pageInfo = {
-      currentPage: data.number,
+      currentPage: data.page,
       totalPages: data.totalPages,
     };
   } catch (error) {
