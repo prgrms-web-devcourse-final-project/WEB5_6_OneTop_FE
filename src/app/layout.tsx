@@ -14,9 +14,7 @@ export const metadata: Metadata = {
       { url: "/logo_32.svg", sizes: "32x32", type: "image/svg+xml" },
       { url: "/logo_64.svg", sizes: "64x64", type: "image/svg+xml" },
     ],
-    apple: [
-      { url: "/logo_128.svg", sizes: "128x128", type: "image/svg+xml" },
-    ],
+    apple: [{ url: "/logo_128.svg", sizes: "128x128", type: "image/svg+xml" }],
   },
 };
 
@@ -34,7 +32,7 @@ const racingSansOne = Racing_Sans_One({
 });
 
 const robotoSerif = Roboto_Serif({
-  weight: "400",
+  weight: "700",
   subsets: ["latin"],
   variable: "--font-roboto-serif",
 });
@@ -58,10 +56,10 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="min-h-screen font-family-pretendard">
-          <TanstackProvider>
-            <LoginModal />
-              {children}
-          </TanstackProvider>
+        <TanstackProvider>
+          <LoginModal />
+          {children}
+        </TanstackProvider>
       </body>
     </html>
   );
