@@ -10,15 +10,20 @@ function InputGender({ id, control, className }: InputProps) {
     <Controller
       control={control}
       name={id}
-      defaultValue="male"
+      defaultValue="M"
       render={({ field }) => (
-        <div className={tw("flex gap-20 items-center justify-center w-full py-5", className)}>
+        <div
+          className={tw(
+            "flex gap-20 items-center justify-center w-full py-5",
+            className
+          )}
+        >
           <button
             type="button"
-            onClick={() => field.onChange("male")}
+            onClick={() => field.onChange("M")}
             className={tw(
               "px-8 py-4 rounded-lg text-2xl font-medium transition-all duration-200 hover:opacity-80",
-              field.value === "male"
+              field.value === "M"
                 ? "drop-shadow-md shadow-white opacity-100 scale-115 hover:opacity-100"
                 : "drop-shadow-md shadow-white opacity-50"
             )}
@@ -28,10 +33,10 @@ function InputGender({ id, control, className }: InputProps) {
           </button>
           <button
             type="button"
-            onClick={() => field.onChange("female")}
+            onClick={() => field.onChange("F")}
             className={tw(
               "px-8 py-4 rounded-lg text-2xl font-medium transition-all duration-200 hover:opacity-80",
-              field.value === "female"
+              field.value === "F"
                 ? "drop-shadow-md shadow-white opacity-100 scale-115 hover:opacity-100"
                 : "drop-shadow-md shadow-white opacity-50"
             )}
