@@ -1,7 +1,6 @@
-import BaselineList from "@/domains/scenario-list/component/BaselineList";
-import Pagination from "@/share/components/Pagination";
+import { Suspense } from "react";
 import { BannerSection } from "@/share/components/BannerSection";
-import { nextFetcher } from "@/share/utils/nextFetcher";
+import BaselineSection from "@/domains/scenario-list/component/BaselineSection";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -19,42 +18,9 @@ interface PageProps {
 }
 
 export default async function Page({ searchParams }: PageProps) {
-  const queryParams = await searchParams;
-  const page = Number(queryParams.page) || 1;
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
   const size = 10;
-
-  let baselines = [];
-  let pageInfo = {
-    currentPage: page,
-    totalPages: 0,
-  };
-
-  // API 호출 (1-based)
-  const apiUrl = new URL(`http://localhost:8080/api/v1/scenarios/baselines`);
-  apiUrl.searchParams.set("page", page.toString());
-  apiUrl.searchParams.set("size", size.toString());
-  apiUrl.searchParams.set("sort", "createdDate,desc");
-
-  try {
-    const response = await nextFetcher(apiUrl.toString(), {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    baselines = data.items || [];
-    pageInfo = {
-      currentPage: data.page,
-      totalPages: data.totalPages,
-    };
-  } catch (error) {
-    console.error("API 호출 에러:", error);
-    baselines = [];
-  }
 
   return (
     <div className="w-full min-h-[calc(100vh-140px)]">
@@ -63,11 +29,11 @@ export default async function Page({ searchParams }: PageProps) {
         description="AI가 분석한 다양한 시점의 내 상황으로 평행우주를 탐험해보세요"
       />
       <div className="max-w-[1440px] m-auto">
-        <BaselineList baselines={baselines} />
-        <Pagination
-          currentPage={pageInfo.currentPage}
-          totalPages={pageInfo.totalPages}
-        />
+        <Suspense
+          fallback={<div className="p-4 text-center">불러오는 중...</div>}
+        >
+          <BaselineSection page={page} size={size} />
+        </Suspense>
       </div>
     </div>
   );
