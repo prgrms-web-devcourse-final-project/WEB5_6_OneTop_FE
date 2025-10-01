@@ -1,5 +1,6 @@
 import z from "zod";
-import { postsSchema } from "./schemas/posts";
+import { postDetailSchema, postsSchema } from "./schemas/posts";
+import { commentSchema, commentsResponseSchema } from "./schemas/comments";
 
 export type postListResponse = {
   data: {
@@ -16,5 +17,10 @@ export type postListResponse = {
 
 export type Post = z.infer<typeof postsSchema>;
 
+export type PostDetail = z.infer<typeof postDetailSchema>;
+
 export type PostFilterType = "ALL" | "CHAT" | "NOTICE" | "POLL" | "SCENARIO";
 
+export type CommentsResponse = z.infer<typeof commentsResponseSchema>;
+
+export type Comment = z.infer<typeof commentSchema>;
