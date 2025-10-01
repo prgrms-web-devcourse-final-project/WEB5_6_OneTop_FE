@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.5",
     "@floating-ui/react": "^0.27.16",
     "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -20,6 +19,7 @@
     "clsx": "^2.1.1",
     "csrf-sync": "^4.2.1",
     "gsap": "^3.13.0",
+    "lottie-react": "^2.4.1",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-day-picker": "^9.11.0",
