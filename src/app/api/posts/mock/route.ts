@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
       data: null,
       message: "게시글 목록 조회 실패",
       status: 500,
+      error: error,
     });
   }
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { postsSchema } from "../schemas/posts";
 import { Post } from "../types";
 import { AiOutlineLike } from "react-icons/ai";
+import { BiCommentDetail } from "react-icons/bi";
 
 interface PostItemProps {
   post: Post;
@@ -24,12 +25,12 @@ const categoryText = {
 function PostItem({ post }: PostItemProps) {
   const parsedPost = postsSchema.parse(post);
 
-  const { postId, title, author, boardType, createdDate, likeCount, hide } =
+  const { postId, title, author, boardType, createdDate, likeCount, hide, commentCount } =
     parsedPost;
 
   return (
     <li
-      className="flex flex-col gap-2 bg-gray-200 p-6 border-b border-gray-300"
+      className="flex flex-col gap-2 border-b border-gray-200 p-6 "
       id={`post-${postId}`}
     >
       {/* 계층 1 : 카테고리 */}
@@ -57,6 +58,8 @@ function PostItem({ post }: PostItemProps) {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          <BiCommentDetail size={18} />
+          <span className="text-sm">{commentCount}</span>
           <AiOutlineLike size={18} />
           <span className="text-sm">{likeCount}</span>
         </div>

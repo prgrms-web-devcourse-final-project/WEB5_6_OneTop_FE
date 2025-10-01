@@ -10,6 +10,7 @@ export async function nextFetcher(url: string, options?: RequestInit) {
 
   const xsrfToken = allCookies.find((cookie) => cookie.name === "XSRF-TOKEN");
 
+
   // 기본 헤더 설정
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
