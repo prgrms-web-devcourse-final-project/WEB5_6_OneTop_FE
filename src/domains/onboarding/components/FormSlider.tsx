@@ -11,6 +11,7 @@ import { isValidFormKey, StepDefinition, UserOnboardingData } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Swal from "sweetalert2";
+import { useSetUserProfile } from "../api/useSetUserProfile";
 
 function FormSlider({ initialStep }: { initialStep: number }) {
   // URL 정보 처리 HOOK
@@ -38,6 +39,9 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     mode: "onChange",
   });
 
+  // useMutation으로 API 호출 관리
+  const {mutate, isPending} = useSetUserProfile()
+
   // 해당 슬라이드로 이동 이벤트 핸들러
   const goto = (to: number) => {
     const clamp = Math.max(0, Math.min(to, steps.length - 1));
@@ -56,30 +60,33 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   };
 
   const onSubmit = (data: UserOnboardingData) => {
-    console.log(data);
-
-    // TODO : 서버 API 호출 후에 REDIRECT
-    router.push("/baselines")
+    mutate(data);
   };
 
   const onError = (errors: FieldErrors<UserOnboardingData>) => {
     // 모든 에러 메시지를 재귀적으로 수집하는 함수
-    const collectErrorMessages = (errorObj: Record<string, unknown>, prefix = ""): string[] => {
+    const collectErrorMessages = (
+      errorObj: Record<string, unknown>,
+      prefix = ""
+    ): string[] => {
       const messages: string[] = [];
-      
+
       Object.entries(errorObj).forEach(([key, error]) => {
-        if (error && typeof error === 'object') {
-          if ('message' in error && error.message) {
+        if (error && typeof error === "object") {
+          if ("message" in error && error.message) {
             // 직접적인 에러 메시지
             messages.push(`${error.message}`);
           } else {
             // 중첩된 객체 (예: birthday_at)
-            const nestedMessages = collectErrorMessages(error as Record<string, unknown>, prefix ? `${prefix}.${key}` : key);
+            const nestedMessages = collectErrorMessages(
+              error as Record<string, unknown>,
+              prefix ? `${prefix}.${key}` : key
+            );
             messages.push(...nestedMessages);
           }
         }
       });
-      
+
       return messages;
     };
 
@@ -91,7 +98,9 @@ function FormSlider({ initialStep }: { initialStep: number }) {
       title: "입력 오류",
       html: `
         <div style="text-align: center; margin: 10px 0;">
-          ${errorMessages.map(error => `<p style="margin: 8px 0;">${error}</p>`).join('')}
+          ${errorMessages
+            .map((error) => `<p style="margin: 8px 0;">${error}</p>`)
+            .join("")}
         </div>
       `,
       confirmButtonText: "확인",
@@ -211,9 +220,9 @@ function FormSlider({ initialStep }: { initialStep: number }) {
                         <button
                           type="submit"
                           className="h-14 rounded-md w-40 p-2 bg-white flex items-center justify-center text-center text-2xl outline-none"
-                          disabled={!!errors[s.key]}
+                          disabled={!!errors[s.key] || isPending}
                         >
-                          완료하기
+                          {isPending ? "처리중..." : "완료하기"}
                         </button>
                         {index === steps.length - 2 && (
                           <button

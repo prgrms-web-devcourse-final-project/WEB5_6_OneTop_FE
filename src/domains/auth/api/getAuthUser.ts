@@ -1,3 +1,5 @@
+"use server";
+
 import { queryKeys } from "@/share/config/queryKeys";
 import { nextFetcher } from "@/share/utils/nextFetcher";
 
