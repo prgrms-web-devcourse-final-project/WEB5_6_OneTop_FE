@@ -1,12 +1,11 @@
-// src/domains/baselines/components/BaselineContainer.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/share/hooks/useAuth";
+import Swal from "sweetalert2";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
-import Swal from "sweetalert2";
 import { BaselineView } from "./BaselineView";
 import { BaselineSetupForm } from "./BaselineSetupForm";
 import { useBaselineStore } from "../stores/baselineStore";
@@ -22,8 +21,12 @@ interface Props {
 
 export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   const router = useRouter();
-  const { user, isGuest, isLoading: authLoading } = useAuth();
+  const { data: authData, isLoading: authLoading } = useAuthUser();
   const { setIsOpen: setLoginModalOpen } = useLoginModalStore();
+
+  const user = authData?.data;
+  const isGuest = user?.role === "GUEST";
+
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [tempNodes, setTempNodes] = useState<
@@ -40,8 +43,15 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     getEventByYear,
     setError,
     submitBaseline,
-    startNewBaseline,
+    //startNewBaseline,
+    initializeForUser,
   } = useBaselineStore();
+
+  useEffect(() => {
+    if (!authLoading && user && user.id) {
+      initializeForUser(user.id, user.role);
+    }
+  }, [authLoading, user, initializeForUser]);
 
   // 1. 3개 작성 완료 시 자동 알림 (useEffect 추가)
   useEffect(() => {
@@ -73,13 +83,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
   // 게스트 제한: 3개, 로그인: 10개
   const maxNodes = isGuest ? 3 : 10;
-
-  //   // 2. BaselineView에 전달하는 props 수정 (canAddMore 추가)
-  //   const baseNodeCount = 3; // 기본 3개 노드 보장
-  // const totalNodes = events.length + tempNodes.length; // 현재 입력된 노드(실제+임시)
-  // const emptyNodesCount = Math.max(0, baseNodeCount - totalNodes);
-
-  //const totalNodes = events.length + tempNodes.length;
 
   // 컴포넌트 마운트 시 게스트가 이미 제출했는지 체크
   useEffect(() => {
@@ -335,11 +338,8 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
     if (result.isConfirmed) {
       try {
-        await submitBaseline(isGuest);
-
-        const { currentBaseLineId } = useBaselineStore.getState();
-
-        Swal.fire({
+        await submitBaseline(isGuest, user?.id);
+        await Swal.fire({
           title: "제출 완료!",
           html: isGuest
             ? "게스트 모드에서 베이스라인이 저장되었습니다.<br/>더 많은 기능을 사용하려면 로그인하세요."
@@ -369,6 +369,17 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
         });
       } catch (error) {
         console.error("제출 오류:", error);
+
+        // 에러 상세 정보 출력
+        if (error instanceof Error) {
+          Swal.fire({
+            title: "제출 실패",
+            html: `<pre style="text-align: left; font-size: 12px;">${error.message}</pre>`,
+            icon: "error",
+            confirmButtonColor: "#E76F51",
+            confirmButtonText: "확인",
+          });
+        }
       }
     }
   };

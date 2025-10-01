@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useAuthStore } from "@/share/stores/authStore";
+// import { useAuthStore } from "@/share/stores/authStore";
 import { LifeEvent } from "../types";
 import { clientBaselineApi } from "../api/clientBaselineApi";
 
@@ -25,7 +25,8 @@ export interface BaselineStore {
     nodeCount: number;
   }>;
   hasGuestSubmitted: boolean;
-
+  lastUserId: number | null;
+  initializeForUser: (userId: number, role: string) => void;
   // 로컬 저장 액션들
   addEventLocal: (eventData: EventData) => void;
   updateEventLocal: (eventId: string, eventData: EventData) => void;
@@ -33,7 +34,7 @@ export interface BaselineStore {
 
   // 백엔드 연동 액션들
   loadEvents: () => Promise<void>;
-  submitBaseline: (isGuest?: boolean) => Promise<void>;
+  submitBaseline: (isGuest?: boolean, userId?: number) => Promise<void>;
 
   // 새 베이스라인 시작
   startNewBaseline: () => boolean;
@@ -58,14 +59,49 @@ export const useBaselineStore = create<BaselineStore>()(
       isSubmitted: false,
       submittedBaseLines: [],
       hasGuestSubmitted: false,
+      lastUserId: null,
+
+      // 사용자 변경 시 초기화 함수 추가
+      initializeForUser: (userId: number, role: string) => {
+        const { lastUserId, hasGuestSubmitted, events } = get();
+
+        // 다른 사용자로 로그인한 경우
+        if (lastUserId && lastUserId !== userId) {
+          set({
+            events: [],
+            hasGuestSubmitted: false,
+            submittedBaseLines: [],
+            isSubmitted: false,
+            currentBaseLineId: null,
+            lastUserId: userId,
+          });
+          return;
+        }
+
+        // 게스트에서 로그인으로 전환
+        if (role === "USER" && hasGuestSubmitted && events.length > 0) {
+          set({
+            events: [],
+            hasGuestSubmitted: false,
+            submittedBaseLines: [],
+            isSubmitted: false,
+            currentBaseLineId: null,
+            lastUserId: userId,
+          });
+          return;
+        }
+
+        // 첫 로그인이거나 같은 사용자
+        if (!lastUserId) {
+          set({ lastUserId: userId });
+        }
+      },
 
       loadEvents: async () => {
         try {
           set({ isLoading: true, error: null });
-          //console.log("게스트 모드: 백엔드 호출 없이 로컬 데이터만 사용");
           set({ isLoading: false });
         } catch (error) {
-          //console.log("로드 과정에서 오류 발생, 로컬 데이터 유지");
           set({ isLoading: false });
         }
       },
@@ -126,44 +162,24 @@ export const useBaselineStore = create<BaselineStore>()(
         });
       },
 
-      submitBaseline: async (isGuest = false) => {
+      submitBaseline: async (isGuest = false, userId?: number) => {
         try {
+          console.log("submitBaseline 시작", { isGuest, userId });
           set({ isLoading: true, error: null });
 
           const currentEvents = get().events;
-          const { user } = useAuthStore.getState();
 
           if (currentEvents.length < 2) {
             set({ isLoading: false });
             throw new Error("최소 2개 이상의 분기점을 작성해주세요.");
           }
 
-          // 게스트 모드: 로컬에만 저장
-          if (isGuest || !user || user.role === "GUEST") {
-            console.log("게스트 모드: 로컬에서만 제출 처리");
-
-            const newBaseLineId = "guest-mode-" + Date.now();
-
-            set((state) => ({
-              isLoading: false,
-              isSubmitted: true,
-              hasGuestSubmitted: false, // 게스트 플래그도 초기화
-              submittedBaseLines: [], // 제출 목록도 초기화
-              currentBaseLineId: newBaseLineId,
-              // submittedBaseLines: [
-              //   ...state.submittedBaseLines,
-              //   {
-              //     id: newBaseLineId,
-              //     createdAt: new Date(),
-              //     nodeCount: currentEvents.length,
-              //   },
-              // ],
-            }));
-            return;
+          if (!userId) {
+            set({ isLoading: false });
+            throw new Error("사용자 ID가 필요합니다.");
           }
 
-          // 로그인 사용자: 백엔드로 전송
-          console.log("로그인 모드: 서버로 데이터 전송");
+          console.log("서버로 데이터 전송");
 
           const eventsToSubmit = currentEvents.map((event) => ({
             year: event.year,
@@ -174,31 +190,33 @@ export const useBaselineStore = create<BaselineStore>()(
             context: event.context,
           }));
 
-          const newEvents = await clientBaselineApi.createBaseLine(
-            eventsToSubmit,
-            "",
-            user.id
-          );
+          // 게스트든 로그인이든 서버에 제출
+          const { baseLineId, events: newEvents } =
+            await clientBaselineApi.createBaseLine(eventsToSubmit, "", userId);
 
-          const newBaseLineId = newEvents[0]?.baseLineId?.toString() || null;
+          console.log("받은 baseLineId:", baseLineId);
+          console.log("받은 이벤트:", newEvents);
 
           set((state) => ({
             events: newEvents,
             isLoading: false,
             isSubmitted: true,
-            currentBaseLineId: newBaseLineId,
+            hasGuestSubmitted: isGuest, // 게스트일 때만 true
+            currentBaseLineId: baseLineId.toString(),
             submittedBaseLines: [
               ...state.submittedBaseLines,
               {
-                id: newBaseLineId || `baseline-${Date.now()}`,
+                id: baseLineId.toString(),
                 createdAt: new Date(),
                 nodeCount: newEvents.length,
               },
             ],
+            lastUserId: userId,
           }));
 
           console.log("베이스라인 제출 완료");
         } catch (error) {
+          console.error("submitBaseline 에러:", error);
           const errorMessage =
             error instanceof Error ? error.message : "베이스라인 제출 실패";
           set({ error: errorMessage, isLoading: false });
@@ -208,14 +226,6 @@ export const useBaselineStore = create<BaselineStore>()(
 
       startNewBaseline: () => {
         const { hasGuestSubmitted } = get();
-        const { user } = useAuthStore.getState();
-
-        // 게스트가 이미 제출했다면 새로 만들 수 없음
-        if (hasGuestSubmitted && (!user || user.role === "GUEST")) {
-          console.log("게스트는 1개만 생성 가능");
-          return false;
-        }
-
         console.log("새 베이스라인 시작");
 
         set({
@@ -227,7 +237,6 @@ export const useBaselineStore = create<BaselineStore>()(
 
         return true;
       },
-
       getEventByYear: (year) => {
         const events = get().events;
         return events.find((event) => event.year === year) || null;
@@ -239,6 +248,8 @@ export const useBaselineStore = create<BaselineStore>()(
           currentBaseLineId: null,
           error: null,
           isSubmitted: false,
+          hasGuestSubmitted: false,
+          submittedBaseLines: [],
         });
       },
 
@@ -258,18 +269,8 @@ export const useBaselineStore = create<BaselineStore>()(
         isSubmitted: state.isSubmitted,
         submittedBaseLines: state.submittedBaseLines,
         hasGuestSubmitted: state.hasGuestSubmitted,
+        lastUserId: state.lastUserId,
       }),
-      onRehydrateStorage: () => (state) => {
-        // rehydrate 후 사용자 역할 확인
-        const { user } = useAuthStore.getState();
-        if (state && user && user.role === "USER" && state.hasGuestSubmitted) {
-          // 로그인 사용자인데 게스트 데이터가 있으면 초기화
-          state.events = [];
-          state.hasGuestSubmitted = false;
-          state.submittedBaseLines = [];
-          state.isSubmitted = false;
-        }
-      },
     }
   )
 );
