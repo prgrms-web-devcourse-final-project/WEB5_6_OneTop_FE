@@ -1,25 +1,11 @@
-"use server";
-
 import { queryKeys } from "@/share/config/queryKeys";
-import { headers } from "next/headers";
+import { nextFetcher } from "@/share/utils/nextFetcher";
 
+// src/domains/auth/api/getAuthUser.ts 수정
 export async function getAuthUser() {
   try {
-    const headersList = await headers();
-    const cookieHeader = headersList.get("cookie");
-
-    // JSESSIONID 값 추출해서 확인
-    const jsessionMatch = cookieHeader?.match(/JSESSIONID=([^;]+)/);
-    console.log("JSESSIONID value:", jsessionMatch?.[1]);
-
-    if (!cookieHeader?.includes("JSESSIONID")) {
-      console.log("No JSESSIONID found in cookies");
-      return null;
-    }
-
-    const response = await fetch("http://localhost:3000/api/v1/users-auth/me", {
+    const response = await nextFetcher("http://localhost:3000/api/v1/users-auth/me", {
       headers: {
-        Cookie: cookieHeader,
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -30,17 +16,26 @@ export async function getAuthUser() {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText);
+      const errorText = await response.json();
+      throw new Error(errorText.message);
     }
 
-    const data = await response.json();
-
-    if (data.message === "anonymous" || data === "anonymous") {
+    if (!response || response.status === 401) {
       return null;
     }
-    return data;
+
+    // JSON 파싱 시도
+    try {
+      const data = await response.json();
+      console.log("data", data);
+      return data;
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      return null;
+    }
+
   } catch (error) {
-    throw new Error("Failed to get auth user", { cause: error });
+    console.error("getAuthUser error:", error);
+    return null;
   }
 }

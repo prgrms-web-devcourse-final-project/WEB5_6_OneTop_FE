@@ -1,31 +1,48 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 export async function nextFetcher(url: string, options?: RequestInit) {
   const cookieStore = await cookies();
   const allCookies = cookieStore.getAll();
+  const headersList = await headers();
+  const requestCookies = headersList.get("cookie");
+
+  const xsrfToken = allCookies.find((cookie) => cookie.name === "XSRF-TOKEN");
 
   // 기본 헤더 설정
-  const defaultHeaders = {
+  const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
 
+  // XSRF 토큰이 있을 때만 헤더에 추가
+  if (xsrfToken?.value) {
+    defaultHeaders["X-XSRF-TOKEN"] = xsrfToken.value;
+  }
+
   // 기존 헤더와 새 헤더를 병합
+  const cookieHeader =
+    requestCookies ||
+    (allCookies.length
+      ? allCookies.map((c) => `${c.name}=${c.value}`).join("; ")
+      : "");
+
   const mergedHeaders = {
     ...defaultHeaders,
-    ...(allCookies && { Cookie: allCookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ") }),
-    ...options?.headers, // 옵션으로 부여한 속성이 우선순위를 가지도록 수정
-    }),
-
+    ...(cookieHeader && { Cookie: cookieHeader }),
+    ...options?.headers,
   };
+
   const newOptions: RequestInit = {
     ...options,
     headers: mergedHeaders,
+    credentials: "include",
   };
 
   const response = await fetch(url, newOptions);
+
+  console.log("response:", response);
 
   if (!response.ok) {
     const errorBody = await response.text();

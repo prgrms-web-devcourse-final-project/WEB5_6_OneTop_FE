@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useLayoutEffect, useState } from "react";
+import { useRef, useLayoutEffect, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import { guestLoginAction } from "@/app/api/actions/guest-login";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 
 function Page() {
   const leftPannelRef = useRef<HTMLButtonElement>(null);
@@ -16,6 +17,10 @@ function Page() {
   const setLoginModalOpen = useLoginModalStore((s) => s.setIsOpen);
   const [guestLoginLoading, setGuestLoginLoading] = useState(false);
   const router = useRouter();
+  const { data: authUser } = useAuthUser();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo");
+  const hasRedirectedRef = useRef(false);
 
   const open = (e: HTMLElement) => {
     gsap.to(e, {
@@ -26,10 +31,15 @@ function Page() {
     });
   };
 
-  const onGuestLogin = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectTo = urlParams.get("redirectTo");
+  // useEffect(() => {
+  //   if (authUser && !hasRedirectedRef.current) {
+  //     hasRedirectedRef.current = true;
+  //     router.replace(redirectTo || "/");
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [authUser]);
 
+  const onGuestLogin = async () => {
     try {
       setGuestLoginLoading(true);
       await guestLoginAction();
