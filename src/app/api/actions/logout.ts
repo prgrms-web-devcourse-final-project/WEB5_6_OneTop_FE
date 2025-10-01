@@ -5,9 +5,7 @@ import { cookies } from "next/headers";
 
 export async function logoutAction() {
   // 근데 이게 서버에는 관련 액션이 없던 것 같은데.
-  try {
-    const path = process.env.NEXT_PUBLIC_API_URL;
-    
+  try {  
     const cookieStore = await cookies();
     cookieStore.delete("JSESSIONID");
 
