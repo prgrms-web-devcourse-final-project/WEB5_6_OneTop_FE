@@ -15,10 +15,12 @@ export async function nextFetcher(url: string, options?: RequestInit) {
   // 기존 헤더와 새 헤더를 병합
   const mergedHeaders = {
     ...defaultHeaders,
-    ...(allCookies && { Cookie: allCookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ") }),
-    ...options?.headers, // 옵션으로 부여한 속성이 우선순위를 가지도록 수정
+    ...(allCookies && {
+      Cookie: allCookies
+        .map((cookie) => `${cookie.name}=${cookie.value}`)
+        .join("; "),
     }),
-
+    ...options?.headers, // 옵션으로 부여한 속성이 우선순위를 가지도록 수정
   };
   const newOptions: RequestInit = {
     ...options,

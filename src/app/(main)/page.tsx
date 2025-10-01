@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="w-full min-h-[calc(100vh-80px) bg-deep-navy">
+    <div className="w-full min-h-[calc(100vh-80px)">
       <MainContainer />
     </div>
   );
