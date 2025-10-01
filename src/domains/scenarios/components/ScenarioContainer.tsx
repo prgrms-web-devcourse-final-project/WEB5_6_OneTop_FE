@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { Analysis } from "../../../app/components/scenarios/Analysis";
 import { RadarChart } from "./RadarChart";
 import { Timeline } from "../../../app/components/scenarios/Timeline";
 import { ScenarioData } from "../types";
-import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 
 // 목업 데이터
 const mockScenarioData: ScenarioData = {
