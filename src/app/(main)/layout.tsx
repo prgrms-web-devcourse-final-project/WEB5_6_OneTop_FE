@@ -7,8 +7,8 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ScrollSmootherProvider>
-      <Shell headerVariant="transparent">{children}</Shell>
-    </ScrollSmootherProvider>
+    <Shell showFooter={false} headerVariant="transparent">
+      <ScrollSmootherProvider>{children}</ScrollSmootherProvider>
+    </Shell>
   );
 }
