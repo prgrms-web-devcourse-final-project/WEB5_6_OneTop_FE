@@ -1,114 +1,85 @@
 import { api } from "@/share/config/api";
 import { AxiosError } from "axios";
-import { ScenarioData, AnalysisData, RadarData, TimelineItem } from "../types";
-
-// DecisionLine 생성 요청
-export interface CreateDecisionLineRequest {
-  baseLineId: number;
-  pivotNodeId: number;
-}
-
-// DecisionLine 응답
-export interface DecisionLineResponse {
-  decisionLineId: number;
-  status: string;
-}
-
-// Scenario 생성 요청 (스웨거 기준)
-export interface CreateScenarioRequest {
-  decisionLineId: number;
-}
-
-// Scenario 생성 응답 (스웨거 기준)
-export interface CreateScenarioResponse {
-  scenarioId: number;
-  status: string;
-  message: string;
-}
-
-// Scenario 상태 응답 (스웨거 기준)
-export interface ScenarioStatusResponse {
-  scenarioId: number;
-  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-  message: string;
-}
-
-// Scenario 정보 응답 (스웨거 기준)
-export interface ScenarioInfoResponse {
-  scenarioId: number;
-  status: string;
-  job: string;
-  total: number;
-  summary: string;
-  description: string;
-  img: string;
-  createdDate: string;
-  indicators: Array<{
-    type: string;
-    point: number;
-    analysis: string;
-  }>;
-}
-
-// Timeline 응답 (스웨거 기준)
-export interface TimelineResponse {
-  scenarioId: number;
-  events: string; // JSON string
-}
+import {
+  CreateScenarioResponse,
+  DecisionLineResponse,
+  ScenarioData,
+  ScenarioInfoResponse,
+  ScenarioStatusResponse,
+  TimelineItem,
+  TimelineResponse,
+} from "../types";
 
 export const clientScenariosApi = {
-  // 1. DecisionLine 생성
+  // DecisionLine 생성
   createDecisionLine: async (
+    userId: number,
     baseLineId: number,
-    pivotNodeId: number
+    pivotOrd: number, // index 사용
+    selectedAltIndex: number // 0 또는 1
   ): Promise<DecisionLineResponse> => {
     try {
-      console.log("🚀 DecisionLine 생성:", { baseLineId, pivotNodeId });
+      console.log("DecisionLine 생성:", {
+        userId,
+        baseLineId,
+        pivotOrd,
+        selectedAltIndex,
+      });
 
       const response = await api.post<DecisionLineResponse>(
         "/api/v1/decision-flow/from-base",
-        { baseLineId, pivotNodeId }
+        {
+          userId,
+          baseLineId,
+          pivotOrd,
+          selectedAltIndex,
+          category: null,
+          situation: null,
+          options: null,
+          selectedIndex: null,
+          description: null,
+        }
       );
 
-      console.log("✅ DecisionLine 생성 성공:", response.data);
+      console.log("DecisionLine 생성 성공:", response.data);
       return response.data;
     } catch (error) {
-      console.error("❌ DecisionLine 생성 실패:", error);
+      console.error("DecisionLine 생성 실패:", error);
 
       if (error instanceof AxiosError && error.response) {
-        console.error("📋 에러 응답:", error.response.data);
+        console.error("에러 응답:", error.response.data);
       }
 
       throw error;
     }
   },
 
-  // 2. Scenario 생성 (스웨거 기준)
+  // Scenario 생성
   createScenario: async (
     decisionLineId: number
   ): Promise<CreateScenarioResponse> => {
     try {
-      console.log("🚀 시나리오 생성:", { decisionLineId });
+      console.log("시나리오 생성:", { decisionLineId });
 
       const response = await api.post<CreateScenarioResponse>(
         "/api/v1/scenarios",
         { decisionLineId }
       );
 
-      console.log("✅ 시나리오 생성 성공:", response.data);
+      console.log("시나리오 생성 성공:", response.data);
       return response.data;
     } catch (error) {
-      console.error("❌ 시나리오 생성 실패:", error);
+      console.error("시나리오 생성 실패:", error);
 
       if (error instanceof AxiosError && error.response) {
-        console.error("📋 에러 응답:", error.response.data);
+        console.error("에러 응답:", error.response.data);
       }
 
       throw error;
     }
   },
 
-  // 3. 상태 조회 (스웨거 기준)
+  // 상태 조회
   getScenarioStatus: async (
     scenarioId: number
   ): Promise<ScenarioStatusResponse> => {
@@ -123,7 +94,7 @@ export const clientScenariosApi = {
     }
   },
 
-  // 4. 상세 정보 조회 (스웨거 기준)
+  // 상세 정보 조회
   getScenarioInfo: async (
     scenarioId: number
   ): Promise<ScenarioInfoResponse> => {
@@ -138,23 +109,28 @@ export const clientScenariosApi = {
     }
   },
 
-  // 5. 타임라인 조회 (스웨거 기준)
+  // 타임라인 조회 (백엔드 응답에 맞춤)
   getScenarioTimeline: async (scenarioId: number): Promise<TimelineItem[]> => {
     try {
-      const response = await api.get<TimelineResponse>(
-        `/api/v1/scenarios/${scenarioId}/timeline`
-      );
+      const url = `/api/v1/scenarios/${scenarioId}/timeline`;
+      console.log("요청 URL:", url);
+      console.log("Base URL:", api.defaults.baseURL);
+      console.log("Full URL:", `${api.defaults.baseURL}${url}`);
 
-      // events는 JSON string이므로 파싱 필요
-      const events = JSON.parse(response.data.events);
-      return events;
+      const response = await api.get<TimelineResponse>(url);
+      return response.data.events;
     } catch (error) {
       console.error("타임라인 조회 실패:", error);
+      if (error instanceof AxiosError) {
+        console.error("요청 URL:", error.config?.url);
+        console.error("응답 상태:", error.response?.status);
+        console.error("응답 데이터:", error.response?.data);
+      }
       throw error;
     }
   },
 
-  // 6. 통합 데이터 조회 (프론트엔드용 헬퍼)
+  // 통합 데이터 조회
   getScenarioData: async (scenarioId: number): Promise<ScenarioData> => {
     try {
       const [info, timeline] = await Promise.all([
@@ -162,18 +138,17 @@ export const clientScenariosApi = {
         clientScenariosApi.getScenarioTimeline(scenarioId),
       ]);
 
-      // 스웨거 응답을 프론트엔드 타입으로 변환
+      // 안전한 조회 함수
+      const findIndicator = (type: string) =>
+        info.indicators.find((i) => i.type === type);
+
       return {
         analysis: {
-          economy:
-            info.indicators.find((i) => i.type === "경제")?.analysis || "",
-          health:
-            info.indicators.find((i) => i.type === "건강")?.analysis || "",
-          relationships:
-            info.indicators.find((i) => i.type === "관계")?.analysis || "",
-          jobs: info.indicators.find((i) => i.type === "직업")?.analysis || "",
-          happiness:
-            info.indicators.find((i) => i.type === "행복")?.analysis || "",
+          economy: findIndicator("경제")?.analysis || "데이터 없음",
+          health: findIndicator("건강")?.analysis || "데이터 없음",
+          relationships: findIndicator("관계")?.analysis || "데이터 없음",
+          jobs: findIndicator("직업")?.analysis || "데이터 없음",
+          happiness: findIndicator("행복")?.analysis || "데이터 없음",
           aiInsight: info.summary,
         },
         radarData: {
@@ -182,18 +157,18 @@ export const clientScenariosApi = {
             {
               label: "현재",
               data: [
-                info.indicators.find((i) => i.type === "경제")?.point || 0,
-                info.indicators.find((i) => i.type === "건강")?.point || 0,
-                info.indicators.find((i) => i.type === "관계")?.point || 0,
-                info.indicators.find((i) => i.type === "직업")?.point || 0,
-                info.indicators.find((i) => i.type === "행복")?.point || 0,
+                findIndicator("경제")?.point || 0,
+                findIndicator("건강")?.point || 0,
+                findIndicator("관계")?.point || 0,
+                findIndicator("직업")?.point || 0,
+                findIndicator("행복")?.point || 0,
               ],
               backgroundColor: "rgba(54, 162, 235, 0.2)",
               borderColor: "rgba(54, 162, 235, 1)",
             },
           ],
         },
-        timeline: timeline,
+        events: timeline,
       };
     } catch (error) {
       console.error("시나리오 데이터 조회 실패:", error);
@@ -201,11 +176,13 @@ export const clientScenariosApi = {
     }
   },
 
-  // 7. 피벗 목록 조회 (DecisionLine 생성에 필요)
+  // 피벗 목록 조회
   getPivots: async (baseLineId: number) => {
     try {
       const response = await api.get(`/api/v1/base-lines/${baseLineId}/pivots`);
-      return response.data;
+
+      // 응답에서 pivots 배열 추출
+      return response.data.pivots || [];
     } catch (error) {
       console.error("피벗 목록 조회 실패:", error);
       throw error;
