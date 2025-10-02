@@ -1,7 +1,7 @@
 import { PiWarningCircleFill } from "react-icons/pi";
 import { FaLightbulb } from "react-icons/fa";
 import { Tooltip } from "@/share/components/Tooltip";
-import { AnalysisProps } from "../../../domains/scenarios/types";
+import { AnalysisProps } from "../types";
 
 export const Analysis = ({ data }: AnalysisProps) => {
   return (
