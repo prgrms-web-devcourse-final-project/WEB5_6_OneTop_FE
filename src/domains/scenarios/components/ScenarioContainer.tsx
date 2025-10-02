@@ -74,10 +74,10 @@ export const ScenarioContainer = () => {
           </h2>
           <p className="text-gray-600 mb-6">올바른 시나리오 ID가 필요합니다.</p>
           <button
-            onClick={() => (window.location.href = "/baselines")}
+            onClick={() => (window.location.href = "/scenario-list")}
             className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
-            베이스라인으로 돌아가기
+            시나리오 목록으로 돌아가기
           </button>
         </div>
       </div>
