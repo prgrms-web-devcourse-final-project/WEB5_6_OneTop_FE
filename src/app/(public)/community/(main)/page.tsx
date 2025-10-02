@@ -1,10 +1,11 @@
+import { getPostList } from "@/domains/community/api/getPostList";
 import PostFilter from "@/domains/community/components/PostFilter";
 import PostList from "@/domains/community/components/PostList";
 import { PostFilterType } from "@/domains/community/types";
 import { BannerSection } from "@/share/components/BannerSection";
-import { nextFetcher } from "@/share/utils/nextFetcher";
+import Pagination from "@/share/components/Pagination";
 import { Metadata } from "next";
-import { cookies, headers } from "next/headers";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "커뮤니티 | Re:Life",
@@ -27,30 +28,14 @@ async function Page({
   const category = arrivedSearchParams.category || "ALL";
   const page = arrivedSearchParams.page || 0;
 
-  // GET 방식으로 API 호출 - Next.js API Route 사용
-  const apiUrl = new URL(`http://localhost:3000/api/v1/posts`);
-  apiUrl.searchParams.set("category", category === "ALL" ? "" : category);
-  apiUrl.searchParams.set("page", page.toString());
-  apiUrl.searchParams.set("size", "10");
-  apiUrl.searchParams.set("searchType", "TITLE");
-  apiUrl.searchParams.set("keyword", "");
-  apiUrl.searchParams.set("sort", "createdDate");
-
   let posts = [];
+  let totalPages = 0;
 
   try {
-    // 내부적으로 content-type, accept 헤더를 추가해줌, cookie도 추가해줌
-    const response = await nextFetcher(apiUrl.toString(), {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("API Response:", data);
+    const response = await getPostList(page, 10, "", category, "TITLE", "createdDate");
+    const data = response;
     posts = data.items || [];
+    totalPages = data.totalPages || 0;
   } catch (error) {
     console.error("API 호출 에러:", error);
     posts = []; // 에러 시 빈 배열
@@ -59,6 +44,7 @@ async function Page({
   return (
     <>
       <div className="w-full flex flex-col items-center min-h-[calc(100vh-140px)]">
+        {/* 헤더 영역 */}
         <BannerSection>
           <input
             type="text"
@@ -72,11 +58,14 @@ async function Page({
             </button>
           </div>
         </BannerSection>
-        <div className="w-[80%]">
-          {/* 헤더 영역 */}
-
+        <div className="w-[80%] py-4">
           {/* 게시글 영역 */}
-          <PostList posts={posts} />
+          <Suspense fallback={<div>목록을 불러오는 중입니다.....</div>}>
+            <PostList posts={posts} />
+          </Suspense>
+
+          {/* 페이지네이션 영역 */}
+          <Pagination currentPage={page} totalPages={totalPages} />
         </div>
       </div>
     </>

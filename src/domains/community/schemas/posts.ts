@@ -20,6 +20,23 @@ export const postsSchema = z.object({
   liked: z.boolean().optional(),
 });
 
+export const postDetailSchema = z.object({
+  postId: z.number(),
+  title: z.string(),
+  content: z.string(),
+  author: z.string(),
+  category: postCategorySchema,
+  likeCount: z.number(),
+  liked : z.boolean(),
+  createdDate: z.string(),
+  polls: z.object({
+    options: z.array(z.object({
+      index: z.number(),
+      text: z.string(),
+    })),
+  }),
+});
+
 // 검색 조건 스키마
 export const searchConditionSchema = z.object({
   category: z.enum(["ALL", "CHAT", "NOTICE", "VOTE", "SCENARIO"]).optional(),

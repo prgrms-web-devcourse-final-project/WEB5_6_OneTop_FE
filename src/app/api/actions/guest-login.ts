@@ -1,5 +1,6 @@
 "use server";
 
+import { nextFetcher } from "@/share/utils/nextFetcher";
 import { cookies, headers } from "next/headers";
 
 export async function guestLoginAction() {
@@ -8,7 +9,7 @@ export async function guestLoginAction() {
   const protocol = host?.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  const res = await fetch(`${baseUrl}/api/v1/users-auth/guest`, {
+  const res = await nextFetcher(`${baseUrl}/api/v1/users-auth/guest`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     cache: "no-store",

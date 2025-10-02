@@ -27,7 +27,7 @@ function PostFilter({ category }: PostFilterProps) {
       params.set("category", category);
     }
 
-    params.set("page", "0");
+    params.set("page", "1");
     router.push(`/community?${params.toString()}`);
   };
 

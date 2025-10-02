@@ -4,6 +4,7 @@ import {
   LayoutEdge,
   TreeStructure,
   NodeAnalysis,
+  DecisionNode,
 } from "../types";
 
 const LAYOUT_CONFIG = {
@@ -96,7 +97,7 @@ export const useTreeLayout = () => {
     layoutNodesMap: Map<string, LayoutNode>,
     analysis: NodeAnalysis,
     yRegions: ReturnType<typeof calculateRegions>,
-    childrenMap: Map<string, any[]>
+    childrenMap: Map<string, (BaseNode | DecisionNode)[]>
   ): number => {
     // 리프 노드
     if (leafPositions.has(nodeId)) {

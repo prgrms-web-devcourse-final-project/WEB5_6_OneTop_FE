@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { useSearchParams } from "next/navigation";
 import { Analysis } from "../../../app/components/scenarios/Analysis";
 import { RadarChart } from "./RadarChart";
@@ -57,8 +58,8 @@ export const ScenarioContainer = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <div className="text-white text-xl">인증 확인 중...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-700 text-xl">인증 확인 중...</div>
         </div>
       </div>
     );

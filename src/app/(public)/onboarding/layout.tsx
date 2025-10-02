@@ -1,7 +1,6 @@
-import { getAuthUser } from "@/domains/auth/api/getAuthUser";
-import { userProfileSchema } from "@/domains/auth/schemas/loginResponseSchema";
+
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
+
 
 export const metadata: Metadata = {
   title: "Re:Life | 로그인/게스트 선택",
@@ -13,7 +12,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-async function Layout({ children }: { children: React.ReactNode, searchParams: Promise<{ redirectTo: string | null }> }) {
+async function Layout({ children }: { children: React.ReactNode }) {
   // TODO: 로그인 상태라면 redirect 처리
 
   return <div>{children}</div>;
