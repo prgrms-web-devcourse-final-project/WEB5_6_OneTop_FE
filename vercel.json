@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/api/v1/:path*",
-      "destination": "https://gooraeng.xyz/api/v1/:path*",
+      "destination": "https://api.relife.kr/api/v1/:path*",
       "permanent": true
     }
   ]
