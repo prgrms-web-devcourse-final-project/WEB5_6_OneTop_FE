@@ -1,5 +1,5 @@
 import BackButton from "@/share/components/BackButton";
-import LikeButton from "./LikeButton";
+import PostLikeButton from "./PostLikeButton";
 import { BiCommentDetail } from "react-icons/bi";
 import { getPost } from "../api/getPost";
 import { postDetailSchema } from "../schemas/posts";
@@ -55,7 +55,7 @@ async function PostContent({ id }: { id: string }) {
       <div className="border-b border-gray-300 pt-4 pb-4">
         <div className="flex gap-4 items-center justify-between">
           <div className="flex gap-4">
-            <LikeButton
+            <PostLikeButton
               likeCount={likeCount || 0}
               id={postId?.toString() || ""}
               likedByMe={liked || false}
