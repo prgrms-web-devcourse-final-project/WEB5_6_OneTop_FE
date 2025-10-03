@@ -1,15 +1,36 @@
 
 import axios from "axios";
 
-// TODO : 서버에 올릴 api url은 이쪽에서 변경해야 합니다.
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+// API 베이스 URL을 환경에 따라 동적으로 설정
 
 const getApiBaseUrl = () => {
- if(process.env.NEXT_PUBLIC_API_BASE_URL) {
-  return process.env.NEXT_PUBLIC_API_BASE_URL;
- }
+  // 개발 환경 판별
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // 브라우저 환경에서 localhost 확인
+  const isLocalhost = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname === '127.0.0.1' ||
+     window.location.hostname.startsWith('192.168.') ||
+     window.location.hostname.endsWith('.local'));
 
- return "http://localhost:3000"
+  // 개발 환경이거나 localhost에서 실행 중인 경우
+  if (isDevelopment || isLocalhost) {
+    return "http://localhost:3000";
+  }
+
+  // 프로덕션 환경에서는 환경 변수 사용
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+
+  // 기본값은 현재 호스트 기준 (fallback)
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.host}`;
+  }
+
+  // 서버 사이드에서는 기본 localhost 반환
+  return "http://localhost:3000";
 }
 
 
@@ -51,7 +72,7 @@ api.interceptors.response.use(
         // GET 요청으로 새 CSRF 토큰 받아오기
         await axios.get("/api/v1/users-auth/me", {
           withCredentials: true,
-          baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+          baseURL: getApiBaseUrl(),
         });
 
         const token = getCsrfTokenFromCookie();
