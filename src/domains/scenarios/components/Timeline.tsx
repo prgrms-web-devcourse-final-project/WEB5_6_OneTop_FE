@@ -1,4 +1,4 @@
-import { TimelineProps } from "../../../domains/scenarios/types";
+import { TimelineProps } from "../types";
 
 export const Timeline = ({ data }: TimelineProps) => {
   return (
