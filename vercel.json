@@ -1,5 +1,5 @@
 {
-  "redirects": [
+  "rewrites": [
     {
       "source": "/api/v1/:path*",
       "destination": "https://api.relife.kr/api/v1/:path*",
