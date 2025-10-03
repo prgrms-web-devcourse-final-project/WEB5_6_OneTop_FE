@@ -3,7 +3,7 @@ import axios from "axios";
 
 // API 베이스 URL을 환경에 따라 동적으로 설정
 
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   // 개발 환경 판별
   const isDevelopment = process.env.NODE_ENV === 'development';
   
