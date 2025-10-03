@@ -1,6 +1,5 @@
 "use client";
 
-import { queryKeys } from "@/share/config/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { logoutAction } from "@/app/api/actions/logout";

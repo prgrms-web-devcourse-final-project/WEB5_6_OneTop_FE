@@ -20,5 +20,7 @@ export const queryKeys = {
   },
   comment: {
     like: (id: string) => ["comment", "like", id],
+    set: (id: string) => ["comment", "set", id],
+    get: (id: string) => ["comment", "get", id],
   },
 };
