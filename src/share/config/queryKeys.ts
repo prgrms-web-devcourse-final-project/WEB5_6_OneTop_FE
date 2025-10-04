@@ -23,4 +23,27 @@ export const queryKeys = {
     set: (id: string) => ["comment", "set", id],
     get: (id: string) => ["comment", "get", id],
   },
+  usageStats: {
+    all: () => ["usageStats"] as const,
+  },
+  representativeProfile: {
+    all: () => ["representativeProfile"] as const,
+    get: () => ["representativeProfile", "get"] as const,
+  },
+  myInfo: {
+    all: () => ["myInfo"] as const,
+    get: () => ["myInfo", "get"] as const,
+  },
+  myScenarios: {
+    all: () => ["myScenarios"] as const,
+    list: (page: number) => ["myScenarios", "list", page] as const,
+  },
+  myPosts: {
+    all: () => ["myPosts"] as const,
+    list: (page: number) => ["myPosts", "list", page] as const,
+  },
+  myComments: {
+    all: () => ["myComments"] as const,
+    list: (page: number) => ["myComments", "list", page] as const,
+  },
 };
