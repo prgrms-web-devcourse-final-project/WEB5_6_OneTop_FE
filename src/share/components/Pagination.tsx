@@ -6,7 +6,6 @@ import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import tw from "../utils/tw";
 
 interface BasePaginationProps {
-  currentPage: number;
   totalPages: number;
 }
 
@@ -17,16 +16,26 @@ interface UrlPaginationProps extends BasePaginationProps {
 
 interface StatePaginationProps extends BasePaginationProps {
   mode: "state";
+  currentPage: number;
   onPageChange: (page: number) => void;
 }
 
 type PaginationProps = UrlPaginationProps | StatePaginationProps;
 
 export default function Pagination(props: PaginationProps) {
-  const { currentPage, totalPages } = props;
+  const { totalPages } = props;
   const mode = props.mode || "url";
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const currentPage =
+    mode === "url"
+      ? Number(
+          searchParams.get(
+            (props as UrlPaginationProps).pageParamName || "page"
+          )
+        ) || 1
+      : (props as StatePaginationProps).currentPage;
 
   const createPageUrl = (page: number) => {
     if (mode === "url") {
