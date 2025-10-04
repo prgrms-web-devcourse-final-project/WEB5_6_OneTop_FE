@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// 게시판 카테고리
 export const postCategorySchema = z.enum([
   "CHAT",
   "NOTICE",
@@ -7,6 +8,7 @@ export const postCategorySchema = z.enum([
   "SCENARIO",
 ]);
 
+// 게시판 리스트 스키마
 export const postsSchema = z.object({
   postId: z.number(),
   title: z.string(),
@@ -20,6 +22,7 @@ export const postsSchema = z.object({
   liked: z.boolean().optional(),
 });
 
+// 게시판 상세 스키마
 export const postDetailSchema = z.object({
   postId: z.number(),
   title: z.string(),
@@ -27,14 +30,33 @@ export const postDetailSchema = z.object({
   author: z.string(),
   category: postCategorySchema,
   likeCount: z.number(),
-  liked : z.boolean(),
+  liked: z.boolean(),
   createdDate: z.string(),
-  polls: z.object({
-    options: z.array(z.object({
-      index: z.number(),
-      text: z.string(),
-    })),
-  }),
+  polls: z
+    .object({
+      options: z.array(
+        z.object({
+          index: z.number(),
+          text: z.string(),
+        })
+      ),
+    })
+    .optional(),
+});
+
+export const postWriteSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  category: postCategorySchema,
+  hide: z.boolean(),
+  poll: z.object({
+    options: z.array(
+      z.object({
+        index: z.number(),
+        text: z.string(),
+      })
+    ),
+  }).optional(),
 });
 
 // 검색 조건 스키마
@@ -57,6 +79,7 @@ export const postSearchRequestSchema = z.object({
   pageable: pageableSchema,
 });
 
+// 게시판 리스트 응답 스키마
 export const postListResponseSchema = z.object({
   data: z.object({
     items: postsSchema.array(),
