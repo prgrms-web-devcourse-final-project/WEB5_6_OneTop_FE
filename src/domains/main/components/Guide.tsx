@@ -1,79 +1,138 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import { FaSpaceShuttle } from "react-icons/fa";
+
 interface Props {
   number: string;
   title: string;
   description: string;
   isActive?: boolean;
+  onClick?: () => void;
+  stepRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const Step = ({ number, title, description, isActive = false }: Props) => {
+const Step = ({
+  number,
+  title,
+  description,
+  isActive = false,
+  onClick,
+  stepRef,
+}: Props) => {
   return (
-    <div className="flex flex-col items-center text-center relative">
-      {/* Step Number and Circle */}
-      <div className="relative mb-6">
+    <div
+      className="flex flex-col items-center text-center relative"
+      ref={stepRef}
+    >
+      <div className="text-white text-6xl font-bold mb-4">{number}</div>
+      <div className="relative mb-7">
         <div
-          className={`w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all duration-300 ${
-            isActive
-              ? "border-white bg-white/10"
-              : "border-white/50 bg-transparent"
-          }`}
-        >
-          {isActive && (
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          )}
-        </div>
+          onClick={onClick}
+          className={`w-7 h-7 rounded-full bg-ivory transition-all duration-300 cursor-pointer hover:scale-125`}
+        ></div>
+        <span className="absolute top-[6px] left-[6px] inline-block w-4 h-4 rounded-full bg-deep-navy pointer-events-none" />
       </div>
-      <div className="text-white text-6xl font-bold mb-4 opacity-90">
-        {number}
-      </div>
-      <h3 className="text-white text-2xl font-bold mb-3">{title}</h3>
-      <p className="text-gray-300 text-sm max-w-xs">{description}</p>
+      <h3 className="text-white text-2xl font-semibold mb-4">{title}</h3>
+      <p className="text-gray-300 text-lg">{description}</p>
     </div>
   );
 };
 
 const Guide = () => {
-  return (
-    <section className="w-full h-screen relative">
-      <div className="absolute inset-0" />
-      <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-        <div className="text-center mb-20">
-          <h2 className="text-white text-4xl font-bold mb-3">Re:Life 가이드</h2>
-          <p className="text-gray-300 text-base">쉽고 간단한 시작 가이드</p>
-        </div>
-        <div className="max-w-7xl w-full relative">
-          <div
-            className="absolute top-6 left-0 right-0 h-0.5 bg-white/30 hidden lg:block"
-            style={{ width: "calc(100% - 100px)", left: "50px" }}
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-            <Step
-              number="01"
-              title="기록하기"
-              description="인생의 중요한 순간 기록"
-              isActive={true}
-            />
-            <Step
-              number="02"
-              title="평행우주"
-              description="다른 선택 AI 시뮬레이션"
-            />
-            <Step number="03" title="비교 분석" description="현재와 비교" />
+  const [activeStep, setActiveStep] = useState(0);
+  const [shuttlePosition, setShuttlePosition] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stepRefs = [
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+  ];
 
-            <Step number="04" title="함께 고민하기" description="커뮤니티" />
+  const steps = [
+    {
+      number: "01",
+      title: "기록하기",
+      description: "인생의 중요한 순간 기록",
+    },
+    {
+      number: "02",
+      title: "평행우주",
+      description: "다른 선택 AI 시뮬레이션",
+    },
+    {
+      number: "03",
+      title: "비교 분석",
+      description: "현재와 비교",
+    },
+    {
+      number: "04",
+      title: "함께 고민하기",
+      description: "커뮤니티",
+    },
+  ];
+
+  // 우주선 위치 계산
+  useEffect(() => {
+    const calculatePosition = () => {
+      const stepElement = stepRefs[activeStep].current;
+      const containerElement = containerRef.current;
+
+      if (stepElement && containerElement) {
+        const stepRect = stepElement.getBoundingClientRect();
+        const containerRect = containerElement.getBoundingClientRect();
+
+        const stepCenter = stepRect.left + stepRect.width / 2;
+        const containerLeft = containerRect.left;
+        const position = stepCenter - containerLeft;
+
+        setShuttlePosition(position);
+      }
+    };
+
+    calculatePosition();
+    window.addEventListener("resize", calculatePosition);
+
+    return () => window.removeEventListener("resize", calculatePosition);
+  }, [activeStep]);
+
+  return (
+    <section className="w-full h-screen relativ">
+      <div className="relative z-10 h-full py-25">
+        <div className="flex flex-col items-center gap-3 text-white">
+          <h2 className="text-[32px] font-semibold">
+            <span className="font-family-logo">Re:Life</span> 가이드
+          </h2>
+          <p className="text-lg">쉽고 간단한 시작 가이드</p>
+        </div>
+        <div
+          className="max-w-[1440px] mx-auto relative mt-[25vh]"
+          ref={containerRef}
+        >
+          <div className="absolute top-[90px] left-0 right-0 h-0.5 bg-white hidden md:block" />
+          <div
+            className="absolute top-[90px] hidden md:block transition-all duration-700 ease-in-out z-10"
+            style={{
+              left: `${shuttlePosition}px`,
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <FaSpaceShuttle size={52} className="text-white" />
+          </div>
+
+          <div className="grid gap-8 grid-cols-2 md:grid-cols-4">
+            {steps.map((step, index) => (
+              <Step
+                key={index}
+                number={step.number}
+                title={step.title}
+                description={step.description}
+                isActive={activeStep === index}
+                onClick={() => setActiveStep(index)}
+                stepRef={stepRefs[index]}
+              />
+            ))}
           </div>
         </div>
       </div>
