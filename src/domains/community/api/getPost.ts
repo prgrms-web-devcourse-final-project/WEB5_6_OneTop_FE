@@ -1,8 +1,9 @@
 import { nextFetcher } from "@/share/utils/nextFetcher";
+import { getApiBaseUrl } from "@/share/config/api";
 
 
 export async function getPost(id: string) {
-  const path = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/posts/${id}`;
+  const path = `${getApiBaseUrl()}/api/v1/posts/${id}`;
   const response = await nextFetcher(path, {
     method: "GET",
   });

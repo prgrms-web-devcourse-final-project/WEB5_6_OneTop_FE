@@ -18,4 +18,9 @@ export const queryKeys = {
     detail: (id: number | null) => ["scenarios", "detail", id] as const,
     status: (id: number | null) => ["scenarios", "status", id] as const,
   },
+  comment: {
+    like: (id: string) => ["comment", "like", id],
+    set: (id: string) => ["comment", "set", id],
+    get: (id: string) => ["comment", "get", id],
+  },
 };

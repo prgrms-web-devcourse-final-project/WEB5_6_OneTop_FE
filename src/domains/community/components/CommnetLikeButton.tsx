@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import tw from "@/share/utils/tw";
 import { useUndoLike } from "../api/useUndoLike";
 
-function LikeButton({
+function PostLikeButton({
   likeCount,
   id,
   likedByMe,
@@ -21,6 +21,7 @@ function LikeButton({
     count: likeCount,
   });
 
+  // TODO : COMMENT 관련 API 추가되면 변경
   const { mutate: likeMutation, isPending } = useLike({
     options: {
       onMutate: async () => {
@@ -77,4 +78,4 @@ function LikeButton({
     </button>
   );
 }
-export default LikeButton;
+export default PostLikeButton;

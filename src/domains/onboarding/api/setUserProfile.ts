@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { UserOnboardingData } from "../types";
+import { getApiBaseUrl } from "@/share/config/api";
 
 export async function setUserProfile(data: UserOnboardingData) {
   const username = data.name;
@@ -34,7 +35,7 @@ export async function setUserProfile(data: UserOnboardingData) {
   )}T00:00:00`;
 
   const response = await axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users-info`,
+    `${getApiBaseUrl()}/api/v1/users-info`,
     {
       username,
       birthdayAt,

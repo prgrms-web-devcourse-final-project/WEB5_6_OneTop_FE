@@ -1,4 +1,5 @@
 import { nextFetcher } from "@/share/utils/nextFetcher";
+import { getApiBaseUrl } from "@/share/config/api";
 
 export async function getPostList(
   page: number,
@@ -8,7 +9,7 @@ export async function getPostList(
   searchType?: string,
   sort?: string
 ) {
-  const path = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/posts`;
+  const path = `${getApiBaseUrl()}/api/v1/posts`;
   const apiUrl = new URL(path);
   apiUrl.searchParams.set("page", page.toString());
   apiUrl.searchParams.set("size", size.toString());
