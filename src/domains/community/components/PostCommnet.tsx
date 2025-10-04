@@ -7,16 +7,19 @@ import { PiNotePencil } from "react-icons/pi";
 import { useGetComments } from "../api/useGetComments";
 import { useDeleteComment } from "../api/useDeleteComment";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 export function PostCommnet({ id }: { id: string }) {
   const [editCommentId, setEditCommentId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string | null>("");
 
   const { data: comments, isLoading, isError } = useGetComments({ id });
-  const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment();
+  const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment({ postId: id });
   // const {mutate: updateComment, isPending: isUpdateing} = useUpdateComment();
 
-  const parsedComments = commentsResponseSchema.safeParse(comments?.data || comments);
+  const parsedComments = commentsResponseSchema.safeParse(
+    comments?.data || comments
+  );
 
   if (!parsedComments.success) {
     return (
@@ -33,6 +36,20 @@ export function PostCommnet({ id }: { id: string }) {
       </div>
     );
   }
+
+  const handleClickDelete = (commentId: string) => {
+    Swal.fire({
+      title: "정말 삭제하시겠습니까?",
+      text: "삭제된 댓글은 복구할 수 없습니다.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteComment({ commentId });
+      }
+    });
+  };
 
   return (
     <ul className="flex flex-col gap-2 ">
@@ -83,6 +100,7 @@ export function PostCommnet({ id }: { id: string }) {
                   <button
                     type="button"
                     className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
+                    onClick={() => handleClickDelete(commentId.toString())}
                   >
                     <BiSolidTrash size={20} />
                   </button>

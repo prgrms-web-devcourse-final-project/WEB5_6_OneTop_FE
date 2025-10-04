@@ -1,22 +1,35 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { api } from "@/share/config/api";
 import { getApiBaseUrl } from "@/share/config/api";
 import { queryKeys } from "@/share/config/queryKeys";
-import { useRouter } from "next/navigation";
 
-export function useDeleteComment() {
+export function useDeleteComment({
+  postId,
+  options = {},
+}: {
+  postId: string;
+  options?: UseMutationOptions<unknown, Error, { commentId: string }>;
+}) {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
     mutationKey: ["comment", "delete"],
-    mutationFn: ({ id }: { id: string }) =>
-      api.delete(`${getApiBaseUrl()}/api/v1/posts/${id}/comments/${id}`),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comment.get(id) });
+    mutationFn: ({ commentId }: { commentId: string }) =>
+      api.delete(
+        `${getApiBaseUrl()}/api/v1/posts/${postId}/comments/${commentId}`
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.comment.get(postId),
+      });
     },
     onError: (error) => {
       console.error(error);
     },
+    ...options,
   });
 }
