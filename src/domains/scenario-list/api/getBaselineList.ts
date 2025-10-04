@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from "@/share/config/api";
 import { nextFetcher } from "@/share/utils/nextFetcher";
 
 export async function getBaselineList(
@@ -5,7 +6,7 @@ export async function getBaselineList(
   size: number,
   sort: string = "createdDate,desc"
 ) {
-  const path = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/scenarios/baselines`;
+  const path = `${getApiBaseUrl()}/api/v1/scenarios/baselines`;
   const apiUrl = new URL(path);
 
   apiUrl.searchParams.set("page", page.toString());
