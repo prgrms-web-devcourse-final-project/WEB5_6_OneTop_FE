@@ -5,29 +5,50 @@ import Link from "next/link";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import tw from "../utils/tw";
 
-interface PaginationProps {
+interface BasePaginationProps {
   currentPage: number;
   totalPages: number;
 }
 
-export default function Pagination({
-  currentPage,
-  totalPages,
-}: PaginationProps) {
+interface UrlPaginationProps extends BasePaginationProps {
+  mode?: "url";
+  pageParamName?: string;
+}
+
+interface StatePaginationProps extends BasePaginationProps {
+  mode: "state";
+  onPageChange: (page: number) => void;
+}
+
+type PaginationProps = UrlPaginationProps | StatePaginationProps;
+
+export default function Pagination(props: PaginationProps) {
+  const { currentPage, totalPages } = props;
+  const mode = props.mode || "url";
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
   const createPageUrl = (page: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", page.toString());
-    return `${pathname}?${params.toString()}`;
+    if (mode === "url") {
+      const params = new URLSearchParams(searchParams);
+      const pageParamName =
+        (props as UrlPaginationProps).pageParamName || "page";
+      params.set(pageParamName, page.toString());
+      return `${pathname}?${params.toString()}`;
+    }
+    return "#";
+  };
+
+  const handleClick = (page: number) => {
+    if (mode === "state") {
+      (props as StatePaginationProps).onPageChange(page);
+    }
   };
 
   const getPageNumbers = (): number[] => {
     const pages: number[] = [];
     const showPages = 3;
 
-    // totalPages가 showPages 이하면 모든 페이지 표시
     if (totalPages <= showPages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -53,95 +74,95 @@ export default function Pagination({
 
   const pageNumbers = getPageNumbers();
 
-  return (
-    <div className="py-10 flex justify-center items-center gap-2">
-      {/* 이전 버튼 */}
-      {currentPage === 1 ? (
-        <button
-          disabled
-          className={tw(
-            "w-10 h-10 flex items-center justify-center rounded-md",
-            "opacity-30 cursor-not-allowed"
-          )}
-        >
-          <FaAngleLeft />
-        </button>
-      ) : (
-        <Link
-          href={createPageUrl(currentPage - 1)}
-          className={tw(
-            "w-10 h-10 flex items-center justify-center rounded-md",
-            "hover:bg-gray-50"
-          )}
-        >
-          <FaAngleLeft />
-        </Link>
-      )}
+  const buttonClass = "w-10 h-10 flex items-center justify-center rounded-md";
+  const disabledClass = tw(buttonClass, "opacity-30 cursor-not-allowed");
+  const activeClass = tw(buttonClass, "hover:bg-gray-50");
 
-      {/* 첫 페이지 */}
+  const NavigationButton = ({
+    page,
+    disabled,
+    children,
+  }: {
+    page: number;
+    disabled: boolean;
+    children: React.ReactNode;
+  }) => {
+    if (disabled) {
+      return (
+        <button disabled className={disabledClass}>
+          {children}
+        </button>
+      );
+    }
+
+    if (mode === "state") {
+      return (
+        <button onClick={() => handleClick(page)} className={activeClass}>
+          {children}
+        </button>
+      );
+    }
+
+    return (
+      <Link href={createPageUrl(page)} className={activeClass}>
+        {children}
+      </Link>
+    );
+  };
+
+  const PageButton = ({ page }: { page: number }) => {
+    const isActive = page === currentPage;
+    const className = tw(
+      buttonClass,
+      "transition",
+      isActive ? "bg-deep-navy text-white" : "hover:bg-gray-50"
+    );
+
+    if (mode === "state") {
+      return (
+        <button onClick={() => handleClick(page)} className={className}>
+          {page}
+        </button>
+      );
+    }
+
+    return (
+      <Link href={createPageUrl(page)} className={className}>
+        {page}
+      </Link>
+    );
+  };
+
+  return (
+    <div className="py-8 flex justify-center items-center gap-2">
+      <NavigationButton page={currentPage - 1} disabled={currentPage === 1}>
+        <FaAngleLeft />
+      </NavigationButton>
+
       {!pageNumbers.includes(1) && (
         <>
-          <Link
-            href={createPageUrl(1)}
-            className="w-10 h-10 hover:bg-gray-50 rounded-md flex items-center justify-center"
-          >
-            1
-          </Link>
+          <PageButton page={1} />
           <span className="px-2">...</span>
         </>
       )}
 
-      {/* 중간 페이지들 */}
       {pageNumbers.map((page) => (
-        <Link
-          key={page}
-          href={createPageUrl(page)}
-          className={tw(
-            "w-10 h-10 transition rounded-md flex items-center justify-center",
-            page === currentPage
-              ? "bg-deep-navy text-white"
-              : "hover:bg-gray-50"
-          )}
-        >
-          {page}
-        </Link>
+        <PageButton key={page} page={page} />
       ))}
 
-      {/* 마지막 페이지 */}
       {!pageNumbers.includes(totalPages) && (
         <>
           <span className="px-2">...</span>
-          <Link
-            href={createPageUrl(totalPages)}
-            className="w-10 h-10 hover:bg-gray-50 rounded-md flex items-center justify-center"
-          >
-            {totalPages}
-          </Link>
+          <PageButton page={totalPages} />
         </>
       )}
 
-      {/* 다음 버튼 */}
-      {currentPage === totalPages ? (
-        <button
-          disabled
-          className={tw(
-            "w-10 h-10 flex items-center justify-center rounded-md",
-            "opacity-30 cursor-not-allowed"
-          )}
-        >
-          <FaAngleRight />
-        </button>
-      ) : (
-        <Link
-          href={createPageUrl(currentPage + 1)}
-          className={tw(
-            "w-10 h-10 flex items-center justify-center rounded-md",
-            "hover:bg-gray-50"
-          )}
-        >
-          <FaAngleRight />
-        </Link>
-      )}
+      <NavigationButton
+        page={currentPage + 1}
+        disabled={currentPage === totalPages}
+      >
+        <FaAngleRight />
+      </NavigationButton>
     </div>
   );
 }
