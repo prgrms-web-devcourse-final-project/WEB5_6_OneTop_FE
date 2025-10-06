@@ -46,4 +46,7 @@ export const queryKeys = {
     all: () => ["myComments"] as const,
     list: (page: number) => ["myComments", "list", page] as const,
   },
+  user: {
+    info: () => ["user", "info"] as const,
+  },
 };
