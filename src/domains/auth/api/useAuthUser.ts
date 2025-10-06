@@ -11,5 +11,6 @@ export const useAuthUser = () => {
     retry: 0,
     retryDelay: 1000,
     refetchOnWindowFocus: true,
+    throwOnError: false, // 에러를 throw하지 않고 error 상태로 관리
   });
 };

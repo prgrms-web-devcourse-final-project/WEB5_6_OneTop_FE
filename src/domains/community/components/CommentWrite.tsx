@@ -8,9 +8,9 @@ import { useForm } from "react-hook-form";
 
 // TODO: dehydration 으로 변경해 성능 최적화.
 function CommentWrite({ id }: { id: string }) {
-  const { data: authUser } = useAuthUser();
+  const { data: authUser, isError, error } = useAuthUser();
   const parsedAuthUser = userProfileSchema.safeParse(authUser?.data);
-  const author = parsedAuthUser.data?.nickname;
+  const author = parsedAuthUser.success ? parsedAuthUser.data?.nickname : null;
   const { mutate: setComment } = useSetComment();
   
   const { register, handleSubmit, reset } = useForm<{
@@ -19,11 +19,21 @@ function CommentWrite({ id }: { id: string }) {
   }>();
 
   const onSubmit = (data: { content: string; hide: boolean }) => {
+    // 로그인하지 않은 경우 댓글 작성 방지
+    if (!author) {
+      alert("로그인 후 댓글을 작성해주세요.");
+      return;
+    }
+    
     setComment(
       { content: data.content, hide: data.hide, id },
       {
         onSuccess: () => {
           reset(); // 폼 초기화
+        },
+        onError: (error) => {
+          console.error("댓글 작성 실패:", error);
+          alert("댓글 작성에 실패했습니다.");
         },
       }
     );

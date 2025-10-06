@@ -15,7 +15,7 @@ function HeaderLoginButton({ variant = "default" }: Props) {
   const { data: authUser } = useAuthUser();
   // safeParse를 이용해 오류 방지
   const parsedAuthUser = userProfileSchema.safeParse(authUser?.data);
-  const isLogin = !!parsedAuthUser.data?.username;
+  const isLogin = parsedAuthUser.success && !!parsedAuthUser.data?.username;
 
   const { logout } = useLogout();
 
