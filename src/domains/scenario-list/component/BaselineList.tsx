@@ -1,6 +1,6 @@
+import EmptyState from "@/share/components/EmptyState";
 import { Baseline as BaselineType } from "../types";
 import Baseline from "./Baseline";
-import EmptyState from "./EmptyState";
 
 interface BaselineListProps {
   baselines: BaselineType[];
@@ -9,7 +9,13 @@ interface BaselineListProps {
 
 function BaselineList({ baselines }: BaselineListProps) {
   if (!baselines || baselines.length === 0) {
-    return <EmptyState />;
+    <EmptyState
+      title="생성된 인생 기록이 없습니다."
+      description="먼저 베이스라인에서 인생 분기점을 입력해주세요."
+      linkText="베이스라인 입력하러 가기"
+      linkHref="/baselines"
+      showBackground={true}
+    />;
   }
 
   return (
