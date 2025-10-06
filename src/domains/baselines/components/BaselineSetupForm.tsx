@@ -39,6 +39,7 @@ interface Props {
   existingEvent?: LifeEvent | null;
   onClose: () => void;
   className?: string;
+  birthYear?: number;
 }
 
 export const BaselineSetupForm = ({
@@ -46,6 +47,7 @@ export const BaselineSetupForm = ({
   selectedYear,
   existingEvent,
   onClose,
+  birthYear,
 }: Props) => {
   const {
     addEventLocal,
@@ -98,22 +100,23 @@ export const BaselineSetupForm = ({
     }
   }, [isOpen, selectedYear, existingEvent, reset]);
 
-  // 나이 입력 시 자동으로 년도 계산 (입력은 문자열)
+  // 나이 입력 시 자동으로 년도 계산
   const watchAge = watch("ageAtEvent");
   useEffect(() => {
-    if (watchAge && /^\d+$/.test(watchAge)) {
+    if (watchAge && /^\d+$/.test(watchAge) && birthYear) {
       const ageNum = Number(watchAge);
       if (ageNum >= 1 && ageNum <= 100) {
-        const calculatedYear = 2000 + ageNum; // 임시 나이(추후 연결필요)
+        const calculatedYear = birthYear + (ageNum - 1);
         setValue("yearOfEvent", calculatedYear, { shouldValidate: true });
       }
     }
-  }, [watchAge, setValue]);
+  }, [watchAge, setValue, birthYear]);
 
-  // 로컬 저장 (백엔드 호출 없음)
   const onSubmit = async (data: FormData) => {
     try {
-      const calculatedYear = 2000 + data.ageAtEvent; // 임시 나이(추후 연결필요)
+      const calculatedYear = birthYear
+        ? birthYear + (data.ageAtEvent - 1)
+        : 2000 + (data.ageAtEvent - 1);
 
       const eventData = {
         year: calculatedYear,
@@ -125,7 +128,6 @@ export const BaselineSetupForm = ({
       };
 
       if (existingEvent) {
-        // 로컬 수정
         updateEventLocal(existingEvent.id, eventData);
 
         Swal.fire({
@@ -137,12 +139,11 @@ export const BaselineSetupForm = ({
           showConfirmButton: false,
         });
       } else {
-        // 로컬 추가
         addEventLocal(eventData);
 
         Swal.fire({
           title: "저장 완료",
-          html: "분기점이 임시 저장되었습니다. <br/>''마무리하고 제출' 버튼을 클릭하여 최종 저장하세요.",
+          html: "분기점이 임시 저장되었습니다. <br/>'마무리하고 제출' 버튼을 클릭하여 최종 저장하세요.",
           icon: "success",
           confirmButtonColor: "#6366f1",
           timer: 2000,
@@ -191,7 +192,6 @@ export const BaselineSetupForm = ({
 
     if (result.isConfirmed) {
       try {
-        // 로컬 삭제
         deleteEventLocal(existingEvent.id);
         onClose();
 
@@ -308,8 +308,11 @@ export const BaselineSetupForm = ({
                 <span className="inline-block ml-2 mr-4">세</span>
                 {/* 계산된 년도 표시 */}
                 <span className="text-gray-300 text-sm">
-                  {watchAge && /^\d+$/.test(watchAge) && Number(watchAge) > 0
-                    ? `(${2000 + Number(watchAge)}년)`
+                  {watchAge &&
+                  /^\d+$/.test(watchAge) &&
+                  Number(watchAge) > 0 &&
+                  birthYear
+                    ? `(${birthYear + (Number(watchAge) - 1)}년)`
                     : "(나이 입력 시 년도 자동 계산)"}
                 </span>
               </div>

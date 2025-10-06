@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
+import { api } from "@/share/config/api";
 import { BaselineView } from "./BaselineView";
 import { BaselineSetupForm } from "./BaselineSetupForm";
 import { useBaselineStore } from "../stores/baselineStore";
@@ -19,16 +20,72 @@ interface Props {
   footerHeight?: number;
 }
 
+interface User {
+  id: number;
+  email: string;
+  username: string;
+  role: "USER" | "GUEST";
+  nickname: string;
+}
+
 export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   const router = useRouter();
   const { data: authData, isLoading: authLoading } = useAuthUser();
   const { setIsOpen: setLoginModalOpen } = useLoginModalStore();
 
-  const user = authData?.data;
+  // user 정보와 생년월일 가져오기
+  const [user, setUser] = useState<User | null>(null);
+  const [birthYear, setBirthYear] = useState<number | undefined>(undefined);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+
   const isGuest = user?.role === "GUEST";
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (authLoading || isFetchingData) return;
+
+      try {
+        setIsFetchingData(true);
+        console.log("=== 사용자 정보 가져오기 시작 ===");
+
+        // user 정보
+        const authResponse = await api.get("/api/v1/users-auth/me");
+        console.log("users-auth/me response:", authResponse);
+
+        if (authResponse.data) {
+          setUser(authResponse.data);
+          console.log("user 설정:", authResponse.data);
+          console.log("role:", authResponse.data.role);
+        }
+
+        // 생년월일 정보
+        const infoResponse = await api.get("/api/v1/users-info");
+        console.log("users-info response:", infoResponse);
+
+        if (infoResponse.data?.birthdayAt) {
+          const birthdayStr = infoResponse.data.birthdayAt;
+          const year = parseInt(
+            birthdayStr.split("-")[0] || birthdayStr.substring(0, 4)
+          );
+
+          if (!isNaN(year)) {
+            console.log("추출된 생년:", year);
+            setBirthYear(year);
+          }
+        }
+      } catch (error) {
+        console.error("사용자 정보 조회 실패:", error);
+      } finally {
+        setIsFetchingData(false);
+      }
+    };
+
+    fetchUserData();
+  }, [authLoading]);
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [tempNodes, setTempNodes] = useState<
     Array<{ year: number; age: number }>
   >([]);
@@ -117,11 +174,11 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   // 컴포넌트 마운트 시 이벤트 로드
   useEffect(() => {
     if (!authLoading && user) {
-      loadEvents().catch((error) => {
+      loadEvents(birthYear).catch((error) => {
         console.error("이벤트 로드 실패:", error);
       });
     }
-  }, [authLoading, user, loadEvents]);
+  }, [authLoading, user, loadEvents, birthYear]);
 
   // 에러 처리
   useEffect(() => {
@@ -177,12 +234,6 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   };
 
   const handleAddNode = async () => {
-    console.log("=== handleAddNode 디버깅 ===");
-    console.log("user:", user);
-    console.log("isGuest:", isGuest);
-    console.log("events.length:", events.length);
-    console.log("maxNodes:", maxNodes);
-
     if (!user) {
       console.log("사용자 인증 대기 중...");
       return;
@@ -299,6 +350,12 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
       return;
     }
 
+    // 중복 제출 방지
+    if (isSubmitting) {
+      console.log("이미 제출 중입니다.");
+      return;
+    }
+
     if (sortedEvents.length < 2) {
       Swal.fire({
         title: "분기점이 부족합니다",
@@ -338,7 +395,31 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
     if (result.isConfirmed) {
       try {
-        await submitBaseline(isGuest, user?.id);
+        setIsSubmitting(true);
+
+        // birthYear가 없으면 즉시 가져오기
+        let finalBirthYear = birthYear;
+
+        if (!finalBirthYear) {
+          try {
+            const infoResponse = await api.get("/api/v1/users-info");
+            if (infoResponse.data?.birthdayAt) {
+              const birthdayStr = infoResponse.data.birthdayAt;
+              const year = parseInt(
+                birthdayStr.split("-")[0] || birthdayStr.substring(0, 4)
+              );
+              if (!isNaN(year)) {
+                finalBirthYear = year;
+                setBirthYear(year);
+              }
+            }
+          } catch (error) {
+            console.error("생년월일 조회 실패:", error);
+          }
+        }
+
+        await submitBaseline(isGuest, user?.id, finalBirthYear);
+
         await Swal.fire({
           title: "제출 완료!",
           html: isGuest
@@ -348,24 +429,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           confirmButtonColor: "#10B981",
           confirmButtonText: "확인",
         }).then(() => {
-          if (isGuest) {
-            Swal.fire({
-              title: "로그인하시겠습니까?",
-              text: "로그인하면 여러 베이스라인을 만들 수 있습니다.",
-              icon: "question",
-              showCancelButton: true,
-              confirmButtonColor: "#6366f1",
-              cancelButtonColor: "#6B7280",
-              confirmButtonText: "로그인하기",
-              cancelButtonText: "나중에",
-            }).then((loginResult) => {
-              if (loginResult.isConfirmed) {
-                setLoginModalOpen(true);
-              }
-            });
-          } else {
-            router.push("/scenario-list");
-          }
+          router.push("/scenario-list");
         });
       } catch (error) {
         console.error("제출 오류:", error);
@@ -380,6 +444,8 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
             confirmButtonText: "확인",
           });
         }
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -407,7 +473,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [footerHeight]);
 
-  const isLoading = authLoading || storeLoading;
+  const isLoading = authLoading || storeLoading || isFetchingData;
 
   if (isLoading) {
     return (
@@ -415,7 +481,11 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <div className="text-white text-xl">
-            {authLoading ? "인증 확인 중..." : "데이터 로딩 중..."}
+            {authLoading
+              ? "인증 확인 중..."
+              : isFetchingData
+              ? "사용자 정보 로딩 중..."
+              : "데이터 로딩 중..."}
           </div>
         </div>
       </div>
@@ -427,6 +497,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   const emptyNodesCount = Math.max(0, baseNodeCount - totalNodes);
 
   const canAddMore = totalNodes < maxNodes;
+
   return (
     <div className="min-h-[calc(100vh-140px)]">
       <div className="w-full min-h-[calc(100vh-140px)] flex overflow-hidden">
@@ -438,7 +509,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           events={allEventsForView}
           tempNodes={tempNodes}
           isGuest={isGuest || !user}
-          canAddMore={canAddMore} // 추가
+          canAddMore={canAddMore}
           maxNodes={maxNodes}
           emptyNodesCount={emptyNodesCount}
         />
@@ -448,6 +519,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
             selectedYear={selectedYear}
             existingEvent={selectedEvent}
             onClose={handleFormClose}
+            birthYear={birthYear}
           />
         )}
         {!isFormOpen && (
@@ -469,6 +541,18 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         </p>
                       </li>
                     ))}
+                    {/* 임시 노드 표시 추가 */}
+                    {!isSubmitted &&
+                      tempNodes.map((temp, i) => (
+                        <li
+                          key={`temp-${temp.year}-${i}`}
+                          className="flex items-center gap-[6.8vw] text-gray-500"
+                        >
+                          <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
+                            노드를 클릭해 분기를 입력해 주세요
+                          </h4>
+                        </li>
+                      ))}
                     {!isSubmitted &&
                       Array.from({ length: emptyNodesCount }, (_, i) => (
                         <li
@@ -491,10 +575,12 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                     >
                       <button
                         onClick={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoading || isSubmitting}
                         className="bg-white font-medium text-gray-800 px-6 py-4 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {isLoading ? "처리 중..." : "마무리하고 제출"}
+                        {isLoading || isSubmitting
+                          ? "처리 중..."
+                          : "마무리하고 제출"}
                       </button>
                     </div>
                   )}

@@ -23,4 +23,7 @@ export const queryKeys = {
     set: (id: string) => ["comment", "set", id],
     get: (id: string) => ["comment", "get", id],
   },
+  user: {
+    info: () => ["user", "info"] as const,
+  },
 };

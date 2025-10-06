@@ -38,7 +38,7 @@ const Comparison = () => {
         <button
           type="button"
           onClick={() => (window.location.href = "/onboarding")}
-          className="h-[55px] px-[50px] bg-deep-navy rounded-full text-white text-xl font-medium"
+          className="h-[55px] px-[50px] bg-deep-navy rounded-full text-white text-xl font-medium transition-all duration-300 hover:scale-105"
         >
           시작하기
         </button>

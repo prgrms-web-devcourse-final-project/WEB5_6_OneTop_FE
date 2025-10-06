@@ -10,10 +10,15 @@ import {
   BaselineListResponse,
 } from "../types";
 
-const convertNodeToEvent = (node: BaseNodeDto): LifeEvent => {
+const convertNodeToEvent = (
+  node: BaseNodeDto,
+  birthYear?: number
+): LifeEvent => {
+  const calculatedYear = birthYear ? birthYear + (node.ageYear - 1) : 0;
+
   return {
     id: node.id.toString(),
-    year: 0,
+    year: calculatedYear,
     age: node.ageYear,
     category: categoryToFrontend[node.category],
     eventTitle: node.situation,
@@ -36,10 +41,16 @@ export const clientBaselineApi = {
       context?: string;
     }>,
     title?: string,
-    userId: number = 1
+    userId: number = 1,
+    birthYear?: number
   ): Promise<{ baseLineId: number; events: LifeEvent[] }> => {
     try {
-      console.log("베이스라인 생성 시작:", { events, title, userId });
+      console.log("베이스라인 생성 시작:", {
+        events,
+        title,
+        userId,
+        birthYear,
+      });
 
       const request: BaseLineBulkCreateRequest = {
         userId,
@@ -63,7 +74,8 @@ export const clientBaselineApi = {
 
       if (response.data && response.data.baseLineId) {
         const nodes = await clientBaselineApi.getBaseLineNodes(
-          response.data.baseLineId
+          response.data.baseLineId,
+          birthYear
         );
 
         // baseLineId를 각 노드에 추가
@@ -87,14 +99,17 @@ export const clientBaselineApi = {
     }
   },
 
-  getBaseLineNodes: async (baseLineId: number): Promise<LifeEvent[]> => {
+  getBaseLineNodes: async (
+    baseLineId: number,
+    birthYear?: number
+  ): Promise<LifeEvent[]> => {
     try {
       const response = await api.get<BaseNodeDto[]>(
         `/api/v1/base-lines/${baseLineId}/nodes`
       );
 
       if (Array.isArray(response.data)) {
-        return response.data.map(convertNodeToEvent);
+        return response.data.map((node) => convertNodeToEvent(node, birthYear));
       }
       return [];
     } catch (error) {
@@ -131,24 +146,25 @@ export const clientBaselineApi = {
       return [];
     }
   },
-  getBaseLine: async (): Promise<LifeEvent[]> => {
+
+  getBaseLine: async (birthYear?: number): Promise<LifeEvent[]> => {
     try {
       const baseLineId = 1;
-      return await clientBaselineApi.getBaseLineNodes(baseLineId);
+      return await clientBaselineApi.getBaseLineNodes(baseLineId, birthYear);
     } catch (error) {
       console.error("베이스라인 조회 실패:", error);
       return [];
     }
   },
 
-  getNode: async (nodeId: number): Promise<LifeEvent> => {
+  getNode: async (nodeId: number, birthYear?: number): Promise<LifeEvent> => {
     try {
       const response = await api.get<BaseNodeDto>(
         `/api/v1/base-lines/nodes/${nodeId}`
       );
 
       if (response.data) {
-        return convertNodeToEvent(response.data);
+        return convertNodeToEvent(response.data, birthYear);
       }
       throw new Error("노드 조회 실패");
     } catch (error) {
