@@ -5,6 +5,8 @@ import Link from "next/link";
 import RepresentativeProfileModal from "./RepresentativeProfileModal";
 import { useRepresentativeProfile } from "../../hooks/useRepresentativeProfile";
 import { RadarChartCore } from "@/share/components/RaderChartCore";
+import Loading from "@/share/components/Loading";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export default function RepresentativeProfile() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,7 +15,15 @@ export default function RepresentativeProfile() {
   );
 
   const { query, mutation } = useRepresentativeProfile();
-  const profile = query.data;
+  const { data: profile, isLoading, error } = query;
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    showErrorToast(error);
+  }
 
   const handleSubmit = (scenarioId: number) => {
     mutation.mutate(scenarioId, {

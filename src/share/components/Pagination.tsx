@@ -7,6 +7,7 @@ import tw from "../utils/tw";
 
 interface BasePaginationProps {
   totalPages: number;
+  scrollToId?: string;
 }
 
 interface UrlPaginationProps extends BasePaginationProps {
@@ -23,7 +24,7 @@ interface StatePaginationProps extends BasePaginationProps {
 type PaginationProps = UrlPaginationProps | StatePaginationProps;
 
 export default function Pagination(props: PaginationProps) {
-  const { totalPages } = props;
+  const { totalPages, scrollToId } = props;
   const mode = props.mode || "url";
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -51,6 +52,15 @@ export default function Pagination(props: PaginationProps) {
   const handleClick = (page: number) => {
     if (mode === "state") {
       (props as StatePaginationProps).onPageChange(page);
+    }
+  };
+
+  const handleScroll = () => {
+    if (scrollToId) {
+      document.getElementById(scrollToId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -113,7 +123,12 @@ export default function Pagination(props: PaginationProps) {
     }
 
     return (
-      <Link href={createPageUrl(page)} className={activeClass}>
+      <Link
+        href={createPageUrl(page)}
+        className={activeClass}
+        scroll={!scrollToId}
+        onClick={handleScroll}
+      >
         {children}
       </Link>
     );
@@ -136,7 +151,12 @@ export default function Pagination(props: PaginationProps) {
     }
 
     return (
-      <Link href={createPageUrl(page)} className={className}>
+      <Link
+        href={createPageUrl(page)}
+        className={className}
+        scroll={!scrollToId}
+        onClick={handleScroll}
+      >
         {page}
       </Link>
     );

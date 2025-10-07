@@ -1,8 +1,10 @@
 "use client";
 
+import Loading from "@/share/components/Loading";
 import { useBaselines } from "../hooks/useBaselines";
 import BaselineList from "./BaselineList";
 import Pagination from "@/share/components/Pagination";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 interface BaselineSectionProps {
   page: number;
@@ -14,15 +16,11 @@ export default function BaselineSection({ page, size }: BaselineSectionProps) {
   const { data, isLoading, error } = query;
 
   if (isLoading) {
-    return <div className="p-4 text-center">불러오는 중...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        오류가 발생했습니다. 다시 시도해주세요.
-      </div>
-    );
+    showErrorToast(error);
   }
 
   const baselines = data?.items || [];
