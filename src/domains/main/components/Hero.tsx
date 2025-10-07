@@ -136,7 +136,7 @@ export const Hero = () => {
         scrub: 1,
         pin: true,
         onUpdate: (self) => {
-          if (self.progress > 0.9 && !hasStartedCounting.current) {
+          if (self.progress > 0.8 && !hasStartedCounting.current) {
             hasStartedCounting.current = true;
             setStartCounting(true);
           }
@@ -201,7 +201,7 @@ export const Hero = () => {
       />
       <div
         ref={planet1Ref}
-        className="absolute left-1/2 -translate-x-1/2 -bottom-55 opacity-0"
+        className="absolute left-1/2 -translate-x-1/2 -bottom-57 opacity-0"
       >
         <div className="relative w-[450px] h-[450px]">
           <Image src="/parallel_universe01.png" alt="" fill sizes="450px" />
@@ -209,7 +209,7 @@ export const Hero = () => {
       </div>
       <div
         ref={planet2Ref}
-        className="absolute left-1/2 -translate-x-1/2 -top-37.5 opacity-0"
+        className="absolute left-1/2 -translate-x-1/2 -top-40 opacity-0"
       >
         <div className="relative w-[450px] h-[450px]">
           <Image src="/parallel_universe02.png" alt="" fill sizes="450px" />
