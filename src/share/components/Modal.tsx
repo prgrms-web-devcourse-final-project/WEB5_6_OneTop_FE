@@ -27,22 +27,9 @@ export default function Modal({
 }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
-      // 현재 스크롤 위치 저장
-      const scrollY = window.scrollY;
-
-      // body와 html 스크롤 완전히 막기
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      document.body.style.overflowY = "scroll";
-
+      document.body.style.overflow = "hidden";
       return () => {
-        // 원래대로 복구
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        document.body.style.overflowY = "";
-        window.scrollTo(0, scrollY);
+        document.body.style.overflow = "";
       };
     }
   }, [isOpen]);
@@ -51,31 +38,43 @@ export default function Modal({
 
   const getButtonClass = (variant: "primary" | "outline" = "primary") => {
     if (variant === "primary") {
-      return "bg-deep-navy text-white px-4 py-2 rounded-md";
+      return "bg-deep-navy text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition";
     } else {
-      return "bg-white text-deep-navy border border-deep-navy px-4 py-2 rounded-md";
+      return "bg-white text-deep-navy border border-deep-navy px-4 py-2 rounded-md hover:bg-gray-50 transition";
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-10 overflow-hidden">
+    <div className="fixed inset-0 z-10 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-[rgba(0,0,0,0.2)] backdrop-blur-sm"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm"
         onClick={onClose}
-      ></div>
+      />
       <div
-        className="relative bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] flex flex-col"
+        className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col"
+        style={{ maxHeight: "90vh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4 flex-shrink-0">
+        <div className="flex justify-between items-center px-6 py-4 flex-shrink-0">
           <h3 className="text-xl font-bold">{title}</h3>
-          <button onClick={onClose}>
+          <button
+            onClick={onClose}
+            className="hover:bg-gray-100 rounded-lg p-1 transition"
+          >
             <IoClose size={24} />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 min-h-0">{children}</div>
+        <div
+          className="px-6"
+          style={{
+            overflowY: "auto",
+            flex: "1 1 auto",
+          }}
+        >
+          {children}
+        </div>
         {actions.length > 0 && (
-          <div className="flex pt-4 justify-end gap-3 flex-shrink-0">
+          <div className="flex px-6 py-4 justify-end gap-3 flex-shrink-0">
             {actions.map((action, idx) => (
               <button
                 key={idx}
