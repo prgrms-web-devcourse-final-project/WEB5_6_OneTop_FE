@@ -1,9 +1,19 @@
 "use client";
 
+import Loading from "@/share/components/Loading";
 import { useUsageStats } from "../../hooks/useUsageStats";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export default function MyUsageStats() {
-  const { data } = useUsageStats();
+  const { data, isLoading, error } = useUsageStats();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    showErrorToast(error);
+  }
 
   return (
     <div className="w-full">

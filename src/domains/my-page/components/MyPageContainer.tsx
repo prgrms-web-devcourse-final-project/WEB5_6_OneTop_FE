@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import Loading from "./Loading";
 import MyUsageStats from "./myusagestats/MyUsageStats";
 import MyInfo from "./myinfo/MyInfo";
 import Myscenarios from "./myscenarios/MyScenarios";
@@ -12,48 +10,42 @@ export default function MyPageContainer() {
     <div className="w-full">
       {/* 사용 통계 */}
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Suspense fallback={<Loading />}>
-          <MyUsageStats />
-        </Suspense>
+        <MyUsageStats />
       </div>
 
       {/* 대표 프로필 */}
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Suspense fallback={<Loading />}>
-          <RepresentativeProfile />
-        </Suspense>
+        <RepresentativeProfile />
       </div>
 
       {/* 내 정보 */}
       <div className="w-full bg-gray-200">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Suspense fallback={<Loading />}>
-            <MyInfo />
-          </Suspense>
+          <MyInfo />
         </div>
       </div>
 
       {/* 평행우주 목록 */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Suspense fallback={<Loading />}>
-          <Myscenarios />
-        </Suspense>
+      <div
+        id="scenarios"
+        className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-4"
+      >
+        <Myscenarios />
       </div>
 
       {/* 작성글 */}
-      <div className="w-full bg-gray-200">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Suspense fallback={<Loading />}>
-            <MyPosts />
-          </Suspense>
+      <div id="posts" className="w-full bg-gray-200">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-4">
+          <MyPosts />
         </div>
       </div>
 
       {/* 댓글 */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Suspense fallback={<Loading />}>
-          <MyComments />
-        </Suspense>
+      <div
+        id="comments"
+        className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-4"
+      >
+        <MyComments />
       </div>
     </div>
   );
