@@ -10,7 +10,6 @@ export async function nextFetcher(url: string, options?: RequestInit) {
 
   const xsrfToken = allCookies.find((cookie) => cookie.name === "XSRF-TOKEN");
 
-
   // 기본 헤더 설정
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
@@ -43,18 +42,21 @@ export async function nextFetcher(url: string, options?: RequestInit) {
 
   const response = await fetch(url, newOptions);
 
-  console.log("response:", response);
-
   if (!response.ok) {
-    const errorBody = await response.text();
-    console.error("Error fetching data:", errorBody);
-    switch (response.status) {
-      case 401:
-        throw new Error("Unauthorized");
-      case 403:
-        throw new Error("Forbidden");
-      default:
-        throw new Error(`Request failed with status ${response.status}`);
+    try {
+      const errorBody = await response.json();
+
+      switch (response.status) {
+        case 401:
+          throw new Error(errorBody.message);
+        case 403:
+          throw new Error(errorBody.message);
+        default:
+          throw new Error(`${response.status} - ${errorBody.message}`);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw error;
     }
   }
 

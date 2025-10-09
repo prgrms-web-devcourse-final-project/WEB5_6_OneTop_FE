@@ -45,18 +45,20 @@ export const postDetailSchema = z.object({
 });
 
 export const postWriteSchema = z.object({
-  title: z.string(),
-  content: z.string(),
+  title: z.string().min(1, "제목을 입력해주세요."),
+  content: z.string().min(1, "내용을 입력해주세요."),
   category: postCategorySchema,
-  hide: z.boolean(),
-  poll: z.object({
-    options: z.array(
-      z.object({
-        index: z.number(),
-        text: z.string(),
-      })
-    ),
-  }).optional(),
+  hide: z.boolean().optional(),
+  poll: z
+    .object({
+      options: z.array(
+        z.object({
+          index: z.number(),
+          text: z.string().min(1, "투표 항목의 내용을 입력해주세요."),
+        })
+      ),
+    })
+    .optional(),
 });
 
 // 검색 조건 스키마

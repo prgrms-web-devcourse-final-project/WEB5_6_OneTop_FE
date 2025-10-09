@@ -9,15 +9,19 @@ import { useDeleteComment } from "../api/useDeleteComment";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { useUpdateComment } from "../api/useUpdateComment";
+import tw from "@/share/utils/tw";
+import { useQueryClient } from "@tanstack/react-query";
+import CommnetLikeButton from "./CommnetLikeButton";
 
 export function PostCommnet({ id }: { id: string }) {
   // state 선언
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState<string>("");
   const [editHide, setEditHide] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   // 조회 query
-  const { data: comments, isLoading, isError } = useGetComments({ id });
+  const { data: comments, isLoading } = useGetComments({ id });
 
   // 수정, 삭제 mutation
   const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment({
@@ -105,7 +109,7 @@ export function PostCommnet({ id }: { id: string }) {
             {editCommentId === commentId ? (
               <form onSubmit={onSubmit} className="flex gap-2">
                 <textarea
-                  className="flex-10 h-20 rounded-md border border-gray-300 px-4"
+                  className="flex-14 h-20 rounded-md border border-gray-300 p-4"
                   value={editContent || ""}
                   onChange={(e) => setEditContent(e.target.value)}
                 />
@@ -121,22 +125,27 @@ export function PostCommnet({ id }: { id: string }) {
             )}
 
             <div className="flex items-center gap-2 justify-between">
-              <button
-                type="button"
-                className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
-              >
-                <BiLike size={20} />
-                <span>{likeCount}</span>
-              </button>
+              <CommnetLikeButton
+                id={commentId.toString()}
+                postId={id}
+                likeCount={likeCount}
+                likedByMe={isLiked}
+              />
 
               {/* 본인 댓글일 때만 수정, 삭제 버튼 표시 */}
               {isMine && (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
+                    className={tw(
+                      "flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue",
+                      editCommentId === commentId &&
+                        "text-amber-500 hover:text-amber-500"
+                    )}
                     onClick={() => {
-                      setEditCommentId(commentId);
+                      setEditCommentId(
+                        commentId === editCommentId ? null : commentId
+                      );
                       setEditContent(content);
                       setEditHide(author === "익명" ? true : false);
                     }}

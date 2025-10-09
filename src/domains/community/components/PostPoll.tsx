@@ -1,6 +1,7 @@
 "use client";
 import tw from "@/share/utils/tw";
 import { useState } from "react";
+
 interface PostPoll {
   index: number;
   subject: string;
@@ -39,26 +40,38 @@ function PostPoll() {
   return (
     <ul className="flex gap-2 flex-col p-2">
       {pollItems.map((item, index) => (
-        <li key={index} className="relative overflow-hidden">
+        <li
+          key={index}
+          className="relative overflow-hidden"
+          onClick={() => handleVote(item.index)}
+        >
           <input
             type="button"
             value={item.subject}
             className="px-4 py-2 bg-white text-deep-navy rounded h-11 w-full border border-deep-navy"
-            onClick={() => handleVote(item.index)}
           />
-            <div
-              className={tw(
-                "absolute top-0 left-0 h-full bg-deep-navy flex items-center justify-end",
-                "transition-all duration-500 ease-in-out rounded-md px-4",
-                whatEverVoted ? "opacity-100" : "opacity-0"
-              )}
-              style={{
-                width: whatEverVoted ? `${fullCount > 0 ? ((item.votes / fullCount) * 100).toFixed(0) : 0}%` : '0%',
-              }}
-            >
+          <div
+            className={tw(
+              "absolute top-0 left-0 h-full bg-deep-navy flex items-center justify-end",
+              "transition-all duration-500 ease-in-out rounded-md px-4",
+              whatEverVoted ? "opacity-100" : "opacity-0"
+            )}
+            style={{
+              width: whatEverVoted
+                ? `${
+                    fullCount > 0
+                      ? ((item.votes / fullCount) * 100).toFixed(0)
+                      : 0
+                  }%`
+                : "0%",
+            }}
+          >
             <div className="flex items-center gap-2">
               <span className="text-white">
-                {fullCount > 0 ? ((item.votes / fullCount) * 100).toFixed(0) : 0}%
+                {fullCount > 0
+                  ? ((item.votes / fullCount) * 100).toFixed(0)
+                  : 0}
+                %
               </span>
               <span className="text-white">{item.votes}</span>
             </div>
