@@ -1,6 +1,7 @@
 import { getPostList } from "@/domains/community/api/getPostList";
 import PostFilter from "@/domains/community/components/PostFilter";
 import PostList from "@/domains/community/components/PostList";
+import SearchBar from "@/domains/community/components/SearchBar";
 import { PostFilterType } from "@/domains/community/types";
 import { BannerSection } from "@/share/components/BannerSection";
 import Pagination from "@/share/components/Pagination";
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
 type CommunityMainParams = {
   category?: PostFilterType;
   page?: number;
+  keyword?: string;
+  searchType?: string;
 };
 
 async function Page({
@@ -28,19 +31,17 @@ async function Page({
   const arrivedSearchParams = await searchParams;
   const category = arrivedSearchParams.category || "ALL";
   const page = arrivedSearchParams.page || 0;
+  const keyword = arrivedSearchParams.keyword || "";
+  const searchType = arrivedSearchParams.searchType || "TITLE";
 
   let posts = [];
   let totalPages = 0;
 
   try {
     const response = await getPostList(
-      page,
-      10,
-      "",
-      category,
-      "TITLE",
-      "createdDate"
+      { page, size: 10, keyword, category, searchType, sort: "createdDate" }
     );
+    
     const data = response;
     posts = data.items || [];
     totalPages = data.totalPages || 0;
@@ -54,11 +55,7 @@ async function Page({
       <div className="w-full flex flex-col items-center min-h-[calc(100vh-140px)]">
         {/* 헤더 영역 */}
         <BannerSection>
-          <input
-            type="text"
-            className="w-[80%] rounded-full px-4 py-2 bg-white placeholder:text-gray-500"
-            placeholder="검색어를 입력해주세요."
-          />
+          <SearchBar />
           <div className="flex w-full justify-between items-center px-4 absolute bottom-4">
             <PostFilter category={category} />
             <Link
