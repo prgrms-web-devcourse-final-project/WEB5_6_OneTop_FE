@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { PiWarningCircleFill } from "react-icons/pi";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { Tooltip } from "@/share/components/Tooltip";
 import { CompareBarChart } from "./CompareBarChart";
 import { CompareTimeline } from "./CompareTimeline";
-import { PiWarningCircleFill } from "react-icons/pi";
+import { CompareRadarChart } from "./CompareRadarChart";
 import {
   CompareTimelineItem,
   RadarData,
   ScenarioCompareResponse,
   TimelineResponse,
 } from "../../types";
-import { CompareRadarChart } from "./CompareRadarChart";
 import { clientCompareApi } from "../../api/clientCompareApi";
 
 export const ScenarioCompareContainer = () => {
@@ -97,7 +97,7 @@ export const ScenarioCompareContainer = () => {
           </h2>
           <p className="text-gray-600 mb-6">올바른 시나리오 ID가 필요합니다.</p>
           <button
-            onClick={() => (window.location.href = "/baselines")}
+            onClick={() => (window.location.href = "/scenario-list")}
             className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
             시나리오 목록으로 돌아가기
@@ -140,7 +140,7 @@ export const ScenarioCompareContainer = () => {
               다시 시도
             </button>
             <button
-              onClick={() => (window.location.href = "/baselines")}
+              onClick={() => (window.location.href = "/scenario-list")}
               className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               시나리오 목록으로 돌아가기
