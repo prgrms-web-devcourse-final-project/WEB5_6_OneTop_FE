@@ -1,37 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import Swal from "sweetalert2";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBaselineStore } from "../stores/baselineStore";
-import { LifeEvent } from "../types";
-
-const eventSchema = z.object({
-  category: z.enum(["교육", "직업", "관계", "경제", "건강", "행복", "기타"]),
-  eventTitle: z.string().min(1, "선택 상황을 입력해주세요"),
-  actualChoice: z.string().min(1, "실제 선택을 입력해주세요"),
-  context: z.string().optional(),
-  ageAtEvent: z
-    .string()
-    .min(1, "나이를 입력해주세요")
-    .refine((val) => /^\d+$/.test(val), {
-      message: "나이를 숫자로 입력해주세요",
-    })
-    .transform((val) => Number(val))
-    .refine((num) => num >= 1 && num <= 100, {
-      message: "나이는 1세 이상 100세 이하이어야 합니다",
-    }),
-  yearOfEvent: z
-    .number()
-    .min(1900, "년도는 1900년 이상이어야 합니다")
-    .max(2100, "년도는 2100년 이하여야 합니다"),
-});
-// 폼의 원시 입력 타입(전부 문자열 기반)
-type FormInput = z.input<typeof eventSchema>;
-// 파싱 이후 타입(나이: number)
-type FormData = z.output<typeof eventSchema>;
+import { useBaselineFormActions } from "../hooks/useBaselineFormActions";
+import {
+  type FormInput,
+  type FormData,
+  createEventSchema,
+} from "../lib/schemas";
+import type { LifeEvent } from "../types";
 
 interface Props {
   isOpen: boolean;
@@ -49,13 +28,18 @@ export const BaselineSetupForm = ({
   onClose,
   birthYear,
 }: Props) => {
-  const {
-    addEventLocal,
-    updateEventLocal,
-    deleteEventLocal,
-    events,
-    isSubmitted,
-  } = useBaselineStore();
+  const { events, isSubmitted } = useBaselineStore();
+
+  const { handleFormSubmit, handleDelete } = useBaselineFormActions({
+    existingEvent,
+    onClose,
+    birthYear,
+  });
+
+  const eventSchema = useMemo(
+    () => createEventSchema(events, existingEvent?.id),
+    [events, existingEvent?.id]
+  );
 
   // 자동 높이 조절 함수
   const adjustTextareaHeight = (element: HTMLTextAreaElement) => {
@@ -112,116 +96,11 @@ export const BaselineSetupForm = ({
     }
   }, [watchAge, setValue, birthYear]);
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      const calculatedYear = birthYear
-        ? birthYear + (data.ageAtEvent - 1)
-        : 2000 + (data.ageAtEvent - 1);
-
-      const eventData = {
-        year: calculatedYear,
-        age: data.ageAtEvent,
-        category: data.category,
-        eventTitle: data.eventTitle.trim(),
-        actualChoice: data.actualChoice.trim(),
-        context: data.context?.trim(),
-      };
-
-      if (existingEvent) {
-        updateEventLocal(existingEvent.id, eventData);
-
-        Swal.fire({
-          title: "수정 완료",
-          html: "분기점이 수정되었습니다. <br/>'마무리하고 제출' 버튼을 클릭하여 최종 저장하세요.",
-          icon: "success",
-          confirmButtonColor: "#6366f1",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      } else {
-        addEventLocal(eventData);
-
-        Swal.fire({
-          title: "저장 완료",
-          html: "분기점이 임시 저장되었습니다. <br/>'마무리하고 제출' 버튼을 클릭하여 최종 저장하세요.",
-          icon: "success",
-          confirmButtonColor: "#6366f1",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      }
-
-      onClose();
-    } catch (error) {
-      console.error("저장 실패:", error);
-      Swal.fire({
-        title: "저장 실패",
-        text: "저장 중 오류가 발생했습니다.",
-        icon: "error",
-        confirmButtonColor: "#E76F51",
-        confirmButtonText: "확인",
-      });
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!existingEvent) return;
-
-    // 제출된 상태에서는 삭제 불가
-    if (isSubmitted) {
-      Swal.fire({
-        title: "삭제 불가",
-        text: "이미 제출된 베이스라인은 수정할 수 없습니다.",
-        icon: "warning",
-        confirmButtonColor: "#6366f1",
-        confirmButtonText: "확인",
-      });
-      return;
-    }
-
-    const result = await Swal.fire({
-      title: "분기점 삭제",
-      text: "정말로 이 분기점을 삭제하시겠습니까?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#E76F51",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "삭제",
-      cancelButtonText: "취소",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        deleteEventLocal(existingEvent.id);
-        onClose();
-
-        Swal.fire({
-          title: "삭제 완료",
-          text: "분기점이 삭제되었습니다.",
-          icon: "success",
-          confirmButtonColor: "#E76F51",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      } catch (error) {
-        console.error("삭제 실패:", error);
-        Swal.fire({
-          title: "삭제 실패",
-          text: "삭제 중 오류가 발생했습니다.",
-          icon: "error",
-          confirmButtonColor: "#E76F51",
-          confirmButtonText: "확인",
-        });
-      }
-    }
-  };
-
   if (!isOpen || !selectedYear) return null;
 
   return (
     <div className="flex-1 bg-[linear-gradient(246deg,_rgba(217,217,217,0)_41.66%,_rgba(130,79,147,0.15)_98.25%)]">
       <div className="fixed top-[60px] w-[54.5vw] ml-[155px] mt-30">
-        {/* 폼 헤더 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <span className="flex items-center justify-center w-[150px] h-11 bg-gray-300 rounded-4xl">
@@ -251,7 +130,10 @@ export const BaselineSetupForm = ({
         )}
 
         {/* 폼 */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="flex flex-col gap-5"
+        >
           {/* 카테고리 선택 */}
           <div className="relative flex items-center border border-white rounded-lg py-3 pl-7 pr-5">
             <label className="block w-[115px] text-white text-lg mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
@@ -306,7 +188,6 @@ export const BaselineSetupForm = ({
                   disabled={isSubmitted}
                 />
                 <span className="inline-block ml-2 mr-4">세</span>
-                {/* 계산된 년도 표시 */}
                 <span className="text-gray-300 text-sm">
                   {watchAge &&
                   /^\d+$/.test(watchAge) &&

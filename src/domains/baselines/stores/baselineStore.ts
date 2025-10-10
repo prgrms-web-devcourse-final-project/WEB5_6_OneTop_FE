@@ -1,16 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { LifeEvent } from "../types";
+import { EventData, LifeEvent } from "../types";
 import { clientBaselineApi } from "../api/clientBaselineApi";
-
-export interface EventData {
-  year: number;
-  age: number;
-  category: LifeEvent["category"];
-  eventTitle: string;
-  actualChoice: string;
-  context?: string;
-}
 
 export interface BaselineStore {
   events: LifeEvent[];
@@ -66,7 +57,7 @@ export const useBaselineStore = create<BaselineStore>()(
 
       // 사용자 변경 시 초기화 함수 추가
       initializeForUser: (userId: number, role: string) => {
-        const { lastUserId, hasGuestSubmitted, events } = get();
+        const { lastUserId, hasGuestSubmitted, isSubmitted } = get();
 
         // 다른 사용자로 로그인한 경우
         if (lastUserId && lastUserId !== userId) {
@@ -82,7 +73,7 @@ export const useBaselineStore = create<BaselineStore>()(
         }
 
         // 게스트에서 로그인으로 전환
-        if (role === "USER" && hasGuestSubmitted && events.length > 0) {
+        if (role === "USER" && lastUserId && hasGuestSubmitted) {
           set({
             events: [],
             hasGuestSubmitted: false,
@@ -91,6 +82,12 @@ export const useBaselineStore = create<BaselineStore>()(
             currentBaseLineId: null,
             lastUserId: userId,
           });
+          return;
+        }
+
+        // 로그인 사용자가 이미 제출한 베이스라인이 있는 경우
+        if (role === "USER" && isSubmitted) {
+          set({ lastUserId: userId });
           return;
         }
 
@@ -171,7 +168,6 @@ export const useBaselineStore = create<BaselineStore>()(
         birthYear?: number
       ) => {
         try {
-          console.log("submitBaseline 시작", { isGuest, userId, birthYear });
           set({ isLoading: true, error: null });
 
           const currentEvents = get().events;
@@ -186,8 +182,6 @@ export const useBaselineStore = create<BaselineStore>()(
             throw new Error("사용자 ID가 필요합니다.");
           }
 
-          console.log("서버로 데이터 전송");
-
           const eventsToSubmit = currentEvents.map((event) => ({
             year: event.year,
             age: event.age,
@@ -197,7 +191,6 @@ export const useBaselineStore = create<BaselineStore>()(
             context: event.context,
           }));
 
-          // 게스트든 로그인이든 서버에 제출
           const { baseLineId, events: newEvents } =
             await clientBaselineApi.createBaseLine(
               eventsToSubmit,
@@ -205,9 +198,6 @@ export const useBaselineStore = create<BaselineStore>()(
               userId,
               birthYear
             );
-
-          console.log("받은 baseLineId:", baseLineId);
-          console.log("받은 이벤트:", newEvents);
 
           set((state) => ({
             events: newEvents,
@@ -225,8 +215,6 @@ export const useBaselineStore = create<BaselineStore>()(
             ],
             lastUserId: userId,
           }));
-
-          console.log("베이스라인 제출 완료");
         } catch (error) {
           console.error("submitBaseline 에러:", error);
           const errorMessage =
@@ -237,9 +225,6 @@ export const useBaselineStore = create<BaselineStore>()(
       },
 
       startNewBaseline: () => {
-        const { hasGuestSubmitted } = get();
-        console.log("새 베이스라인 시작");
-
         set({
           events: [],
           currentBaseLineId: null,

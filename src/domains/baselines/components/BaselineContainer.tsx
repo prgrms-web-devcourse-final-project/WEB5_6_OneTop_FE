@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
-import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
-import { api } from "@/share/config/api";
 import { BaselineView } from "./BaselineView";
 import { BaselineSetupForm } from "./BaselineSetupForm";
 import { useBaselineStore } from "../stores/baselineStore";
@@ -15,80 +13,27 @@ import { PiNumberCircleTwoLight } from "react-icons/pi";
 import { PiNumberCircleThreeLight } from "react-icons/pi";
 import { PiNumberCircleFourLight } from "react-icons/pi";
 import { PiWarningFill } from "react-icons/pi";
+import { useBaselineUser } from "../hooks/useBaselineUser";
+import { useGuestLimits } from "../hooks/useGuestLimits";
+import { useBaselineNodes } from "../hooks/useBaselineNodes";
+import { useBaselineSubmit } from "../hooks/useBaselineSubmit";
+import { useScrollButton } from "../hooks/useScrollButton";
 
 interface Props {
   footerHeight?: number;
 }
 
-interface User {
-  id: number;
-  email: string;
-  username: string;
-  role: "USER" | "GUEST";
-  nickname: string;
-}
-
 export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
   const router = useRouter();
-  const { data: authData, isLoading: authLoading } = useAuthUser();
+  const searchParams = useSearchParams();
   const { setIsOpen: setLoginModalOpen } = useLoginModalStore();
 
-  // user 정보와 생년월일 가져오기
-  const [user, setUser] = useState<User | null>(null);
-  const [birthYear, setBirthYear] = useState<number | undefined>(undefined);
-  const [isFetchingData, setIsFetchingData] = useState(false);
-
-  const isGuest = user?.role === "GUEST";
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (authLoading || isFetchingData) return;
-
-      try {
-        setIsFetchingData(true);
-        console.log("=== 사용자 정보 가져오기 시작 ===");
-
-        // user 정보
-        const authResponse = await api.get("/api/v1/users-auth/me");
-        console.log("users-auth/me response:", authResponse);
-
-        if (authResponse.data) {
-          setUser(authResponse.data);
-          console.log("user 설정:", authResponse.data);
-          console.log("role:", authResponse.data.role);
-        }
-
-        // 생년월일 정보
-        const infoResponse = await api.get("/api/v1/users-info");
-        console.log("users-info response:", infoResponse);
-
-        if (infoResponse.data?.birthdayAt) {
-          const birthdayStr = infoResponse.data.birthdayAt;
-          const year = parseInt(
-            birthdayStr.split("-")[0] || birthdayStr.substring(0, 4)
-          );
-
-          if (!isNaN(year)) {
-            console.log("추출된 생년:", year);
-            setBirthYear(year);
-          }
-        }
-      } catch (error) {
-        console.error("사용자 정보 조회 실패:", error);
-      } finally {
-        setIsFetchingData(false);
-      }
-    };
-
-    fetchUserData();
-  }, [authLoading]);
-
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tempNodes, setTempNodes] = useState<
-    Array<{ year: number; age: number }>
-  >([]);
+  const {
+    user,
+    birthYear,
+    isGuest,
+    isLoading: userLoading,
+  } = useBaselineUser();
 
   const {
     events,
@@ -96,144 +41,89 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     error,
     isSubmitted,
     hasGuestSubmitted,
-    loadEvents,
-    getEventByYear,
     setError,
-    submitBaseline,
-    //startNewBaseline,
     initializeForUser,
+    startNewBaseline,
   } = useBaselineStore();
 
+  // 새 베이스라인 초기화
   useEffect(() => {
-    if (!authLoading && user && user.id) {
-      initializeForUser(user.id, user.role);
-    }
-  }, [authLoading, user, initializeForUser]);
+    const isNewBaseline = searchParams.get("new") === "true";
 
-  // 1. 3개 작성 완료 시 자동 알림 (useEffect 추가)
-  useEffect(() => {
-    // 게스트가 정확히 3개를 작성했고, 아직 제출 안 했고, 폼이 닫혀있을 때만 실행
-    if (isGuest && events.length === 3 && !isSubmitted && !isFormOpen) {
-      const hasShownModal = sessionStorage.getItem("guestLimitModalShown");
-
-      // 세션 동안 한 번만 표시
-      if (!hasShownModal) {
-        sessionStorage.setItem("guestLimitModalShown", "true");
-
+    if (isNewBaseline && user) {
+      // 게스트가 이미 제출한 경우 로그인 유도
+      if (isGuest && hasGuestSubmitted) {
         Swal.fire({
           title: "게스트 모드 제한",
-          html: "게스트 모드에서는 최대 3개까지만 작성할 수 있습니다.<br/>더 많은 베이스라인을 만들려면 로그인하세요.",
-          icon: "info",
+          html: "게스트 모드에서는 1개의 베이스라인만 생성할 수 있습니다.<br/>로그인하면 무제한으로 만들 수 있습니다.",
+          icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#6366f1",
           cancelButtonColor: "#6B7280",
           confirmButtonText: "로그인하기",
-          cancelButtonText: "나중에",
+          cancelButtonText: "시나리오 목록으로",
+          allowOutsideClick: false,
         }).then((result) => {
           if (result.isConfirmed) {
             setLoginModalOpen(true);
+          } else {
+            router.push("/scenario-list");
           }
         });
+        return;
       }
-    }
-  }, [isGuest, events.length, isSubmitted, isFormOpen, setLoginModalOpen]);
 
-  // 게스트 제한: 3개, 로그인: 10개
-  const maxNodes = isGuest ? 3 : 10;
+      // 로그인 사용자이거나 게스트가 아직 제출 안한 경우 초기화
+      if (!isGuest || !hasGuestSubmitted) {
+        startNewBaseline();
+      }
 
-  // 컴포넌트 마운트 시 게스트가 이미 제출했는지 체크
-  useEffect(() => {
-    if (!authLoading && isGuest && hasGuestSubmitted && events.length === 0) {
-      Swal.fire({
-        title: "게스트 모드 제한",
-        html: "게스트 모드에서는 1개의 베이스라인만 생성할 수 있습니다.<br/>로그인하면 무제한으로 만들 수 있습니다.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#6366f1",
-        cancelButtonColor: "#6B7280",
-        confirmButtonText: "로그인하기",
-        cancelButtonText: "뒤로가기",
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setLoginModalOpen(true);
-        } else {
-          router.push("/");
-        }
-      });
+      // URL에서 쿼리 파라미터 제거
+      router.replace("/baselines", { scroll: false });
     }
   }, [
-    authLoading,
+    searchParams,
+    user,
     isGuest,
     hasGuestSubmitted,
-    events.length,
+    startNewBaseline,
     router,
     setLoginModalOpen,
   ]);
 
-  // 컴포넌트 마운트 시 이벤트 로드
+  // 사용자 초기화
   useEffect(() => {
-    if (!authLoading && user) {
-      loadEvents(birthYear).catch((error) => {
-        console.error("이벤트 로드 실패:", error);
-      });
+    if (user && user.id) {
+      initializeForUser(user.id, user.role);
     }
-  }, [authLoading, user, loadEvents, birthYear]);
+  }, [user, initializeForUser]);
 
-  // 에러 처리
-  useEffect(() => {
-    if (error) {
-      Swal.fire({
-        title: "오류 발생",
-        text: error,
-        icon: "error",
-        confirmButtonColor: "#E76F51",
-        confirmButtonText: "확인",
-      }).then(() => {
-        setError(null);
-      });
-    }
-  }, [error, setError]);
+  const {
+    selectedYear,
+    isFormOpen,
+    tempNodes,
+    selectedEvent,
+    allEventsForView,
+    setTempNodes,
+    handleNodeClick,
+    handleFormClose,
+    handleDeleteTempNode,
+    setIsFormOpen,
+    setSelectedYear,
+  } = useBaselineNodes(user, birthYear);
 
-  const handleNodeClick = (
-    year: number,
-    age: number,
-    isEmpty: boolean = false
-  ) => {
-    if (!user) {
-      console.log("사용자 인증 대기 중...");
-      return;
-    }
+  // 게스트 제한
+  const { maxNodes } = useGuestLimits({
+    isGuest,
+    isAuthLoading: userLoading,
+    hasGuestSubmitted,
+    eventCount: events.length,
+    isSubmitted,
+    isFormOpen,
+  });
 
-    if (isSubmitted) {
-      Swal.fire({
-        title: "편집 불가",
-        text: "이미 제출된 베이스라인은 수정할 수 없습니다.",
-        icon: "info",
-        confirmButtonColor: "#6366f1",
-        confirmButtonText: "확인",
-      });
-      return;
-    }
-
-    if (isEmpty) {
-      const currentYear = new Date().getFullYear();
-      const allYears = [
-        ...events.map((e) => e.year),
-        ...tempNodes.map((t) => t.year),
-      ];
-      const lastEventYear =
-        allYears.length > 0 ? Math.max(...allYears) : currentYear - 1;
-      const newYear = Math.max(lastEventYear + 1, currentYear);
-
-      setSelectedYear(newYear);
-    } else {
-      setSelectedYear(year);
-    }
-    setIsFormOpen(true);
-  };
-
-  const handleAddNode = async () => {
+  // 노드 추가
+  const handleAddNode = async (): Promise<void> => {
     if (!user) {
       console.log("사용자 인증 대기 중...");
       return;
@@ -259,7 +149,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     }
 
     if (isSubmitted) {
-      Swal.fire({
+      await Swal.fire({
         title: "추가 불가",
         text: "이미 제출된 베이스라인은 수정할 수 없습니다.",
         icon: "info",
@@ -273,7 +163,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
     // 최대 개수 체크
     if (totalNodes >= maxNodes) {
-      Swal.fire({
+      await Swal.fire({
         title: "최대 개수 초과",
         text: `최대 ${maxNodes}개까지만 분기점을 추가할 수 있습니다.`,
         icon: "warning",
@@ -300,202 +190,62 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
     setIsFormOpen(true);
   };
 
-  const handleFormClose = () => {
-    setIsFormOpen(false);
+  const { isSubmitting, handleSubmit, sortedEvents } = useBaselineSubmit(
+    user,
+    birthYear,
+    isGuest
+  );
 
-    if (selectedYear && !getEventByYear(selectedYear)) {
-      setTempNodes((prev) => prev.filter((node) => node.year !== selectedYear));
-    }
-    setTimeout(() => {
-      setSelectedYear(null);
-    }, 100);
-  };
-
-  const handleDeleteTempNode = (year: number) => {
-    setTempNodes((prev) => prev.filter((node) => node.year !== year));
-    if (selectedYear === year) {
-      setIsFormOpen(false);
-      setSelectedYear(null);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedYear && getEventByYear(selectedYear)) {
-      setTempNodes((prev) => prev.filter((node) => node.year !== selectedYear));
-    }
-  }, [events, selectedYear, getEventByYear]);
-
-  const selectedEvent = selectedYear ? getEventByYear(selectedYear) : null;
-
-  const allEventsForView = [
-    ...events,
-    ...tempNodes.map((temp) => ({
-      id: `temp-${temp.year}`,
-      year: temp.year,
-      age: temp.age,
-      category: "기타" as const,
-      eventTitle: "",
-      actualChoice: "",
-      context: "",
-      createdAt: new Date(),
-      isTemp: true,
-    })),
-  ];
-
-  const sortedEvents = events.sort((a, b) => a.year - b.year);
-
-  const handleSubmit = async () => {
-    if (!user) {
-      console.log("사용자 인증 대기 중...");
-      return;
-    }
-
-    // 중복 제출 방지
-    if (isSubmitting) {
-      console.log("이미 제출 중입니다.");
-      return;
-    }
-
-    if (sortedEvents.length < 2) {
-      Swal.fire({
-        title: "분기점이 부족합니다",
-        text: "최소 2개 이상의 분기점을 작성한 후 제출해주세요.",
-        icon: "warning",
-        confirmButtonColor: "#6366f1",
-        confirmButtonText: "확인",
-      });
-      return;
-    }
-
-    if (isSubmitted) {
-      Swal.fire({
-        title: "이미 제출됨",
-        text: "이미 제출된 베이스라인입니다.",
-        icon: "info",
-        confirmButtonColor: "#6366f1",
-        confirmButtonText: "확인",
-      });
-      return;
-    }
-
-    const result = await Swal.fire({
-      title: "베이스라인 제출",
-      html: `총 ${sortedEvents.length}개의 분기점을 제출하시겠습니까? <br>${
-        isGuest
-          ? "<strong>게스트는 1개의 베이스라인만 생성 가능합니다.</strong>"
-          : "제출 후에는 수정이 불가능합니다."
-      }`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#6366f1",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "제출하기",
-      cancelButtonText: "취소",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        setIsSubmitting(true);
-
-        // birthYear가 없으면 즉시 가져오기
-        let finalBirthYear = birthYear;
-
-        if (!finalBirthYear) {
-          try {
-            const infoResponse = await api.get("/api/v1/users-info");
-            if (infoResponse.data?.birthdayAt) {
-              const birthdayStr = infoResponse.data.birthdayAt;
-              const year = parseInt(
-                birthdayStr.split("-")[0] || birthdayStr.substring(0, 4)
-              );
-              if (!isNaN(year)) {
-                finalBirthYear = year;
-                setBirthYear(year);
-              }
-            }
-          } catch (error) {
-            console.error("생년월일 조회 실패:", error);
-          }
-        }
-
-        await submitBaseline(isGuest, user?.id, finalBirthYear);
-
-        await Swal.fire({
-          title: "제출 완료!",
-          html: isGuest
-            ? "게스트 모드에서 베이스라인이 저장되었습니다.<br/>더 많은 기능을 사용하려면 로그인하세요."
-            : "베이스라인이 성공적으로 제출되었습니다.",
-          icon: "success",
-          confirmButtonColor: "#10B981",
-          confirmButtonText: "확인",
-        }).then(() => {
-          router.push("/scenario-list");
-        });
-      } catch (error) {
-        console.error("제출 오류:", error);
-
-        // 에러 상세 정보 출력
-        if (error instanceof Error) {
-          Swal.fire({
-            title: "제출 실패",
-            html: `<pre style="text-align: left; font-size: 12px;">${error.message}</pre>`,
-            icon: "error",
-            confirmButtonColor: "#E76F51",
-            confirmButtonText: "확인",
-          });
-        }
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  };
-
-  const [bottomPosition, setBottomPosition] = useState(30);
+  const { bottomPosition } = useScrollButton(footerHeight);
   const isMobile = useMobileDetection(768);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.pageYOffset;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+    if (error) {
+      Swal.fire({
+        title: "오류 발생",
+        text: error,
+        icon: "error",
+        confirmButtonColor: "#E76F51",
+        confirmButtonText: "확인",
+      }).then(() => {
+        setError(null);
+      });
+    }
+  }, [error, setError]);
 
-      if (distanceFromBottom <= footerHeight) {
-        const adjustment =
-          ((footerHeight - distanceFromBottom) / footerHeight) * 70;
-        setBottomPosition(30 + adjustment);
-      } else {
-        setBottomPosition(30);
-      }
-    };
+  const isLoading = userLoading || storeLoading;
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [footerHeight]);
-
-  const isLoading = authLoading || storeLoading || isFetchingData;
-
-  if (isLoading) {
+  if (isLoading && !user) {
     return (
       <div className="min-h-[calc(100vh-140px)] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <div className="text-white text-xl">
-            {authLoading
-              ? "인증 확인 중..."
-              : isFetchingData
-              ? "사용자 정보 로딩 중..."
-              : "데이터 로딩 중..."}
-          </div>
+          <div className="text-white text-xl">사용자 정보 로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 사용자 정보 로드 실패 시
+  if (!isLoading && !user) {
+    return (
+      <div className="min-h-[calc(100vh-140px)] flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-xl mb-4">사용자 정보를 불러올 수 없습니다</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-white text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200"
+          >
+            새로고침
+          </button>
         </div>
       </div>
     );
   }
 
   const baseNodeCount = 3;
-  const totalNodes = events.length + tempNodes.length; // 실제+임시노드 갯수
+  const totalNodes = events.length + tempNodes.length;
   const emptyNodesCount = Math.max(0, baseNodeCount - totalNodes);
-
   const canAddMore = totalNodes < maxNodes;
 
   return (
@@ -533,7 +283,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         key={event.id}
                         className="flex items-start gap-[6.8vw]"
                       >
-                        <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
+                        <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
                           &quot;{event.eventTitle}&quot;
                         </h4>
                         <p className="mt-1 text-xl line-clamp-2">
@@ -548,7 +298,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                           key={`temp-${temp.year}-${i}`}
                           className="flex items-center gap-[6.8vw] text-gray-500"
                         >
-                          <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
+                          <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
                             노드를 클릭해 분기를 입력해 주세요
                           </h4>
                         </li>
@@ -559,7 +309,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                           key={`empty-${i}`}
                           className="flex items-center gap-[6.8vw] text-gray-500"
                         >
-                          <h4 className="w-[26.6vw] h-21 text-[24px] line-clamp-2">
+                          <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
                             노드를 클릭해 분기를 입력해 주세요
                           </h4>
                         </li>
@@ -576,7 +326,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                       <button
                         onClick={handleSubmit}
                         disabled={isLoading || isSubmitting}
-                        className="bg-white font-medium text-gray-800 px-6 py-4 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-white font-medium text-gray-800 px-6 py-3 rounded-lg text-lg hover:bg-gray-300 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isLoading || isSubmitting
                           ? "처리 중..."
