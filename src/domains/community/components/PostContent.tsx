@@ -33,6 +33,7 @@ async function PostContent({ id }: { id: string }) {
 
   const user = await getAuthUser();
   const isMine = user?.nickname === author;
+  console.log(post);
 
   return (
     <>
@@ -59,8 +60,15 @@ async function PostContent({ id }: { id: string }) {
         {/* 투표 항목이 있다면 렌더링 */}
         {polls && (
           <div>
-            <h3 className="text-lg font-semibold px-2">투표하기</h3> 
-            <PostPoll />
+            <h3 className="text-lg font-semibold px-2">투표하기</h3>
+            <PostPoll
+              items={polls.options.map((option) => ({
+                index: option.index,
+                text: option.text,
+                voteCount: option.voteCount || 0,
+                isVoted: polls.selected?.[0] === option.index || false,
+              }))}
+            />
           </div>
         )}
         {/* 시나리오 연결 기능이 추가되면 추가될 영역 */}

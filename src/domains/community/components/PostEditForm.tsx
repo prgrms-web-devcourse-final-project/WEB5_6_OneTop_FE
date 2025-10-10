@@ -14,6 +14,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useGetPost } from "../api/useGetPost";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { useEditPost } from "../api/useEditPost";
+import { queryKeys } from "@/share/config/queryKeys";
+import { refresh } from "@/app/api/actions/refresh";
 
 function PostEditForm() {
   const [pollItems, setPollItems] = useState<string[]>(["", ""]);
@@ -37,14 +39,15 @@ function PostEditForm() {
   });
 
   const { mutate: editPost } = useEditPost({
-      onSuccess: () => {
-        Swal.fire({
-          title: "success",
-          text: "글수정이 완료되었습니다.",
-          icon: "success",
-        });
-        router.push(`/community/detail/${id}`);
-      },
+    onSuccess: () => {
+      Swal.fire({
+        title: "success",
+        text: "글수정이 완료되었습니다.",
+        icon: "success",
+      });
+      refresh(queryKeys.post.nextId(id as string)[1]);
+      router.push(`/community/detail/${id}`);
+    },
   });
 
   const onSubmit = (data: PostWrite) => {
@@ -85,17 +88,23 @@ function PostEditForm() {
         router.push("/community");
       }
     }
-  }, [isUserSuccess, isPostSuccess, user?.data?.nickname, post?.author, router])
+  }, [
+    isUserSuccess,
+    isPostSuccess,
+    user?.data?.nickname,
+    post?.author,
+    router,
+  ]);
 
   useEffect(() => {
     if (isPostSuccess) {
-      setPollItems(post?.polls?.options.map((option) => option.text) || ["", ""]);
+      setPollItems(
+        post?.polls?.options.map((option) => option.text) || ["", ""]
+      );
     }
-  }, [isPostSuccess, post?.polls?.options])
+  }, [isPostSuccess, post?.polls?.options]);
 
   const category = watch("category");
-
-  
 
   return (
     <form

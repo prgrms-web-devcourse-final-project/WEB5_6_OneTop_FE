@@ -1,5 +1,6 @@
 import { getPostList } from "@/domains/community/api/getPostList";
 import PostFilter from "@/domains/community/components/PostFilter";
+import PollCardList from "@/domains/community/components/PollCardList";
 import PostList from "@/domains/community/components/PostList";
 import SearchBar from "@/domains/community/components/SearchBar";
 import { PostFilterType } from "@/domains/community/types";
@@ -38,10 +39,15 @@ async function Page({
   let totalPages = 0;
 
   try {
-    const response = await getPostList(
-      { page, size: 10, keyword, category, searchType, sort: "createdDate" }
-    );
-    
+    const response = await getPostList({
+      page,
+      size: 10,
+      keyword,
+      category,
+      searchType,
+      sort: "createdDate",
+    });
+
     const data = response;
     posts = data.items || [];
     totalPages = data.totalPages || 0;
@@ -60,14 +66,17 @@ async function Page({
             <PostFilter category={category} />
             <Link
               href="/community/write"
-              className="bg-deep-navy text-gray-200 border border-gray-200 rounded-md px-4 py-2"
+              className="bg-deep-navy text-gray-200 border border-gray-200 rounded-md px-4 py-2 hover:!text-gray-200"
             >
               글쓰기
             </Link>
           </div>
         </BannerSection>
-        <div className="w-[80%] py-4">
+
+        <div className="w-[60%] py-4">
           {/* 게시글 영역 */}
+          <PollCardList />
+
           <Suspense fallback={<div>목록을 불러오는 중입니다.....</div>}>
             <PostList posts={posts} />
           </Suspense>

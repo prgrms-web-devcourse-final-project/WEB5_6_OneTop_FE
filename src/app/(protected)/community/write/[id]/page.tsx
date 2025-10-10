@@ -1,5 +1,4 @@
 import { BannerSection } from "@/share/components/BannerSection";
-import PostWriteForm from "@/domains/community/components/PostWriteForm";
 import {
   dehydrate,
   HydrationBoundary,
