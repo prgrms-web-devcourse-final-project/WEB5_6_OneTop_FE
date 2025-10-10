@@ -2,10 +2,6 @@ import { getPostList } from "../api/getPostList";
 import { PostDetail } from "../types";
 import PollCard from "./PollCard";
 
-interface PollCardListProps {
-  items: PostDetail[];
-}
-
 async function PollCardList() {
   const {items} = await getPostList({
     page: 1,
@@ -15,8 +11,6 @@ async function PollCardList() {
     sort: "createdDate",
     keyword: "",
   });
-
-
 
   return (
     <ul className="flex gap-4 overflow-x-auto w-full">

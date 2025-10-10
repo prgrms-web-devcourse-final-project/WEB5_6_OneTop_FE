@@ -39,9 +39,14 @@ async function Page({
   let totalPages = 0;
 
   try {
-    const response = await getPostList(
-      { page, size: 10, keyword, category, searchType, sort: "createdDate" }
-    );
+    const response = await getPostList({
+      page,
+      size: 10,
+      keyword,
+      category,
+      searchType,
+      sort: "createdDate",
+    });
 
     const data = response;
     posts = data.items || [];
@@ -68,10 +73,10 @@ async function Page({
           </div>
         </BannerSection>
 
-        <PollCardList />
-        
-        <div className="w-[80%] py-4">
+        <div className="w-[60%] py-4">
           {/* 게시글 영역 */}
+          <PollCardList />
+
           <Suspense fallback={<div>목록을 불러오는 중입니다.....</div>}>
             <PostList posts={posts} />
           </Suspense>

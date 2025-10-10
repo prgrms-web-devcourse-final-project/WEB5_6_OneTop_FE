@@ -64,8 +64,8 @@ async function PostContent({ id }: { id: string }) {
               items={polls.options.map((option) => ({
                 index: option.index,
                 text: option.text,
-                voteCount: 0,
-                isVoted: false,
+                voteCount: option.voteCount || 0,
+                isVoted: polls.selected?.[0] === option.index || false,
               }))}
             />
           </div>

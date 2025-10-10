@@ -23,7 +23,7 @@ export type PostFilterType = "ALL" | "CHAT" | "NOTICE" | "POLL" | "SCENARIO";
 
 export type SearchType = "TITLE" | "TITLE_CONTENT" | "AUTHOR";
 
-export type PostPoll = z.infer<typeof postPollSchema>;
+export type PostPollType = z.infer<typeof postPollSchema>;
 
 export type PostWrite = z.infer<typeof postWriteSchema>;
 

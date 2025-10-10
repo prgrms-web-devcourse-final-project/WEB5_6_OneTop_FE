@@ -35,7 +35,7 @@ function PollCard({ items, className }: PollCardProps) {
   };
 
   return (
-    <li className={tw("w-80 p-4 flex-shrink-0", className)}>
+    <li className={tw("w-80 p-4 flex-shrink-0 bg-gray-100 rounded-md", className)}>
       <div className="flex flex-col px-2 mb-4">
         <div className="flex justify-between">
           <h3>타이틀</h3>

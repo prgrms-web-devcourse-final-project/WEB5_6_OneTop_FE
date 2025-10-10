@@ -25,7 +25,7 @@ export const postsSchema = z.object({
 export const postPollSchema = z.object({
   index: z.number(),
   text: z.string(),
-  voteCount: z.number().optional(),
+  voteCount: z.number(),
   isVoted: z.boolean().optional(),
 });
 
@@ -41,6 +41,7 @@ export const postDetailSchema = z.object({
   createdDate: z.string(),
   polls: z
     .object({
+      selected: z.array(z.number()).optional(),
       options: z.array(postPollSchema),
     })
     .optional(),
