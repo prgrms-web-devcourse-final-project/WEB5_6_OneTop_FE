@@ -31,7 +31,7 @@ export default async function Page({ searchParams }: PageProps) {
       <div className="max-w-[1440px] m-auto">
         <div className="flex justify-end pt-10">
           <Link
-            href="/baselines"
+            href="/baselines?new=true"
             className="flex p-3 justify-center items-center rounded-md bg-deep-navy text-white hover:bg-opacity-80 transition"
           >
             베이스라인 생성

@@ -98,3 +98,81 @@ export interface BaselineListResponse {
   message: string;
   status: number;
 }
+
+export type UserRole = "USER" | "GUEST";
+
+export interface BaselineUser {
+  id: number;
+  email: string;
+  username: string;
+  role: UserRole;
+  nickname: string;
+}
+
+export interface UserInfoResponse {
+  birthdayAt: string;
+}
+
+export interface TempNode {
+  year: number;
+  age: number;
+}
+
+export type NodeClickHandler = (
+  year: number,
+  age: number,
+  isEmpty?: boolean
+) => void;
+
+export interface BaselineUserState {
+  user: BaselineUser | null;
+  birthYear: number | undefined;
+  isGuest: boolean;
+  isLoading: boolean;
+}
+
+export interface GuestLimitConfig {
+  isGuest: boolean;
+  isAuthLoading: boolean;
+  hasGuestSubmitted: boolean;
+  eventCount: number;
+  isSubmitted: boolean;
+  isFormOpen: boolean;
+}
+
+export interface GuestLimitsState {
+  maxNodes: number;
+}
+
+export interface BaselineNodesState {
+  selectedYear: number | null;
+  isFormOpen: boolean;
+  tempNodes: TempNode[];
+  selectedEvent: LifeEvent | null;
+  allEventsForView: Array<LifeEvent & { isTemp?: boolean }>;
+  setTempNodes: React.Dispatch<React.SetStateAction<TempNode[]>>;
+  handleNodeClick: NodeClickHandler;
+  handleFormClose: () => void;
+  handleDeleteTempNode: (year: number) => void;
+  setIsFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedYear: React.Dispatch<React.SetStateAction<number | null>>;
+}
+
+export interface BaselineSubmitState {
+  isSubmitting: boolean;
+  handleSubmit: () => Promise<void>;
+  sortedEvents: LifeEvent[];
+}
+
+export interface ScrollButtonState {
+  bottomPosition: number;
+}
+
+export interface EventData {
+  year: number;
+  age: number;
+  category: LifeEvent["category"];
+  eventTitle: string;
+  actualChoice: string;
+  context?: string;
+}
