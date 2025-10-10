@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthUser } from "@/domains/auth/api/useAuthUser";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
+import SpaceLoading from "@/share/components/SpaceLoading";
 import { Analysis } from "./Analysis";
 import { RadarChart } from "./RadarChart";
 import { Timeline } from "./Timeline";
 import { useScenarioPolling } from "../hooks/useScenarioPolling";
 import { clientScenariosApi } from "../api/clientScenariosApi";
 import { ScenarioData } from "../types";
-import SpaceLoading from "@/share/components/SpaceLoading";
 
 export const ScenarioContainer = () => {
   const searchParams = useSearchParams();
@@ -123,12 +124,12 @@ export const ScenarioContainer = () => {
             시나리오를 찾을 수 없습니다
           </h2>
           <p className="text-gray-600 mb-6">올바른 시나리오 ID가 필요합니다.</p>
-          <button
-            onClick={() => (window.location.href = "/scenario-list")}
+          <Link
+            href="/scenario-list"
             className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
             시나리오 목록으로 돌아가기
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -203,12 +204,12 @@ export const ScenarioContainer = () => {
             >
               다시 시도
             </button>
-            <button
-              onClick={() => (window.location.href = "/scenario-list")}
+            <Link
+              href="/scenario-list"
               className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               시나리오 목록으로 돌아가기
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -226,12 +227,12 @@ export const ScenarioContainer = () => {
           <p className="text-gray-600 mb-6">
             시나리오 분석이 완료되지 않았거나 데이터가 없습니다.
           </p>
-          <button
-            onClick={() => (window.location.href = "/scenario-list")}
+          <Link
+            href="/scenario-list"
             className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
             시나리오 목록으로 돌아가기
-          </button>
+          </Link>
         </div>
       </div>
     );

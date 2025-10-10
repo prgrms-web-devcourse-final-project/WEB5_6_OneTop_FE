@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBaselineStore } from "../stores/baselineStore";
 import { useBaselineFormActions } from "../hooks/useBaselineFormActions";
-import { eventSchema, type FormInput, type FormData } from "../lib/schemas";
+import {
+  type FormInput,
+  type FormData,
+  createEventSchema,
+} from "../lib/schemas";
 import type { LifeEvent } from "../types";
 
 interface Props {
@@ -24,13 +28,18 @@ export const BaselineSetupForm = ({
   onClose,
   birthYear,
 }: Props) => {
-  const { isSubmitted } = useBaselineStore();
+  const { events, isSubmitted } = useBaselineStore();
 
   const { handleFormSubmit, handleDelete } = useBaselineFormActions({
     existingEvent,
     onClose,
     birthYear,
   });
+
+  const eventSchema = useMemo(
+    () => createEventSchema(events, existingEvent?.id),
+    [events, existingEvent?.id]
+  );
 
   // 자동 높이 조절 함수
   const adjustTextareaHeight = (element: HTMLTextAreaElement) => {

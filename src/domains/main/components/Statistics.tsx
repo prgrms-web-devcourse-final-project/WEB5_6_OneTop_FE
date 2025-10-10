@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { IoEarthOutline } from "react-icons/io5";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { RxCountdownTimer } from "react-icons/rx";
+import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 
 interface Props {
   icon: React.ReactNode;
@@ -60,39 +61,44 @@ const StatItem = ({ icon, value, label, startCounting }: Props) => {
   return (
     <div
       ref={elementRef}
-      className="flex items-center justify-center gap-3 text-white"
+      className="flex items-center justify-center gap-2 md:gap-3 text-white"
     >
       <div className="pt-6">{icon}</div>
       <div className="flex flex-col">
-        <span className="text-base mb-1">{label}</span>
-        <p className="text-4xl font-extrabold w-[130px]">0{suffix}</p>
+        <span className="text-xs md:text-base mb-1">{label}</span>
+        <p className="text-2xl md:text-4xl font-extrabold w-full sm:w-[90px] md:w-[130px]">
+          0{suffix}
+        </p>
       </div>
     </div>
   );
 };
 
 const Statistics = ({ startCounting }: { startCounting: boolean }) => {
+  const isMobile = useMobileDetection(768);
+
   return (
     <div className="bg-black/70 rounded-lg">
-      <div className="h-[150px] flex items-center justify-between">
-        <div className="justify-center my-8 px-20 border-r border-white/30">
+      <div className="h-25 md:h-[150px] flex items-center justify-between">
+        <div className="hidden min-[980px]:flex justify-center my-8 px-8 min-[1200px]:px-20 border-r border-white/30">
           <h3 className="text-white text-[45px] font-extrabold">Our Stats</h3>
         </div>
-        <div className="flex flex-1 items-center justify-center gap-[10%]">
+        <div className="flex flex-1 items-center justify-center gap-[5%] min-[1200px]:gap-[10%]">
           <StatItem
-            icon={<IoEarthOutline size={32} />}
+            icon={<IoEarthOutline size={isMobile ? 20 : 32} />}
             value="3000+"
             label="평행우주 생성"
             startCounting={startCounting}
           />
+
           <StatItem
-            icon={<AiOutlineLineChart size={32} />}
+            icon={<AiOutlineLineChart size={isMobile ? 20 : 32} />}
             value="100+"
             label="통계 데이터"
             startCounting={startCounting}
           />
           <StatItem
-            icon={<RxCountdownTimer size={32} />}
+            icon={<RxCountdownTimer size={isMobile ? 20 : 32} />}
             value="95%"
             label="예측 정확도"
             startCounting={startCounting}
