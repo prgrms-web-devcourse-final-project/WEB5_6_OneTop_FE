@@ -32,8 +32,12 @@ export interface BaselineStore {
   deleteEventLocal: (eventId: string) => void;
 
   // 백엔드 연동 액션들
-  loadEvents: () => Promise<void>;
-  submitBaseline: (isGuest?: boolean, userId?: number) => Promise<void>;
+  loadEvents: (birthYear?: number) => Promise<void>;
+  submitBaseline: (
+    isGuest?: boolean,
+    userId?: number,
+    birthYear?: number
+  ) => Promise<void>;
 
   // 새 베이스라인 시작
   startNewBaseline: () => boolean;
@@ -96,7 +100,7 @@ export const useBaselineStore = create<BaselineStore>()(
         }
       },
 
-      loadEvents: async () => {
+      loadEvents: async (birthYear?: number) => {
         try {
           set({ isLoading: true, error: null });
           set({ isLoading: false });
@@ -161,9 +165,13 @@ export const useBaselineStore = create<BaselineStore>()(
         });
       },
 
-      submitBaseline: async (isGuest = false, userId?: number) => {
+      submitBaseline: async (
+        isGuest = false,
+        userId?: number,
+        birthYear?: number
+      ) => {
         try {
-          console.log("submitBaseline 시작", { isGuest, userId });
+          console.log("submitBaseline 시작", { isGuest, userId, birthYear });
           set({ isLoading: true, error: null });
 
           const currentEvents = get().events;
@@ -191,7 +199,12 @@ export const useBaselineStore = create<BaselineStore>()(
 
           // 게스트든 로그인이든 서버에 제출
           const { baseLineId, events: newEvents } =
-            await clientBaselineApi.createBaseLine(eventsToSubmit, "", userId);
+            await clientBaselineApi.createBaseLine(
+              eventsToSubmit,
+              "",
+              userId,
+              birthYear
+            );
 
           console.log("받은 baseLineId:", baseLineId);
           console.log("받은 이벤트:", newEvents);

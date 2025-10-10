@@ -5,6 +5,7 @@ import Link from "next/link";
 import MyInfoModal from "./MyInfoModal";
 import { useMyInfo } from "../../hooks/useMyInfo";
 import InfoCard from "./InfoCard";
+import Loading from "@/share/components/Loading";
 import {
   FaCalendar,
   FaChartBar,
@@ -15,11 +16,20 @@ import {
   FaUser,
   FaWind,
 } from "react-icons/fa";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export default function MyInfo() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { query, mutation } = useMyInfo();
-  const data = query.data;
+  const { data, isLoading, error } = query;
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    showErrorToast(error);
+  }
 
   const handleModalClose = () => {
     setIsModalOpen(false);

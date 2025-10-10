@@ -5,12 +5,22 @@ import Pagination from "@/share/components/Pagination";
 import Link from "next/link";
 import EmptyState from "@/share/components/EmptyState";
 import { useMyComments } from "../../hooks/useMyComments";
+import Loading from "@/share/components/Loading";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export default function MyComments() {
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("commentPage")) || 1;
 
-  const { data } = useMyComments(page);
+  const { data, isLoading, error } = useMyComments(page);
+
+  if (isLoading) {
+    return <Loading text="댓글을 불러오는 중..." />;
+  }
+
+  if (error) {
+    showErrorToast(error);
+  }
 
   return (
     <div className="w-full">
@@ -73,6 +83,7 @@ export default function MyComments() {
           currentPage={page}
           totalPages={data.totalPages}
           pageParamName="commentPage"
+          scrollToId="comments"
         />
       )}
     </div>

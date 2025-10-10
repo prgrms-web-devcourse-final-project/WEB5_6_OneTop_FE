@@ -5,6 +5,7 @@ import { UseMutationResult } from "@tanstack/react-query";
 import Modal from "@/share/components/Modal";
 import Pagination from "@/share/components/Pagination";
 import EmptyState from "@/share/components/EmptyState";
+import Loading from "@/share/components/Loading";
 import { useMyScenarios } from "../../hooks/useMyscenarios";
 
 interface RepresentativeProfileModalProps {
@@ -26,7 +27,7 @@ export default function RepresentativeProfileModal({
 }: RepresentativeProfileModalProps) {
   const [page, setPage] = useState(1);
 
-  const { data: scenarios } = useMyScenarios(page, 5, isOpen);
+  const { data: scenarios, isLoading, error } = useMyScenarios(page, 5, isOpen);
 
   const handleSelect = () => {
     if (selectedScenarioId) {
@@ -42,7 +43,9 @@ export default function RepresentativeProfileModal({
       onClose={onClose}
       title="대표 시나리오 선택"
       actions={
-        hasScenarios
+        isLoading
+          ? []
+          : hasScenarios
           ? [
               { label: "취소", onClick: onClose, variant: "outline" },
               {
@@ -55,7 +58,16 @@ export default function RepresentativeProfileModal({
           : [{ label: "닫기", onClick: onClose, variant: "outline" }]
       }
     >
-      {hasScenarios ? (
+      {isLoading ? (
+        <Loading text="시나리오를 불러오는 중..." />
+      ) : error ? (
+        <div className="text-center py-8">
+          <p className="text-red-500">시나리오를 불러오지 못했습니다.</p>
+          <p className="text-sm text-gray-600 mt-2">
+            {error instanceof Error ? error.message : "다시 시도해주세요."}
+          </p>
+        </div>
+      ) : hasScenarios ? (
         <>
           <div className="flex flex-col gap-2">
             {scenarios.items.map((scenario) => (

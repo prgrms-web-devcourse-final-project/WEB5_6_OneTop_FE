@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Baseline as BaselineType } from "../types";
+import DeleteBaselineButton from "./DeleteBaselineButton";
 
 interface BaseLineItemProps {
   baseline: BaselineType;
+  currentPage: number;
+  pageSize: number;
 }
 
-function Baseline({ baseline }: BaseLineItemProps) {
+function Baseline({ baseline, currentPage, pageSize }: BaseLineItemProps) {
   return (
     <div className="border border-gray-100 rounded-lg p-8 flex flex-col gap-6">
       {/* 상단 */}
@@ -18,9 +21,11 @@ function Baseline({ baseline }: BaseLineItemProps) {
           >
             평행우주 조회
           </Link>
-          <button className="flex h-9 px-5 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-md border border-deep-navy bg-transparent text-deep-navy hover:bg-deep-navy hover:text-white transition">
-            삭제
-          </button>
+          <DeleteBaselineButton
+            baselineId={baseline.baselineId}
+            currentPage={currentPage}
+            pageSize={pageSize}
+          />
         </div>
       </div>
 

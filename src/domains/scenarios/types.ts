@@ -41,20 +41,8 @@ export interface AnalysisProps {
   };
 }
 
-export interface Dataset {
-  label: string;
-  data: number[];
-  backgroundColor: string;
-  borderColor: string;
-}
-
-export interface RadarChartData {
-  labels: string[];
-  datasets: Dataset[];
-}
-
 export interface RadarChartProps {
-  data: RadarChartData;
+  data: RadarData;
 }
 
 export interface ChartDataPoint {
@@ -65,10 +53,11 @@ export interface ChartDataPoint {
 }
 
 export interface TimelineProps {
-  data: Array<{
-    year: number;
-    title: string;
-  }>;
+  data: TimelineItem[];
+}
+
+export interface CompareTimelineProps {
+  data: CompareTimelineItem[];
 }
 
 // DecisionLine 생성 요청
@@ -134,4 +123,24 @@ export interface TimelineResponse {
     year: number;
     title: string;
   }>;
+}
+
+export interface IndicatorComparison {
+  type: string;
+  baseScore: number;
+  compareScore: number;
+  analysis: string;
+}
+
+export interface ScenarioCompareResponse {
+  baseScenarioId: number;
+  compareScenarioId: number;
+  overallAnalysis: string;
+  indicators: IndicatorComparison[];
+}
+
+export interface CompareTimelineItem {
+  year: number;
+  title: string;
+  type: "base" | "compare";
 }

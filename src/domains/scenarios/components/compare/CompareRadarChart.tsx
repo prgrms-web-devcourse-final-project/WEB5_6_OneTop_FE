@@ -1,9 +1,9 @@
 "use client";
 
 import { RadarChartCore } from "@/share/components/RaderChartCore";
-import { RadarChartProps } from "../types";
+import { RadarChartProps } from "../../types";
 
-export const RadarChart = ({ data }: RadarChartProps) => {
+export const CompareRadarChart = ({ data }: RadarChartProps) => {
   // Recharts 형태로 데이터 변환
   const chartData = data.labels.map((label, index) => ({
     subject: label,

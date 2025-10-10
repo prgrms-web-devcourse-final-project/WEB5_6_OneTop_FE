@@ -1,7 +1,7 @@
-import { Suspense } from "react";
 import { BannerSection } from "@/share/components/BannerSection";
 import BaselineSection from "@/domains/scenario-list/component/BaselineSection";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "시나리오 기록 | Re:Life",
@@ -29,11 +29,15 @@ export default async function Page({ searchParams }: PageProps) {
         description="AI가 분석한 다양한 시점의 내 상황으로 평행우주를 탐험해보세요"
       />
       <div className="max-w-[1440px] m-auto">
-        <Suspense
-          fallback={<div className="p-4 text-center">불러오는 중...</div>}
-        >
-          <BaselineSection page={page} size={size} />
-        </Suspense>
+        <div className="flex justify-end pt-10">
+          <Link
+            href="/baselines"
+            className="flex p-3 justify-center items-center rounded-md bg-deep-navy text-white hover:bg-opacity-80 transition"
+          >
+            베이스라인 생성
+          </Link>
+        </div>
+        <BaselineSection page={page} size={size} />
       </div>
     </div>
   );

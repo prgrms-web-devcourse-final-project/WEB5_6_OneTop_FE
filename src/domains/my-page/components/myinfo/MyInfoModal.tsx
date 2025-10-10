@@ -6,6 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Modal from "@/share/components/Modal";
 import { MyInfoFormValues, myInfoSchema } from "../../lib/schema";
 import { MyInfo } from "../../type";
+import tw from "@/share/utils/tw";
+import {
+  FaCalendar,
+  FaUser,
+  FaRegLightbulb,
+  FaChartBar,
+  FaRegThumbsUp,
+  FaRegHeart,
+  FaWind,
+  FaShieldAlt,
+} from "react-icons/fa";
 
 interface MyInfoModalProps {
   data: MyInfo;
@@ -13,11 +24,8 @@ interface MyInfoModalProps {
   onClose: () => void;
 }
 
-export default function MyInfoModal({
-  data,
-  mutation,
-  onClose,
-}: MyInfoModalProps) {
+export default function MyInfoModal(props: MyInfoModalProps) {
+  const { data, mutation, onClose } = props;
   const mbtiArray = data.mbti.split("");
 
   const {
@@ -45,7 +53,6 @@ export default function MyInfoModal({
 
   const onSubmit = (formData: MyInfoFormValues) => {
     const mbtiString = `${formData.mbti.ei}${formData.mbti.sn}${formData.mbti.tf}${formData.mbti.jp}`;
-
     mutation.mutate(
       {
         username: data.username,
@@ -59,15 +66,36 @@ export default function MyInfoModal({
         workLifeBal: formData.workLifeBal,
         riskAvoid: formData.riskAvoid,
       },
-      {
-        onSuccess: onClose,
-      }
+      { onSuccess: onClose }
     );
   };
 
+  const baseInputClass = tw(
+    "w-full px-3 py-2 border border-gray-300 rounded-lg",
+    "focus:outline-none focus:border-deep-navy",
+    "transition text-sm hover:border-gray-400"
+  );
+
+  const selectClass = tw(
+    "w-full px-3 py-2 border border-gray-300 rounded-lg",
+    "focus:outline-none focus:border-deep-navy",
+    "transition appearance-none bg-white text-sm cursor-pointer hover:border-gray-400"
+  );
+
+  const mbtiSelectClass = tw(
+    "w-full px-2 py-2 border border-gray-300 rounded-lg",
+    "focus:outline-none focus:border-deep-navy",
+    "transition text-center font-semibold appearance-none bg-white text-sm cursor-pointer hover:border-gray-400"
+  );
+
+  const labelClass = tw(
+    "flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5"
+  );
+  const errorClass = tw("text-red-500 text-xs mt-1");
+
   return (
     <Modal
-      isOpen={true}
+      isOpen
       onClose={onClose}
       title="내 정보 수정"
       actions={[
@@ -80,218 +108,127 @@ export default function MyInfoModal({
         },
       ]}
     >
-      <form className="flex flex-col gap-6">
+      <form className={tw("flex flex-col gap-6")}>
         <div>
-          <h4 className="font-semibold mb-3">기본 정보</h4>
-          <div className="grid grid-cols-2 gap-4">
+          <h4 className={tw("text-base font-semibold mb-3")}>기본 정보</h4>
+          <div className={tw("grid grid-cols-2 gap-4")}>
             <div>
-              <label className="block text-sm font-medium mb-1">생년월일</label>
+              <label className={labelClass}>
+                <FaCalendar size={12} /> 생년월일
+              </label>
               <input
                 type="date"
                 {...register("birthdayAt")}
-                className="w-full px-3 py-2 border rounded-lg"
+                className={baseInputClass}
               />
               {errors.birthdayAt && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.birthdayAt.message}
-                </p>
+                <p className={errorClass}>{errors.birthdayAt.message}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">성별</label>
-              <select
-                {...register("gender")}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
+              <label className={labelClass}>
+                <FaUser size={12} /> 성별
+              </label>
+              <select {...register("gender")} className={selectClass}>
                 <option value="M">남성</option>
                 <option value="F">여성</option>
               </select>
               {errors.gender && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.gender.message}
-                </p>
+                <p className={errorClass}>{errors.gender.message}</p>
               )}
             </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1">가치관</label>
-              <input
-                {...register("beliefs")}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
+            <div className={tw("col-span-2")}>
+              <label className={labelClass}>
+                <FaRegLightbulb size={12} /> 가치관
+              </label>
+              <input {...register("beliefs")} className={baseInputClass} />
               {errors.beliefs && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.beliefs.message}
-                </p>
+                <p className={errorClass}>{errors.beliefs.message}</p>
+              )}
+            </div>
+            <div className={tw("col-span-2")}>
+              <label className={labelClass}>
+                <FaChartBar size={12} /> MBTI
+              </label>
+              <div className={tw("grid grid-cols-4 gap-2")}>
+                {(["ei", "sn", "tf", "jp"] as const).map((key) => (
+                  <select
+                    key={key}
+                    {...register(`mbti.${key}`)}
+                    className={mbtiSelectClass}
+                  >
+                    {(key === "ei"
+                      ? ["E", "I"]
+                      : key === "sn"
+                      ? ["S", "N"]
+                      : key === "tf"
+                      ? ["T", "F"]
+                      : ["J", "P"]
+                    ).map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                ))}
+              </div>
+              {(errors.mbti?.ei ||
+                errors.mbti?.sn ||
+                errors.mbti?.tf ||
+                errors.mbti?.jp) && (
+                <p className={errorClass}>MBTI를 모두 선택해주세요</p>
               )}
             </div>
           </div>
         </div>
-
         <div>
-          <h4 className="text-sm font-medium mb-3">MBTI</h4>
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <select
-                {...register("mbti.ei")}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="E">E</option>
-                <option value="I">I</option>
-              </select>
-              {errors.mbti?.ei && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.mbti.ei.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <select
-                {...register("mbti.sn")}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="S">S</option>
-                <option value="N">N</option>
-              </select>
-              {errors.mbti?.sn && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.mbti.sn.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <select
-                {...register("mbti.tf")}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="T">T</option>
-                <option value="F">F</option>
-              </select>
-              {errors.mbti?.tf && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.mbti.tf.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <select
-                {...register("mbti.jp")}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="J">J</option>
-                <option value="P">P</option>
-              </select>
-              {errors.mbti?.jp && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.mbti.jp.message}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-semibold mb-3">추가 정보 (선택사항)</h4>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                삶의 만족도 (0-10)
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={10}
-                {...register("lifeSatis", {
-                  setValueAs: (v) => {
-                    if (v === "" || v === null || v === undefined)
-                      return undefined;
-                    const num = Number(v);
-                    return isNaN(num) ? undefined : num;
-                  },
-                })}
-                className="w-full px-3 py-2 border rounded-lg"
-                placeholder="선택사항"
-              />
-              {errors.lifeSatis && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.lifeSatis.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                관계 만족도 (0-10)
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={10}
-                {...register("relationship", {
-                  setValueAs: (v) => {
-                    if (v === "" || v === null || v === undefined)
-                      return undefined;
-                    const num = Number(v);
-                    return isNaN(num) ? undefined : num;
-                  },
-                })}
-                className="w-full px-3 py-2 border rounded-lg"
-                placeholder="선택사항"
-              />
-              {errors.relationship && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.relationship.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                자유 중요도 (0-10)
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={10}
-                {...register("workLifeBal", {
-                  setValueAs: (v) => {
-                    if (v === "" || v === null || v === undefined)
-                      return undefined;
-                    const num = Number(v);
-                    return isNaN(num) ? undefined : num;
-                  },
-                })}
-                className="w-full px-3 py-2 border rounded-lg"
-                placeholder="선택사항"
-              />
-              {errors.workLifeBal && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.workLifeBal.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                위험 회피 (0-10)
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={10}
-                {...register("riskAvoid", {
-                  setValueAs: (v) => {
-                    if (v === "" || v === null || v === undefined)
-                      return undefined;
-                    const num = Number(v);
-                    return isNaN(num) ? undefined : num;
-                  },
-                })}
-                className="w-full px-3 py-2 border rounded-lg"
-                placeholder="선택사항"
-              />
-              {errors.riskAvoid && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.riskAvoid.message}
-                </p>
-              )}
-            </div>
+          <h4 className={tw("text-base font-semibold mb-3")}>추가 정보</h4>
+          <div className={tw("grid grid-cols-2 gap-4")}>
+            {(
+              [
+                "삶의 만족도",
+                "관계 만족도",
+                "자유 중요도",
+                "위험 회피",
+              ] as const
+            ).map((label, idx) => {
+              const key = [
+                "lifeSatis",
+                "relationship",
+                "workLifeBal",
+                "riskAvoid",
+              ][idx] as keyof MyInfoFormValues;
+              const Icon =
+                key === "lifeSatis"
+                  ? FaRegThumbsUp
+                  : key === "relationship"
+                  ? FaRegHeart
+                  : key === "workLifeBal"
+                  ? FaWind
+                  : FaShieldAlt;
+              return (
+                <div key={key}>
+                  <label className={labelClass}>
+                    <Icon size={12} /> {label}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={10}
+                    {...register(key, {
+                      setValueAs: (v: string | null) =>
+                        v === "" || v === null || v === undefined
+                          ? null
+                          : Number(v),
+                    })}
+                    className={baseInputClass}
+                  />
+                  {errors[key] && (
+                    <p className={errorClass}>{errors[key]?.message}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </form>

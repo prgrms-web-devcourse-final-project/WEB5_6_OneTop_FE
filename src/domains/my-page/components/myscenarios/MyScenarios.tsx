@@ -4,12 +4,21 @@ import { useSearchParams } from "next/navigation";
 import Pagination from "@/share/components/Pagination";
 import EmptyState from "@/share/components/EmptyState";
 import { useMyScenarios } from "../../hooks/useMyscenarios";
+import Loading from "@/share/components/Loading";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export default function MyScenarios() {
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("scenarioPage")) || 1;
 
-  const { data } = useMyScenarios(page);
+  const { data, isLoading, error } = useMyScenarios(page);
+  if (isLoading) {
+    return <Loading text="작성글을 불러오는 중..." />;
+  }
+
+  if (error) {
+    showErrorToast(error);
+  }
 
   return (
     <div className="w-full">
@@ -94,6 +103,7 @@ export default function MyScenarios() {
           currentPage={page}
           totalPages={data.totalPages}
           pageParamName="scenarioPage"
+          scrollToId="scenarios"
         />
       )}
     </div>

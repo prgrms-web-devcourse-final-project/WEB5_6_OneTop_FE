@@ -110,7 +110,7 @@ const Guide = () => {
           className="max-w-[1440px] mx-auto relative mt-[25vh]"
           ref={containerRef}
         >
-          <div className="absolute top-[90px] left-0 right-0 h-0.5 bg-white hidden md:block" />
+          <div className="absolute top-[90px] left-0 right-0 h-[1px] bg-white hidden md:block" />
           <div
             className="absolute top-[90px] hidden md:block transition-all duration-700 ease-in-out z-10"
             style={{
