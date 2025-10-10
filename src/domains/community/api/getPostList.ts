@@ -1,13 +1,17 @@
 import { nextFetcher } from "@/share/utils/nextFetcher";
 import { getApiBaseUrl } from "@/share/config/api";
 
+interface GetPostListProps {
+  page: number;
+  size: number;
+  keyword?: string;
+  category?: string;
+  searchType?: string;
+  sort?: string;
+}
+
 export async function getPostList(
-  page: number,
-  size: number,
-  keyword?: string,
-  category?: string,
-  searchType?: string,
-  sort?: string
+  { page, size, keyword, category, searchType, sort }: GetPostListProps
 ) {
   const path = `${getApiBaseUrl()}/api/v1/posts`;
   const apiUrl = new URL(path);

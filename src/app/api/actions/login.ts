@@ -1,5 +1,6 @@
 "use server";
 
+import { getApiBaseUrl } from "@/share/config/api";
 import { nextFetcher } from "@/share/utils/nextFetcher";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
@@ -19,7 +20,7 @@ export async function loginAction(formData: FormData) {
   const protocol = host?.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  const res = await nextFetcher(`${baseUrl}/api/v1/users-auth/login`, {
+  const res = await nextFetcher(`${getApiBaseUrl()}/api/v1/users-auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     credentials: "include",
@@ -27,12 +28,9 @@ export async function loginAction(formData: FormData) {
     cache: "no-store",
   });
 
-  if (!res.ok) {
-    const error = await res.text();
-    // RFC 7807 Problem Details 형태의 에러 응답 처리
-    console.log(error);
-    throw new Error(error);
-  } 
+  if (res.status !== 200) {
+    throw new Error(res.statusText);
+  }
 
   const data = await res.json();
   console.log("Login response data:", data);
@@ -48,7 +46,7 @@ export async function loginAction(formData: FormData) {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 60 * 60 * 24 * 30,
     });
     console.log("Cookie:", jsessionid);

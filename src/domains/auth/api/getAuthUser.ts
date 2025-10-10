@@ -36,7 +36,6 @@ export async function getAuthUser() {
     // JSON 파싱 시도
     try {
       const data = await response.json();
-      console.log("data", data);
       return data;
     } catch (parseError) {
       console.error("JSON parse error:", parseError);

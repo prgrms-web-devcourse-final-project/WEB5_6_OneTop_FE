@@ -8,14 +8,28 @@ import { useGetComments } from "../api/useGetComments";
 import { useDeleteComment } from "../api/useDeleteComment";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { useUpdateComment } from "../api/useUpdateComment";
+import tw from "@/share/utils/tw";
+import { useQueryClient } from "@tanstack/react-query";
+import CommnetLikeButton from "./CommnetLikeButton";
 
 export function PostCommnet({ id }: { id: string }) {
-  const [editCommentId, setEditCommentId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState<string | null>("");
+  // state 선언
+  const [editCommentId, setEditCommentId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
+  const [editHide, setEditHide] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
-  const { data: comments, isLoading, isError } = useGetComments({ id });
-  const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment({ postId: id });
-  // const {mutate: updateComment, isPending: isUpdateing} = useUpdateComment();
+  // 조회 query
+  const { data: comments, isLoading } = useGetComments({ id });
+
+  // 수정, 삭제 mutation
+  const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment({
+    postId: id,
+  });
+  const { mutate: updateComment, isPending: isUpdateing } = useUpdateComment({
+    postId: id,
+  });
 
   const parsedComments = commentsResponseSchema.safeParse(
     comments?.data || comments
@@ -51,6 +65,20 @@ export function PostCommnet({ id }: { id: string }) {
     });
   };
 
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    updateComment({
+      commentId: editCommentId as number,
+      content: editContent,
+      hide: editHide,
+    });
+
+    setEditCommentId(null);
+    setEditContent("");
+    setEditHide(false);
+  };
+
   return (
     <ul className="flex flex-col gap-2 ">
       {parsedComments.data?.items.map(
@@ -77,23 +105,51 @@ export function PostCommnet({ id }: { id: string }) {
                 <div>{createdDate}</div>
               </div>
             </div>
-            <div>{content}</div>
+
+            {editCommentId === commentId ? (
+              <form onSubmit={onSubmit} className="flex gap-2">
+                <textarea
+                  className="flex-14 h-20 rounded-md border border-gray-300 p-4"
+                  value={editContent || ""}
+                  onChange={(e) => setEditContent(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="bg-deep-navy text-white rounded-md px-4 py-2 flex-1"
+                >
+                  수정
+                </button>
+              </form>
+            ) : (
+              <div>{content}</div>
+            )}
 
             <div className="flex items-center gap-2 justify-between">
-              <button
-                type="button"
-                className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
-              >
-                <BiLike size={20} />
-                <span>{likeCount}</span>
-              </button>
+              <CommnetLikeButton
+                id={commentId.toString()}
+                postId={id}
+                likeCount={likeCount}
+                likedByMe={isLiked}
+              />
 
               {/* 본인 댓글일 때만 수정, 삭제 버튼 표시 */}
               {isMine && (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
+                    className={tw(
+                      "flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue",
+                      editCommentId === commentId &&
+                        "text-amber-500 hover:text-amber-500"
+                    )}
+                    onClick={() => {
+                      setEditCommentId(
+                        commentId === editCommentId ? null : commentId
+                      );
+                      setEditContent(content);
+                      setEditHide(author === "익명" ? true : false);
+                    }}
+                    disabled={isUpdateing}
                   >
                     <PiNotePencil size={20} />
                   </button>
@@ -101,6 +157,7 @@ export function PostCommnet({ id }: { id: string }) {
                     type="button"
                     className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
                     onClick={() => handleClickDelete(commentId.toString())}
+                    disabled={isDeleting}
                   >
                     <BiSolidTrash size={20} />
                   </button>

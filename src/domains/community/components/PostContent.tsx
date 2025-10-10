@@ -3,6 +3,10 @@ import PostLikeButton from "./PostLikeButton";
 import { BiCommentDetail } from "react-icons/bi";
 import { getPost } from "../api/getPost";
 import { postDetailSchema } from "../schemas/posts";
+import DeletePostButton from "./DeletePostButton";
+import Link from "next/link";
+import { getAuthUser } from "@/domains/auth/api/getAuthUser";
+import PostPoll from "./PostPoll";
 
 async function PostContent({ id }: { id: string }) {
   const post = await getPost(id);
@@ -20,8 +24,15 @@ async function PostContent({ id }: { id: string }) {
   } = parsedPost.data || {};
 
   if (!parsedPost.success) {
-    return <div className="text-red-500 min-h-[400px] flex items-center justify-center">게시글을 불러올 수 없습니다.</div>;
+    return (
+      <div className="text-red-500 min-h-[400px] flex items-center justify-center">
+        게시글을 불러올 수 없습니다.
+      </div>
+    );
   }
+
+  const user = await getAuthUser();
+  const isMine = user?.nickname === author;
 
   return (
     <>
@@ -42,13 +53,17 @@ async function PostContent({ id }: { id: string }) {
       <h2 className="text-2xl font-bold">{title}</h2>
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="min-h-[400px]">
+      <div className="min-h-[400px] flex flex-col gap-2 justify-between">
         {/* 컨텐츠 텍스트, 투표 , 시나리오 등 */}
-        <div className="flex-1 flex flex-col gap-2">
-          <div>{content}</div>
-          <div>{polls?.options.map((option) => option.text)}</div>
-          {/* 시나리오 연결 기능이 추가되면 추가될 영역 */}
-        </div>
+        <div>{content}</div>
+        {/* 투표 항목이 있다면 렌더링 */}
+        {polls && (
+          <div>
+            <h3 className="text-lg font-semibold px-2">투표하기</h3> 
+            <PostPoll />
+          </div>
+        )}
+        {/* 시나리오 연결 기능이 추가되면 추가될 영역 */}
       </div>
 
       {/* 하단 메뉴 영역 */}
@@ -70,14 +85,17 @@ async function PostContent({ id }: { id: string }) {
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <button className="bg-deep-navy text-white px-4 py-2 rounded-md">
-              수정
-            </button>
-            <button className="bg-inherit text-deep-navy border border-deep-navy px-4 py-2 rounded-md">
-              삭제
-            </button>
-          </div>
+          {isMine && (
+            <div className="flex gap-2">
+              <Link
+                href={`/community/write/${id}`}
+                className="bg-deep-navy text-white px-4 py-2 rounded-md flex items-center gap-2 hover:!text-white"
+              >
+                수정
+              </Link>
+              <DeletePostButton>삭제</DeletePostButton>
+            </div>
+          )}
         </div>
         <div className="flex justify-center">
           <BackButton className="bg-deep-navy text-white px-4 py-2 rounded-md">

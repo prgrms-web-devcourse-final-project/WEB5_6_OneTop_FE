@@ -5,15 +5,19 @@ import { useLike } from "../api/useLike";
 import { useRef, useState } from "react";
 import tw from "@/share/utils/tw";
 import { useUndoLike } from "../api/useUndoLike";
+import { useCommnetLike } from "../api/useCommnetLike";
+import { useCommentUnlike } from "../api/useCommentUnlike";
 
 function PostLikeButton({
   likeCount,
   id,
   likedByMe,
+  postId,
 }: {
   likeCount: number;
   id: string;
   likedByMe: boolean;
+  postId: string;
 }) {
   const initialState = useRef({ likedByMe, likeCount });
   const [optimisticState, setOptimisticState] = useState({
@@ -22,8 +26,23 @@ function PostLikeButton({
   });
 
   // TODO : COMMENT 관련 API 추가되면 변경
-  const { mutate: likeMutation, isPending } = useLike({
-    options: {
+  const { mutate: likeMutation, isPending } = useCommnetLike({
+    onMutate: async () => {
+      setOptimisticState((prev) => ({
+        isLiked: !prev.isLiked,
+        count: prev.count + (prev.isLiked ? -1 : 1),
+      }));
+    },
+    onError: () => {
+      setOptimisticState({
+        isLiked: initialState.current.likedByMe,
+        count: initialState.current.likeCount,
+      });
+    },
+  });
+
+  const { mutate: undoLikeMutation, isPending: isUndoLikePending } =
+    useCommentUnlike({
       onMutate: async () => {
         setOptimisticState((prev) => ({
           isLiked: !prev.isLiked,
@@ -36,25 +55,6 @@ function PostLikeButton({
           count: initialState.current.likeCount,
         });
       },
-    },
-  });
-
-  const { mutate: undoLikeMutation, isPending: isUndoLikePending } =
-    useUndoLike({
-      options: {
-        onMutate: async () => {
-          setOptimisticState((prev) => ({
-            isLiked: !prev.isLiked,
-            count: prev.count + (prev.isLiked ? -1 : 1),
-          }));
-        },
-        onError: () => {
-          setOptimisticState({
-            isLiked: initialState.current.likedByMe,
-            count: initialState.current.likeCount,
-          });
-        },
-      },
     });
 
   return (
@@ -66,8 +66,8 @@ function PostLikeButton({
       )}
       onClick={() =>
         optimisticState.isLiked
-          ? undoLikeMutation({ id })
-          : likeMutation({ id })
+          ? undoLikeMutation({ commentId: id, postId })
+          : likeMutation({ commentId: id, postId })
       }
       aria-label="좋아요"
       disabled={isPending || isUndoLikePending}
