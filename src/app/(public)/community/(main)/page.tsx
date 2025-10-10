@@ -66,7 +66,7 @@ async function Page({
             <PostFilter category={category} />
             <Link
               href="/community/write"
-              className="bg-deep-navy text-gray-200 border border-gray-200 rounded-md px-4 py-2"
+              className="bg-deep-navy text-gray-200 border border-gray-200 rounded-md px-4 py-2 hover:!text-gray-200"
             >
               글쓰기
             </Link>

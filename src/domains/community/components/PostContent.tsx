@@ -33,6 +33,7 @@ async function PostContent({ id }: { id: string }) {
 
   const user = await getAuthUser();
   const isMine = user?.nickname === author;
+  console.log(post);
 
   return (
     <>

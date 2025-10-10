@@ -35,7 +35,9 @@ function PollCard({ items, className }: PollCardProps) {
   };
 
   return (
-    <li className={tw("w-80 p-4 flex-shrink-0 bg-gray-100 rounded-md", className)}>
+    <li
+      className={tw("w-80 p-4 flex-shrink-0 bg-gray-100 rounded-md", className)}
+    >
       <div className="flex flex-col px-2 mb-4">
         <div className="flex justify-between">
           <h3>타이틀</h3>
@@ -46,7 +48,7 @@ function PollCard({ items, className }: PollCardProps) {
 
       <PostPoll
         items={
-          dummyItems.polls?.options.map((item, i) => ({
+          items.polls?.options.map((item, i) => ({
             index: i + 1,
             text: item.text,
             voteCount: item.voteCount || 0,
