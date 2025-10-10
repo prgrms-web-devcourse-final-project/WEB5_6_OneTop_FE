@@ -1,5 +1,6 @@
 import { getPostList } from "@/domains/community/api/getPostList";
 import PostFilter from "@/domains/community/components/PostFilter";
+import PollCardList from "@/domains/community/components/PollCardList";
 import PostList from "@/domains/community/components/PostList";
 import SearchBar from "@/domains/community/components/SearchBar";
 import { PostFilterType } from "@/domains/community/types";
@@ -41,7 +42,7 @@ async function Page({
     const response = await getPostList(
       { page, size: 10, keyword, category, searchType, sort: "createdDate" }
     );
-    
+
     const data = response;
     posts = data.items || [];
     totalPages = data.totalPages || 0;
@@ -66,6 +67,9 @@ async function Page({
             </Link>
           </div>
         </BannerSection>
+
+        <PollCardList />
+        
         <div className="w-[80%] py-4">
           {/* 게시글 영역 */}
           <Suspense fallback={<div>목록을 불러오는 중입니다.....</div>}>
