@@ -195,9 +195,22 @@ export const Hero = () => {
       />
       <div
         ref={beamRef}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-[10px] 
-    bg-gradient-to-r from-[rgba(0,150,255,0)] via-[rgba(0,200,255,1)] to-[rgba(0,150,255,0)] 
-    shadow-[0_0_40px_rgba(0,200,255,0.9),0_0_80px_rgba(0,150,255,0.7),0_0_120px_rgba(0,100,255,0.5)] rounded-full z-10 opacity-0"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-5 z-10 opacity-0 blur-[3px]"
+        style={{
+          background: `
+      radial-gradient(ellipse 100% 100% at center, 
+        rgba(0, 200, 255, 1) 0%,
+        rgba(0, 200, 255, 0.8) 30%,
+        rgba(0, 150, 255, 0.3) 60%,
+        transparent 100%
+      )
+    `,
+          boxShadow: `
+      0 0 40px rgba(0, 200, 255, 0.9),
+      0 0 80px rgba(0, 150, 255, 0.7),
+      0 0 120px rgba(0, 100, 255, 0.5)
+    `,
+        }}
       />
       <div
         ref={planet1Ref}

@@ -8,7 +8,9 @@ export default function MainLayout({
 }) {
   return (
     <Shell showFooter={false} headerVariant="transparent">
-      <ScrollSmootherProvider>{children}</ScrollSmootherProvider>
+      <div className="bg-[#02020D] w-full">
+        <ScrollSmootherProvider>{children}</ScrollSmootherProvider>
+      </div>
     </Shell>
   );
 }

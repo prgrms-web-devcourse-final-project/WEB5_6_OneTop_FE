@@ -7,10 +7,10 @@ interface TimelineCoreProps {
 export const TimelineCore = ({
   years,
   renderContent,
-  height = "h-[250px]",
+  height = "h-[300px]",
 }: TimelineCoreProps) => {
   return (
-    <div className={`relative ${height} overflow-x-auto`}>
+    <div className={`relative ${height}`}>
       <div className="flex items-center min-w-max -space-x-[28.5px]">
         {years.map((year, index) => (
           <div

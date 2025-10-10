@@ -9,6 +9,7 @@ import { Timeline } from "./Timeline";
 import { useScenarioPolling } from "../hooks/useScenarioPolling";
 import { clientScenariosApi } from "../api/clientScenariosApi";
 import { ScenarioData } from "../types";
+import SpaceLoading from "@/share/components/SpaceLoading";
 
 export const ScenarioContainer = () => {
   const searchParams = useSearchParams();
@@ -27,11 +28,60 @@ export const ScenarioContainer = () => {
   const [dataLoading, setDataLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 로딩
+  const [showLoader, setShowLoader] = useState<boolean>(false);
+
+  // 진행률
+  const [fakeProgress, setFakeProgress] = useState<number>(0);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (isPolling && status !== "COMPLETED") {
+      // 1.5초 후에 로딩 페이지 표시
+      timeoutId = setTimeout(() => {
+        setShowLoader(true);
+      }, 1500);
+    } else {
+      setShowLoader(false);
+      setFakeProgress(0); // 진행률 초기화
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isPolling, status]);
+
+  // 진행률 로직
+  useEffect(() => {
+    if (!showLoader || status === "COMPLETED") {
+      if (status === "COMPLETED") {
+        setFakeProgress(100);
+      }
+      return;
+    }
+
+    // 진행률 증가
+    const interval = setInterval(() => {
+      setFakeProgress((prev) => {
+        if (prev >= 95) return 95;
+        if (prev >= 70) return prev + 0.3;
+        if (prev >= 40) return prev + 0.8;
+        return prev + 2;
+      });
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [showLoader, status]);
+
   // 시나리오 완료 시 데이터 조회
   useEffect(() => {
     if (!scenarioId) return;
 
     if (status === "COMPLETED") {
+      setFakeProgress(100); // 완료되면 100%
       fetchScenarioData(scenarioId);
     } else if (status === "FAILED") {
       setError("AI 분석에 실패했습니다.");
@@ -86,8 +136,12 @@ export const ScenarioContainer = () => {
 
   // AI 분석 중
   if (isPolling && status !== "COMPLETED") {
+    if (showLoader) {
+      return <SpaceLoading progress={fakeProgress} />;
+    }
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center pointer-events-none">
         <div className="text-center">
           <div className="animate-pulse">
             <div className="text-2xl font-semibold text-gray-700 mb-4">
@@ -150,7 +204,7 @@ export const ScenarioContainer = () => {
               다시 시도
             </button>
             <button
-              onClick={() => (window.location.href = "/baselines")}
+              onClick={() => (window.location.href = "/scenario-list")}
               className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               시나리오 목록으로 돌아가기
@@ -185,7 +239,7 @@ export const ScenarioContainer = () => {
 
   if (scenarioData) {
     return (
-      <div className="h-full">
+      <div className="min-h-screen">
         <div className="max-w-[1440px] m-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 my-15">
             <Analysis data={scenarioData.analysis} />
