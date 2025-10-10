@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
 import { loginSchema } from "../schemas/loginSchema";
 import { useRouter } from "next/navigation";
+import { api } from "@/share/config/api";
 
 // TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
@@ -71,6 +72,14 @@ function LoginModal() {
     setIsOpen(false);
     setError("");
     reset();
+  };
+
+  const handleGithubLogin = () => {
+    window.location.href = `http://localhost:8080/oauth2/authorization/github`;
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `http://localhost:8080/oauth2/authorization/google`;
   };
 
   return (
@@ -153,6 +162,7 @@ function LoginModal() {
           <button
             type="button"
             className="w-full h-15 bg-black text-white rounded-md flex items-center px-6 gap-2"
+            onClick={handleGithubLogin}
           >
             <FaGithub className="w-6 h-6" />
             Github로 로그인
@@ -160,6 +170,7 @@ function LoginModal() {
           <button
             type="button"
             className="w-full h-15 rounded-md border border-gray-300 flex items-center px-6 gap-2"
+            onClick={handleGoogleLogin}
           >
             <FaGoogle className="w-6 h-6" style={{ color: "#4285F4" }} />
             Google로 로그인
