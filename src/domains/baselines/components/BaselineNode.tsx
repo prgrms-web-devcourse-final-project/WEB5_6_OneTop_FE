@@ -18,7 +18,6 @@ interface Props {
 }
 
 export const BaselineNode = ({
-  year,
   age,
   isSelected,
   hasEvent,
@@ -29,13 +28,6 @@ export const BaselineNode = ({
   isTemp = false,
   innerRef,
 }: Props) => {
-  const displayYear =
-    hasEvent && event?.year
-      ? `${event.year}`
-      : year > 0
-      ? `${year}`
-      : "년도 입력";
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete?.();
@@ -68,9 +60,9 @@ export const BaselineNode = ({
           {/* 이벤트 제목 또는 기본 안내 텍스트 */}
           <div className="relative text-[24px] max-w-[210px] text-right line-clamp-1">
             {event?.eventTitle ? (
-              <span className="text-white">{event.eventTitle}</span>
+              <span className="block text-white">{event.eventTitle}</span>
             ) : (
-              <span className="text-gray-400 text-sm">
+              <span className="block text-gray-400 text-sm">
                 {isTemp
                   ? "노드를 클릭해 분기점을 입력해 주세요"
                   : "노드를 클릭해 분기점을 입력해 주세요"}

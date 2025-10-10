@@ -214,36 +214,50 @@ export const Hero = () => {
       />
       <div
         ref={planet1Ref}
-        className="absolute left-1/2 -translate-x-1/2 -bottom-57 opacity-0"
+        className="absolute left-1/2 -translate-x-1/2 -bottom-28 md:-bottom-57 opacity-0"
       >
-        <div className="relative w-[450px] h-[450px]">
-          <Image src="/parallel_universe01.png" alt="" fill sizes="450px" />
+        <div className="relative w-[280px] h-[280px] md:w-[450px] md:h-[450px]">
+          <Image
+            src="/parallel_universe01.png"
+            alt=""
+            fill
+            sizes="(max-width:768px) 280px, 450px"
+          />
         </div>
       </div>
       <div
         ref={planet2Ref}
-        className="absolute left-1/2 -translate-x-1/2 -top-40 opacity-0"
+        className="absolute left-1/2 -translate-x-1/2 -top-20 md:-top-40 opacity-0"
       >
-        <div className="relative w-[450px] h-[450px]">
-          <Image src="/parallel_universe02.png" alt="" fill sizes="450px" />
+        <div className="relative w-[280px] h-[280px] md:w-[450px] md:h-[450px]">
+          <Image
+            src="/parallel_universe02.png"
+            alt=""
+            fill
+            sizes="(max-width:768px) 280px, 450px"
+          />
         </div>
       </div>
-      <div className="absolute w-full left-1/2 top-[40%] -translate-x-1/2 flex flex-col items-center gap-8 text-white z-30">
+
+      {/* 텍스트 */}
+      <div className="absolute w-full left-1/2 top-[40%] -translate-x-1/2 flex flex-col items-center gap-6 md:gap-8 text-white z-30 px-5">
         <h2
           ref={titleRef}
-          className="relative px-12.5 text-[42px] font-semibold text-center opacity-0"
+          className="relative px-8 md:px-12.5 text-[28px] md:text-[42px] font-semibold text-center leading-snug break-keep"
         >
-          <span className="absolute left-0 w-[35px] h-7 bg-[url('/quote_left.png')] bg-cover bg-center"></span>
+          <span className="absolute top-0 left-0 w-[25px] md:w-[35px] h-5 md:h-7 bg-[url('/quote_left.png')] bg-cover bg-center"></span>
           만약 그때 다른 선택을 했더라면?
-          <span className="absolute right-0 w-[35px] h-7 bg-[url('/quote_right.png')] bg-cover bg-center"></span>
+          <span className="absolute top-0 right-0 w-[25px] md:w-[35px] h-5 md:h-7 bg-[url('/quote_right.png')] bg-cover bg-center"></span>
         </h2>
-        <p ref={subtitleRef} className="text-2xl text-center opacity-0">
+        <p ref={subtitleRef} className="text-lg md:text-2xl text-center">
           AI와 실제 통계로 확인하는 나만의 평행우주
         </p>
       </div>
+
+      {/* 통계 */}
       <div
         ref={statsRef}
-        className="max-w-[1440px] w-full absolute bottom-8 left-1/2 -translate-x-1/2 z-30 opacity-0"
+        className="max-w-[1440px] w-full absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 px-5"
       >
         <Statistics startCounting={startCounting} />
       </div>
