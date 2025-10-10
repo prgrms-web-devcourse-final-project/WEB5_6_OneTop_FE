@@ -10,6 +10,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
+import PostPoll from "@/domains/community/components/PostPoll";
 
 async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

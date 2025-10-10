@@ -5,12 +5,22 @@ import Pagination from "@/share/components/Pagination";
 import Link from "next/link";
 import EmptyState from "@/share/components/EmptyState";
 import { useMyPosts } from "../../hooks/useMyPosts";
+import Loading from "@/share/components/Loading";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export default function MyPosts() {
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("postPage")) || 1;
 
-  const { data } = useMyPosts(page);
+  const { data, isLoading, error } = useMyPosts(page);
+
+  if (isLoading) {
+    return <Loading text="작성글을 불러오는 중..." />;
+  }
+
+  if (error) {
+    showErrorToast(error);
+  }
 
   return (
     <div className="w-full">
@@ -57,6 +67,7 @@ export default function MyPosts() {
           currentPage={page}
           totalPages={data.totalPages}
           pageParamName="postPage"
+          scrollToId="posts"
         />
       )}
     </div>

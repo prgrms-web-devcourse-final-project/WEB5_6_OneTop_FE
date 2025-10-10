@@ -136,7 +136,7 @@ const TreeFlowContent = ({ baselineId = "101" }: TreeFlowContentProps) => {
         defaultViewport={DEFAULT_VIEWPORT}
         minZoom={0.2}
         maxZoom={1.5}
-        className="w-full h-screen relative bg-[linear-gradient(270deg,var(--Deep-Navy,#0F1A2B)_0%,#111_100%)]"
+        className="w-full h-screen relative"
         proOptions={{ hideAttribution: true }}
         nodesDraggable={false}
         nodesConnectable={false}

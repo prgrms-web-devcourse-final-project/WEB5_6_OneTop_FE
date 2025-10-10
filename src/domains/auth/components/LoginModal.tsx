@@ -42,6 +42,7 @@ function LoginModal() {
 
     try {
       await loginAction(formData);
+
       // 로그인 성공
       const urlParams = new URLSearchParams(window.location.search);
       const redirectTo = urlParams.get("redirectTo");
