@@ -79,7 +79,7 @@ export const RadarChartCore = ({
               color: "#374151",
             }}
             iconType="circle"
-            iconSize={8}
+            iconSize={12}
             align="center"
             verticalAlign="bottom"
             layout="vertical"

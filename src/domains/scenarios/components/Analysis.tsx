@@ -59,7 +59,7 @@ export const Analysis = ({ data }: AnalysisProps) => {
           <FaLightbulb size={20} color="#FFC823" />
           AI 종합 분석
         </h4>
-        <p className="text-gray-800 text-base">{data.aiInsight}</p>
+        <p className="text-gray-800 text-base break-keep">{data.aiInsight}</p>
       </div>
     </div>
   );
