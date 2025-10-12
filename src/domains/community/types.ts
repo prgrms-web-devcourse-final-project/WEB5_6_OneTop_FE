@@ -19,9 +19,11 @@ export type Post = z.infer<typeof postsSchema>;
 
 export type PostDetail = z.infer<typeof postDetailSchema>;
 
-export type PostFilterType = "ALL" | "CHAT" | "NOTICE" | "POLL" | "SCENARIO";
+export type PostFilterType = "ALL" | "CHAT" | "NOTICE" | "POLL" | "SCENARIO" | "MAIN";
 
 export type SearchType = "TITLE" | "TITLE_CONTENT" | "AUTHOR";
+
+export type PostSortType = "LATEST" | "LIKES";
 
 export type PostPollType = z.infer<typeof postPollSchema>;
 

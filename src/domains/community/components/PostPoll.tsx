@@ -17,13 +17,15 @@ interface PostPollProps {
   className?: string;
   viewLength?: number;
   optionTextLength?: number;
+  postId?: string;
 }
 
 function PostPoll({
   items,
   className,
-  viewLength = 3,
+  viewLength = 50,
   optionTextLength = 100,
+  postId,
 }: PostPollProps) {
   // 초기 설정
   const { id } = useParams();
@@ -43,17 +45,19 @@ function PostPoll({
 
   // 투표 mutation
   const { mutate: setPolls } = useSetPolls({
-    onSuccess: () => {
-      refresh(queryKeys.post.nextId(id as string)[1]);
+    onSuccess: (_data, vars) => {
+      const targetId = vars.postId;
+
+      refresh(queryKeys.post.nextId(targetId as string)[1]);
+
       queryClient.invalidateQueries({
-        queryKey: queryKeys.post.id(id as string),
+        queryKey: queryKeys.post.id(targetId as string),
       });
     },
   });
 
   const handleVote = (targetIndex: number) => {
-    console.log(user)
-    if(!user?.data.nickname) {
+    if (!user?.data.nickname) {
       Swal.fire({
         title: "로그인 후 사용해주세요.",
         icon: "warning",
@@ -63,7 +67,7 @@ function PostPoll({
       return;
     }
 
-    setPolls({ choice: [targetIndex], postId: id as string });
+    setPolls({ choice: [targetIndex], postId: (postId || id) as string });
 
     const newPollItems = pollItems.map((item, i) => ({
       ...item,
@@ -74,6 +78,7 @@ function PostPoll({
         : item.voteCount,
       isVoted: item.isVoted ? false : i === targetIndex,
     }));
+
     setPollItems(newPollItems);
   };
 
@@ -163,6 +168,12 @@ function PostPoll({
             </button>
           </li>
         ))}
+
+      <li className="text-sm text-gray-500 flex items-end justify-end min-h-5">
+        {pollItems.length > viewLength
+          ? `${pollItems.length - viewLength}개의 투표 항목이 더 있습니다.`
+          : "모든 투표 항목을 보여주고 있습니다."}
+      </li>
     </ul>
   );
 }

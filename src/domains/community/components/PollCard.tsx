@@ -1,62 +1,61 @@
-import { PostDetail } from "../types";
+"use client";
+
+import Link from "next/link";
+import { useGetPost } from "../api/useGetPost";
 import PostPoll from "./PostPoll";
 import tw from "@/share/utils/tw";
 
 interface PollCardProps {
-  items: PostDetail;
   className?: string;
+  postId: number;
 }
 
-function PollCard({ items, className }: PollCardProps) {
-  const dummyItems = {
-    postId: 1,
-    polls: {
-      options: [
-        {
-          index: 1,
-          text: "옵션 1",
-          voteCount: 10,
-          isVoted: false,
-        },
-        {
-          index: 2,
-          text: "옵션 2",
-          voteCount: 20,
-          isVoted: false,
-        },
-        {
-          index: 3,
-          text: "옵션 3",
-          voteCount: 30,
-          isVoted: false,
-        },
-      ],
-    },
-  };
+function PollCard({ className, postId }: PollCardProps) {
+  const { data: items } = useGetPost(postId.toString());
 
   return (
-    <li
-      className={tw("w-80 p-4 flex-shrink-0 bg-gray-100 rounded-md", className)}
-    >
-      <div className="flex flex-col px-2 mb-4">
-        <div className="flex justify-between">
-          <h3>타이틀</h3>
-          <p>작성자</p>
+    // 전체 영역
+    <div className="flex flex-col gap-2 bg-gray-100 rounded-md px-4 pt-4">
+      {/* 게시글 영역 */}
+      <div
+        className={tw(
+          "w-full min-h-[280px] min-w-0 flex flex-col justify-between",
+          className
+        )}
+      >
+        <div className="flex flex-col px-2 min-w-0">
+          <div className="flex justify-between min-w-0">
+            <h3 className="text-lg font-bold min-w-0">{items?.title}</h3>
+            <p className="text-sm text-gray-500 min-w-0">{items?.author}</p>
+          </div>
+          <p className="line-clamp-2 min-w-0 break-words whitespace-pre-wrap">
+            {items?.content}
+          </p>
         </div>
-        <p>여러분이라면 어떻게 하실 건가요?</p>
-      </div>
 
-      <PostPoll
-        items={
-          items.polls?.options.map((item, i) => ({
-            index: i + 1,
-            text: item.text,
-            voteCount: item.voteCount || 0,
-            isVoted: item.isVoted || false,
-          })) || []
-        }
-      />
-    </li>
+        <div className="min-w-0">
+          <PostPoll
+            items={
+              items?.polls?.options.map((option) => ({
+                index: option.index,
+                text: option.text,
+                voteCount: option.voteCount || 0,
+                isVoted: items?.polls?.selected?.[0] === option.index || false,
+              })) || []
+            }
+            viewLength={3}
+            postId={items?.postId.toString()}
+          />
+        </div>
+      </div>
+      {/* 더보기 버튼 영역 */}
+      <Link
+        href={`/community/post/${items?.postId}`}
+        className="flex justify-center items-center text-gray-500 border-t border-gray-200 p-4 hover:text-gray-700 transition-colors duration-300"
+      >
+        전체 게시글 확인하러 가기
+      </Link>
+    </div>
   );
 }
 export default PollCard;

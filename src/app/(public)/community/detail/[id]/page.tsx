@@ -82,20 +82,30 @@ async function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: queryKeys.comment.get(id),
-    queryFn: () => getComments({ id }),
-  });
+  try {
+    await Promise.all([
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.comment.get(id),
+        queryFn: () => getComments({ id }),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.post.id(id),
+        queryFn: () => getPost(id),
+      }),
+    ]);
+  } catch (error) {
+    console.error("Prefetch error:", error);
+  }
 
   return (
     <div className="w-full flex flex-col items-center min-h-[calc(100vh-140px)] pt-4">
       <div className="w-[60%] flex flex-col min-h-[calc(100vh-140px)] py-15 gap-4">
         {/* 게시글 영역 */}
-        <PostContent id={id} />
-        {/* 댓글 작성 영역 */}
-        <CommentWrite id={id} />
-        {/* 댓글 영역 */}
         <HydrationBoundary state={dehydrate(queryClient)}>
+          <PostContent id={id} />
+          {/* 댓글 작성 영역 */}
+          <CommentWrite id={id} />
+          {/* 댓글 영역 */}
           <PostCommnet id={id} />
         </HydrationBoundary>
       </div>

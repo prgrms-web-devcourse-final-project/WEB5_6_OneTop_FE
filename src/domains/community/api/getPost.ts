@@ -6,7 +6,7 @@ export async function getPost(id: string) {
   const path = `${getApiBaseUrl()}/api/v1/posts/${id}`;
   const response = await nextFetcher(path, {
     method: "GET",
-    next: { revalidate: 300, tags: queryKeys.post.nextId(id) },
+    next: { revalidate: 10, tags: queryKeys.post.nextId(id) },
   });
 
   if (!response.ok) {

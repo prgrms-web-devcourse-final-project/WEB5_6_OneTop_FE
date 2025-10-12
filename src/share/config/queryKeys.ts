@@ -14,6 +14,9 @@ export const queryKeys = {
     like: () => ["post", "like"],
     nextId: (id: string) => ["post", `post-${id}`],
   },
+  poll: {
+    id: (id: string) => ["poll", id],
+  },
   scenarios: {
     list: () => ["scenarios", "list"] as const,
     detail: (id: number | null) => ["scenarios", "detail", id] as const,

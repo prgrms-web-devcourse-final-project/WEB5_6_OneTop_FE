@@ -1,7 +1,13 @@
+import { queryKeys } from "@/share/config/queryKeys";
 import { getPost } from "../api/getPost";
 import { getPostList } from "../api/getPostList";
-import { PostDetail } from "../types";
-import PollCard from "./PollCard";
+import { Post } from "../types";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import PollCardSwiper from "./PollCardSwiper";
 
 async function PollCardList() {
   const { items } = await getPostList({
@@ -13,16 +19,23 @@ async function PollCardList() {
     keyword: "",
   });
 
-  const details = await Promise.all(
-    items.map((item: PostDetail) => getPost(item.postId.toString()))
+  console.log(items);
+
+  const queryClient = new QueryClient();
+
+  await Promise.all(
+    items.map((item: Post) =>
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.post.id(item.postId.toString()),
+        queryFn: () => getPost(item.postId.toString()),
+      })
+    )
   );
 
   return (
-    <ul className="flex gap-4 overflow-x-auto w-full">
-      {details.map((item: PostDetail) => (
-        <PollCard key={item.postId} items={item} />
-      ))}
-    </ul>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <PollCardSwiper items={items} />
+    </HydrationBoundary>
   );
 }
 export default PollCardList;

@@ -8,6 +8,7 @@ interface PostFilterProps {
 }
 
 const categoryOptions = [
+  { label: "메인", value: "MAIN" },
   { label: "전체", value: "ALL" },
   { label: "잡담", value: "CHAT" },
   { label: "투표", value: "POLL" },
@@ -21,13 +22,16 @@ function PostFilter({ category }: PostFilterProps) {
   const handleFilterChange = (category: PostFilterType) => {
     const params = new URLSearchParams(searchParams);
 
-    if (category === "ALL") {
+    if (category === "MAIN") {
       params.delete("category");
+      params.delete("page");
+      params.delete("keyword");
+      params.delete("searchType");
     } else {
       params.set("category", category);
+      params.set("page", "1");
     }
 
-    params.set("page", "1");
     router.push(`/community?${params.toString()}`);
   };
 
