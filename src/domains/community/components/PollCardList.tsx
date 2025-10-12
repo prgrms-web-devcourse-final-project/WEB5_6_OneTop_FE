@@ -19,8 +19,6 @@ async function PollCardList() {
     keyword: "",
   });
 
-  console.log(items);
-
   const queryClient = new QueryClient();
 
   await Promise.all(

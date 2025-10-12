@@ -13,4 +13,5 @@ function layout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
 export default layout;

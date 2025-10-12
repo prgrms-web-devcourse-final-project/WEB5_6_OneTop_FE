@@ -95,6 +95,8 @@ async function Page({
               <TargetPostSection />
               <hr className="border-gray-300" />
               <SharedScenarioItem />
+              <SharedScenarioItem />
+              <hr className="border-gray-300" />
             </div>
           )}
         </div>
