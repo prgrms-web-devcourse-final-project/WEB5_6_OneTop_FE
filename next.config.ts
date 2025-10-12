@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    domains: [
+      'cdn.edujin.co.kr'
+    ],
+  },
 };
 
 export default nextConfig;

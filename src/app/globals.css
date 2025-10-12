@@ -134,6 +134,36 @@
   }
 }
 
+@keyframes subtleSpace {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+.subtle-space-animation {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    rgba(130, 79, 147, 0.3) 50%,
+    transparent 70%
+  );
+  animation: subtleSpace 8s ease-in-out infinite;
+}
+
 body {
   margin: 0;
   padding: 0;

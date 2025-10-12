@@ -22,6 +22,13 @@ export const postsSchema = z.object({
   liked: z.boolean().optional(),
 });
 
+export const postPollSchema = z.object({
+  index: z.number(),
+  text: z.string(),
+  voteCount: z.number(),
+  isVoted: z.boolean().optional(),
+});
+
 // 게시판 상세 스키마
 export const postDetailSchema = z.object({
   postId: z.number(),
@@ -34,12 +41,8 @@ export const postDetailSchema = z.object({
   createdDate: z.string(),
   polls: z
     .object({
-      options: z.array(
-        z.object({
-          index: z.number(),
-          text: z.string(),
-        })
-      ),
+      selected: z.array(z.number()).optional(),
+      options: z.array(postPollSchema),
     })
     .optional(),
 });

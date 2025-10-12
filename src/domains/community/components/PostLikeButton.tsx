@@ -5,6 +5,8 @@ import { useLike } from "../api/useLike";
 import { useRef, useState } from "react";
 import tw from "@/share/utils/tw";
 import { useUndoLike } from "../api/useUndoLike";
+import Swal from "sweetalert2";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 
 function PostLikeButton({
   likeCount,
@@ -20,6 +22,8 @@ function PostLikeButton({
     isLiked: likedByMe,
     count: likeCount,
   });
+
+  const { data: user } = useAuthUser();
 
   const { mutate: likeMutation, isPending } = useLike({
     options: {
@@ -56,6 +60,23 @@ function PostLikeButton({
       },
     });
 
+  const handleLike = () => {
+    if (!user?.data.username) {
+      Swal.fire({
+        title: "로그인 후 이용해주세요.",
+        icon: "warning",
+        confirmButtonText: "확인",
+      });
+      return;
+    }
+
+    if (optimisticState.isLiked) {
+      undoLikeMutation({ id });
+    } else {
+      likeMutation({ id });
+    }
+  };
+
   return (
     <button
       type="button"
@@ -63,11 +84,7 @@ function PostLikeButton({
         "flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue",
         optimisticState.isLiked && "text-amber-500"
       )}
-      onClick={() =>
-        optimisticState.isLiked
-          ? undoLikeMutation({ id })
-          : likeMutation({ id })
-      }
+      onClick={handleLike}
       aria-label="좋아요"
       disabled={isPending || isUndoLikePending}
     >
