@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import SpaceLoading from "@/share/components/SpaceLoading";
+import { useFakeProgress } from "@/share/hooks/useFakeProgress";
 import { Analysis } from "./Analysis";
 import { RadarChart } from "./RadarChart";
 import { Timeline } from "./Timeline";
@@ -33,8 +34,10 @@ export const ScenarioContainer = () => {
   // 로딩
   const [showLoader, setShowLoader] = useState<boolean>(false);
 
-  // 진행률
-  const [fakeProgress, setFakeProgress] = useState<number>(0);
+  const fakeProgress = useFakeProgress({
+    isActive: showLoader,
+    isCompleted: status === "COMPLETED",
+  });
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -46,7 +49,6 @@ export const ScenarioContainer = () => {
       }, 1500);
     } else {
       setShowLoader(false);
-      setFakeProgress(0); // 진행률 초기화
     }
 
     return () => {
@@ -56,34 +58,11 @@ export const ScenarioContainer = () => {
     };
   }, [isPolling, status]);
 
-  // 진행률 로직
-  useEffect(() => {
-    if (!showLoader || status === "COMPLETED") {
-      if (status === "COMPLETED") {
-        setFakeProgress(100);
-      }
-      return;
-    }
-
-    // 진행률 증가
-    const interval = setInterval(() => {
-      setFakeProgress((prev) => {
-        if (prev >= 95) return 95;
-        if (prev >= 70) return prev + 0.3;
-        if (prev >= 40) return prev + 0.8;
-        return prev + 2;
-      });
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [showLoader, status]);
-
   // 시나리오 완료 시 데이터 조회
   useEffect(() => {
     if (!scenarioId) return;
 
     if (status === "COMPLETED") {
-      setFakeProgress(100); // 완료되면 100%
       fetchScenarioData(scenarioId);
     } else if (status === "FAILED") {
       setError("AI 분석에 실패했습니다.");
@@ -132,7 +111,7 @@ export const ScenarioContainer = () => {
           <p className="text-gray-600 mb-6">올바른 시나리오 ID가 필요합니다.</p>
           <Link
             href="/scenario-list"
-            className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
+            className="block w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
             시나리오 목록으로 돌아가기
           </Link>
@@ -212,7 +191,7 @@ export const ScenarioContainer = () => {
             </button>
             <Link
               href="/scenario-list"
-              className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+              className="block w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               시나리오 목록으로 돌아가기
             </Link>
@@ -235,7 +214,7 @@ export const ScenarioContainer = () => {
           </p>
           <Link
             href="/scenario-list"
-            className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
+            className="block w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
             시나리오 목록으로 돌아가기
           </Link>

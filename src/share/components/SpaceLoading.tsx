@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import LoadingProgress from "./LoadingProgress";
 
 interface Planet {
   mesh: THREE.Mesh;
@@ -47,7 +50,7 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
     renderer.setClearColor(0x000000, 1);
     mountRef.current.appendChild(renderer.domElement);
 
-    camera.position.z = 50;
+    camera.position.z = 70;
 
     // Texture loader
     const textureLoader = new THREE.TextureLoader();
@@ -140,7 +143,7 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
 
     const planets: Planet[] = [];
 
-    const mainPlanetGeometry = new THREE.SphereGeometry(8, 64, 64);
+    const mainPlanetGeometry = new THREE.SphereGeometry(6, 64, 64);
     const mainPlanetMaterial = new THREE.MeshPhongMaterial({
       color: 0xffffff,
       emissive: 0x112244,
@@ -165,18 +168,53 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
 
     const orbitPlanets = [
       {
+        textureUrl: "/texture_mercury.jpg",
+        emissive: 0x2a2a2a,
+        size: 2,
+        distance: 18,
+        speed: 0.025,
+      },
+      {
+        textureUrl: "/texture_venus.jpg",
+        emissive: 0x4a3a1a,
+        size: 5.5,
+        distance: 28,
+        speed: 0.02,
+      },
+      {
         textureUrl: "/texture_mars.jpg",
         emissive: 0x331100,
         size: 3,
-        distance: 25,
+        distance: 40,
         speed: 0.015,
       },
       {
         textureUrl: "/texture_jupiter.jpg",
-        emissive: 0x111111,
-        size: 2.5,
-        distance: 38,
+        emissive: 0x2a2010,
+        size: 10,
+        distance: 58,
         speed: 0.01,
+      },
+      {
+        textureUrl: "/texture_saturn.jpg",
+        emissive: 0x3a3520,
+        size: 9,
+        distance: 75,
+        speed: 0.008,
+      },
+      {
+        textureUrl: "/texture_uranus.jpg",
+        emissive: 0x1a3a4a,
+        size: 4.5,
+        distance: 90,
+        speed: 0.006,
+      },
+      {
+        textureUrl: "/texture_neptune.jpg",
+        emissive: 0x1a2a5a,
+        size: 4.3,
+        distance: 105,
+        speed: 0.005,
       },
     ];
 
@@ -199,6 +237,29 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
       });
 
       const planet = new THREE.Mesh(geometry, material);
+
+      if (config.textureUrl.includes("saturn")) {
+        const ringGeometry = new THREE.RingGeometry(
+          config.size * 1.5,
+          config.size * 2.5,
+          64
+        );
+
+        const ringMaterial = new THREE.MeshBasicMaterial({
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.9,
+        });
+
+        textureLoader.load("/texture_saturn_ring.png", (ringTexture) => {
+          ringMaterial.map = ringTexture;
+          ringMaterial.needsUpdate = true;
+        });
+
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        planet.add(ring);
+      }
 
       const angle = (index / orbitPlanets.length) * Math.PI * 2;
       planet.position.set(
@@ -284,7 +345,7 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
 
       camera.position.z += delta * 0.05;
 
-      camera.position.z = Math.max(20, Math.min(80, camera.position.z));
+      camera.position.z = Math.max(30, Math.min(100, camera.position.z));
     };
 
     renderer.domElement.addEventListener("wheel", handleWheel, {
@@ -400,46 +461,7 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black">
       <div ref={mountRef} className="absolute inset-0" />
-
-      <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-        <div className="text-center space-y-6">
-          <h3 className="text-4xl text-white tracking-wider">
-            평행우주 탐색 중
-          </h3>
-
-          {/* Progress Bar */}
-          <div className="w-80 mx-auto space-y-3">
-            <div className="h-1.5 bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm">
-              <div
-                className="h-full bg-blue-400 transition-all duration-500 ease-out rounded-full"
-                style={{
-                  width: `${progress}%`,
-                  boxShadow:
-                    progress > 0 ? "0 0 20px rgba(96, 165, 250, 0.5)" : "none",
-                }}
-              />
-            </div>
-            <div className="text-sm text-gray-300 font-medium">
-              {Math.round(progress)}%
-            </div>
-          </div>
-
-          <div className="flex gap-2 justify-center">
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-            <div
-              className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"
-              style={{ animationDelay: "0.2s" }}
-            />
-            <div
-              className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"
-              style={{ animationDelay: "0.4s" }}
-            />
-          </div>
-          <div className="mt-12 text-base text-gray-400 opacity-60">
-            마우스를 움직여보세요
-          </div>
-        </div>
-      </div>
+      <LoadingProgress progress={progress} />
     </div>
   );
 };
