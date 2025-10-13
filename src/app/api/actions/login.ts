@@ -46,10 +46,9 @@ export async function loginAction(formData: FormData) {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 30,
     });
-    console.log("Cookie:", jsessionid);
   }
 
   // 성공 시 쿼리 갱신

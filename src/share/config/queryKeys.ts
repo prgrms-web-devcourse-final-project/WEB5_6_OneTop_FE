@@ -12,6 +12,10 @@ export const queryKeys = {
     all: () => ["post"],
     id: (id: string) => ["post", id],
     like: () => ["post", "like"],
+    nextId: (id: string) => ["post", `post-${id}`],
+  },
+  poll: {
+    id: (id: string) => ["poll", id],
   },
   scenarios: {
     list: () => ["scenarios", "list"] as const,

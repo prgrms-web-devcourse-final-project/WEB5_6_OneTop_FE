@@ -1,16 +1,20 @@
+"use client";
+
 import BackButton from "@/share/components/BackButton";
 import PostLikeButton from "./PostLikeButton";
 import { BiCommentDetail } from "react-icons/bi";
-import { getPost } from "../api/getPost";
 import { postDetailSchema } from "../schemas/posts";
 import DeletePostButton from "./DeletePostButton";
 import Link from "next/link";
-import { getAuthUser } from "@/domains/auth/api/getAuthUser";
 import PostPoll from "./PostPoll";
+import { useGetPost } from "../api/useGetPost";
+import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 
-async function PostContent({ id }: { id: string }) {
-  const post = await getPost(id);
-  const parsedPost = postDetailSchema.safeParse(post);
+function PostContent({ id }: { id: string }) {
+  const post = useGetPost(id);
+  const parsedPost = postDetailSchema.safeParse(post.data);
+  const user = useAuthUser();
+
   const {
     postId,
     title,
@@ -31,8 +35,8 @@ async function PostContent({ id }: { id: string }) {
     );
   }
 
-  const user = await getAuthUser();
-  const isMine = user?.nickname === author;
+  const isMine = user?.data?.data.nickname === author;
+  console.log(post);
 
   return (
     <>
@@ -55,12 +59,19 @@ async function PostContent({ id }: { id: string }) {
       {/* 메인 컨텐츠 영역 */}
       <div className="min-h-[400px] flex flex-col gap-2 justify-between">
         {/* 컨텐츠 텍스트, 투표 , 시나리오 등 */}
-        <div>{content}</div>
+        <div className="w-full break-words whitespace-pre-wrap">{content}</div>
         {/* 투표 항목이 있다면 렌더링 */}
         {polls && (
           <div>
-            <h3 className="text-lg font-semibold px-2">투표하기</h3> 
-            <PostPoll />
+            <h3 className="text-lg font-semibold px-2">투표하기</h3>
+            <PostPoll
+              items={polls.options.map((option) => ({
+                index: option.index,
+                text: option.text,
+                voteCount: option.voteCount || 0,
+                isVoted: polls.selected?.[0] === option.index || false,
+              }))}
+            />
           </div>
         )}
         {/* 시나리오 연결 기능이 추가되면 추가될 영역 */}
@@ -75,14 +86,6 @@ async function PostContent({ id }: { id: string }) {
               id={postId?.toString() || ""}
               likedByMe={liked || false}
             />
-            <button
-              type="button"
-              className="flex items-center gap-2 hover:text-deep-navy transition-colors duration-300 text-dusty-blue"
-            >
-              <BiCommentDetail size={20} />
-              <span>댓글 수</span>
-              {likeCount}
-            </button>
           </div>
 
           {isMine && (

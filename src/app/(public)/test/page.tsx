@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import type { TuiEditorRef } from "@/domains/community/components/ToastEditor";
-import PostPoll from "@/domains/community/components/PostPoll";
 
 const TuiEditor = dynamic(
   () => import("@/domains/community/components/ToastEditor"),
@@ -99,7 +98,7 @@ function TestPage() {
         </button>
       </div>
 
-      <PostPoll />
+      {/* <PostPoll /> */}
 
       <TuiEditor ref={editorRef} viewer={true} initialValue={content} />
 
