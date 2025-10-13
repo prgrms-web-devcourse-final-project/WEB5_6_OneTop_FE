@@ -11,7 +11,6 @@ export const getBaselines = async (
   return response.data;
 };
 
-// 임시 api, 실제 api로 변경 필요
 export const deleteBaseline = async (baselineId: number): Promise<void> => {
-  await api.delete(`/api/v1/baselines/${baselineId}`);
+  await api.delete(`/api/v1/base-lines/${baselineId}`);
 };
