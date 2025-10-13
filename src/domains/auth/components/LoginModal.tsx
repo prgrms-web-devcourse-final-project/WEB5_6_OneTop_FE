@@ -78,7 +78,7 @@ function LoginModal() {
     // 현재 페이지 경로를 state로 전달
     const currentPath = window.location.pathname + window.location.search;
     const encodedState = encodeURIComponent(currentPath);
-    window.location.href = `http://localhost:8080/oauth2/authorization/github?state=${encodedState}`;
+    window.location.href = `${getApiBaseUrl()}/oauth2/authorization/github?state=${encodedState}`;
   };
 
   const handleGoogleLogin = () => {
