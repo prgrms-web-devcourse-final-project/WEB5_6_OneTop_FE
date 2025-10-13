@@ -9,6 +9,7 @@ import Link from "next/link";
 import PostPoll from "./PostPoll";
 import { useGetPost } from "../api/useGetPost";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
+import SharedScenarioItem from "./SharedScenarioItem";
 
 function PostContent({ id }: { id: string }) {
   const post = useGetPost(id);
@@ -25,6 +26,7 @@ function PostContent({ id }: { id: string }) {
     liked,
     createdDate,
     polls,
+    scenario,
   } = parsedPost.data || {};
 
   if (!parsedPost.success) {
@@ -36,7 +38,7 @@ function PostContent({ id }: { id: string }) {
   }
 
   const isMine = user?.data?.data.nickname === author;
-  console.log(post);
+  console.log(post.data);
 
   return (
     <>
@@ -75,6 +77,12 @@ function PostContent({ id }: { id: string }) {
           </div>
         )}
         {/* 시나리오 연결 기능이 추가되면 추가될 영역 */}
+        {category === "SCENARIO" && scenario && (
+          <>
+            <h3 className="text-2xl font-semibold mt-10">시나리오 정보</h3>
+            <SharedScenarioItem scenarioInfo={scenario} />
+          </>
+        )}
       </div>
 
       {/* 하단 메뉴 영역 */}

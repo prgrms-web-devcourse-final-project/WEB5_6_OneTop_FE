@@ -1,3 +1,5 @@
+import { ScenarioInfoResponse } from "@/domains/scenarios/types";
+import tw from "@/share/utils/tw";
 import Image from "next/image";
 
 const getColorByScore = (score: number) => {
@@ -49,23 +51,29 @@ const dummyData = {
 
 const img = "https://cdn.edujin.co.kr/news/photo/202310/43954_86537_5933.png";
 
-function SharedScenarioItem() {
-  const dynamicColor = getColorByScore(dummyData.total);
+function SharedScenarioItem({
+  scenarioInfo,
+  className,
+}: {
+  scenarioInfo: ScenarioInfoResponse;
+  className?: string;
+}) {
+  const data = scenarioInfo || dummyData;
+  const dynamicColor = getColorByScore(data.total);
 
   return (
     <div
-      className="bg-deep-navy relative overflow-hidden rounded-md"
+      className={tw(
+        `bg-deep-navy relative overflow-hidden rounded-md ${className}`
+      )}
       style={
         {
           "--dynamic-color": dynamicColor,
         } as React.CSSProperties
       }
     >
-
       <div className="absolute inset-0 opacity-70 pointer-events-none">
-        <div
-          className="subtle-space-animation"
-        ></div>
+        <div className="subtle-space-animation"></div>
       </div>
       <div className="grid grid-cols-10 h-full">
         <div className="relative h-full rounded-l-md overflow-hidden col-span-3">
@@ -87,31 +95,33 @@ function SharedScenarioItem() {
           }}
         >
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-bold text-white">{dummyData.job}</h3>
+            <h3 className="text-lg font-bold text-white">{data.job}</h3>
           </div>
           <div className="flex flex-col gap-2">
-            <h3 className="text-white">{dummyData.summary}</h3>
+            <h3 className="text-white">{data.summary}</h3>
           </div>
           <div className="flex flex-col gap-2">
-            <h3 className="text-white">{dummyData.description}</h3>
+            <h3 className="text-white">{data.description}</h3>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {dummyData.indicators.map((indicator) => (
+          <div className="grid grid-cols-2 gap-2 my-2">
+            {data.indicators.map((indicator) => (
               <div
                 className="flex gap-4 items-center border border-white py-2 px-4 rounded-md"
                 key={indicator.type}
               >
-                <div className="flex flex-col items-center justify-center">
-                  <h3 className="text-white font-bold">{indicator.type}</h3>
+                <div className="flex items-center justify-center gap-1">
+                  <h3 className="text-white font-semibold text-nowrap">
+                    {indicator.type}
+                  </h3>
                   <p className="text-white">{indicator.point}</p>
                 </div>
                 <div className="w-0.5 h-full bg-white" />
-                <p className="text-white">{indicator.analysis}</p>
+                <p className="text-white text-sm h-10 flex items-center">{indicator.analysis}</p>
               </div>
             ))}
           </div>
           <h2 className="text-xl text-white flex justify-center border border-white rounded-b-md py-2">
-            총점 {dummyData.total}
+            총점 {data.total}
           </h2>
         </div>
       </div>
