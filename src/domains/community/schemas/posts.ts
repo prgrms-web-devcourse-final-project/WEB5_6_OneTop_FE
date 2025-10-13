@@ -29,6 +29,25 @@ export const postPollSchema = z.object({
   isVoted: z.boolean().optional(),
 });
 
+// 시나리오 상세
+export const scenarioInfoResponseSchema = z.object({
+  scenarioId: z.number(),
+  status: z.string(),
+  job: z.string(),
+  total: z.number(),
+  summary: z.string(),
+  description: z.string(),
+  img: z.string(),
+  createdDate: z.string(),
+  indicators: z.array(
+    z.object({
+      type: z.string(),
+      point: z.number(),
+      analysis: z.string(),
+    })
+  ),
+});
+
 // 게시판 상세 스키마
 export const postDetailSchema = z.object({
   postId: z.number(),
@@ -45,6 +64,7 @@ export const postDetailSchema = z.object({
       options: z.array(postPollSchema),
     })
     .optional(),
+  scenario: scenarioInfoResponseSchema.optional(),
 });
 
 export const postWriteSchema = z.object({

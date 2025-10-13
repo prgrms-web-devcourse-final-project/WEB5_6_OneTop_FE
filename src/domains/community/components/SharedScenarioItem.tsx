@@ -1,14 +1,35 @@
+import { ScenarioInfoResponse } from "@/domains/scenarios/types";
+import tw from "@/share/utils/tw";
 import Image from "next/image";
 
-const getColorByScore = (score: number) => {
-  if (score >= 400) {
-    return "rgba(135, 206, 235, 0.6)";
+const getThemeByScore = (score: number) => {
+  if (score >= 460) {
+    return {
+      accent: "linear-gradient(135deg, #77E4D4, #A682FF, #FFD580)",
+      background:
+        "radial-gradient(circle at 20% 30%, #0A0F1A 0%, #150A33 100%)",
+      blendMode: "screen",
+    };
+  } else if (score >= 400) {
+    return {
+      accent: "#77E4D4",
+      background: "#0A0F1A",
+    };
   } else if (score >= 300) {
-    return "rgba(176, 196, 222, 0.5)";
+    return {
+      accent: "#6A8FFF",
+      background: "#10172A",
+    };
   } else if (score >= 200) {
-    return "rgba(218, 165, 32, 0.5)";
+    return {
+      accent: "#FFCA5F",
+      background: "#1A1410",
+    };
   } else {
-    return "rgba(128, 128, 128, 0.4)";
+    return {
+      accent: "#FF6B6B",
+      background: "#1C0E0E",
+    };
   }
 };
 
@@ -16,7 +37,7 @@ const dummyData = {
   scenarioId: 1001,
   status: "COMPLETED",
   job: "AI 연구원",
-  total: 400,
+  total: 480,
   summary:
     "당신은 성공적인 AI 연구자가 되어 학계와 업계에서 인정받으며, 균형 잡힌 삶을 살고 있습니다.",
   description:
@@ -49,24 +70,42 @@ const dummyData = {
 
 const img = "https://cdn.edujin.co.kr/news/photo/202310/43954_86537_5933.png";
 
-function SharedScenarioItem() {
-  const dynamicColor = getColorByScore(dummyData.total);
+function SharedScenarioItem({
+  scenarioInfo,
+  className,
+}: {
+  scenarioInfo: ScenarioInfoResponse;
+  className?: string;
+}) {
+  const data = scenarioInfo || dummyData;
+  const { accent, background, blendMode } = getThemeByScore(data.total);
 
   return (
     <div
-      className="bg-deep-navy relative overflow-hidden rounded-md"
-      style={
-        {
-          "--dynamic-color": dynamicColor,
-        } as React.CSSProperties
-      }
+      className={tw(`relative overflow-hidden rounded-md ${className}`)}
+      style={{ background }}
     >
-
+      {/* 애니메이션 색상 */}
       <div className="absolute inset-0 opacity-70 pointer-events-none">
         <div
           className="subtle-space-animation"
-        ></div>
+          style={{
+            background:
+              data.total >= 460
+                ? accent
+                : `radial-gradient(
+                ellipse at center,
+                transparent 30%,
+                ${accent}40 50%,
+                transparent 70%
+              )`,
+            filter: data.total >= 460 ? "blur(40px)" : "none",
+            mixBlendMode: (blendMode ||
+              "normal") as React.CSSProperties["mixBlendMode"],
+          }}
+        />
       </div>
+
       <div className="grid grid-cols-10 h-full">
         <div className="relative h-full rounded-l-md overflow-hidden col-span-3">
           <Image
@@ -87,31 +126,35 @@ function SharedScenarioItem() {
           }}
         >
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-bold text-white">{dummyData.job}</h3>
+            <h3 className="text-lg font-bold text-white">{data.job}</h3>
           </div>
           <div className="flex flex-col gap-2">
-            <h3 className="text-white">{dummyData.summary}</h3>
+            <h3 className="text-white">{data.summary}</h3>
           </div>
           <div className="flex flex-col gap-2">
-            <h3 className="text-white">{dummyData.description}</h3>
+            <h3 className="text-white">{data.description}</h3>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {dummyData.indicators.map((indicator) => (
+          <div className="grid grid-cols-2 gap-2 my-2">
+            {data.indicators.map((indicator) => (
               <div
                 className="flex gap-4 items-center border border-white py-2 px-4 rounded-md"
                 key={indicator.type}
               >
-                <div className="flex flex-col items-center justify-center">
-                  <h3 className="text-white font-bold">{indicator.type}</h3>
+                <div className="flex items-center justify-center gap-1">
+                  <h3 className="text-white font-semibold text-nowrap">
+                    {indicator.type}
+                  </h3>
                   <p className="text-white">{indicator.point}</p>
                 </div>
                 <div className="w-0.5 h-full bg-white" />
-                <p className="text-white">{indicator.analysis}</p>
+                <p className="text-white text-sm h-10 flex items-center">
+                  {indicator.analysis}
+                </p>
               </div>
             ))}
           </div>
           <h2 className="text-xl text-white flex justify-center border border-white rounded-b-md py-2">
-            총점 {dummyData.total}
+            총점 {data.total}
           </h2>
         </div>
       </div>

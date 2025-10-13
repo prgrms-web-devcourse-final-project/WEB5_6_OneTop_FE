@@ -1,0 +1,35 @@
+name: Sync Fork
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    container: pandoc/latex
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mustache
+        run: apk add ruby && gem install mustache
+
+      - name: creates output
+        run: sh ./build.sh
+
+      - name: Pushes to another repository
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
+        with:
+          source-directory: 'output'
+          destination-github-username: ${{ secrets.FORK_OWNER }} # 개인 레포 소유자의 username
+          destination-repository-name: "WEB5_6_OneTop_FE" # 포크 뜬 개인 레포 이름
+          user-email: ${{ secrets.FORK_ACC }} # 개인 계정 이메일
+          commit-message: ${{ github.event.commits[0].message }}
+          target-branch: main # 개인 레포의 어느 브랜치에 복사할건지
+
+      - name: Test get variable exported by push-to-another-repository
+        run: echo $DESTINATION_CLONED_DIRECTORY
