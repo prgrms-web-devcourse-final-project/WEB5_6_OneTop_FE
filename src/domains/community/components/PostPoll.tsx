@@ -87,7 +87,7 @@ function PostPoll({
       {pollItems
         .slice(0, Math.min(viewLength, pollItems.length))
         .map((item, index) => (
-          <li key={index}>
+          <li key={index} className="cursor-pointer">
             <button
               className={tw("relative overflow-hidden w-full")}
               onClick={() => handleVote(index)}

@@ -9,6 +9,8 @@ import { useCommnetLike } from "../api/useCommnetLike";
 import { useCommentUnlike } from "../api/useCommentUnlike";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import Swal from "sweetalert2";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/share/config/queryKeys";
 
 function PostLikeButton({
   likeCount,
@@ -26,6 +28,7 @@ function PostLikeButton({
     isLiked: likedByMe,
     count: likeCount,
   });
+  const queryClient = useQueryClient();
 
   const { data: user } = useAuthUser();
 
@@ -36,6 +39,9 @@ function PostLikeButton({
         isLiked: !prev.isLiked,
         count: prev.count + (prev.isLiked ? -1 : 1),
       }));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.comment.get(id) });
     },
     onError: () => {
       setOptimisticState({
