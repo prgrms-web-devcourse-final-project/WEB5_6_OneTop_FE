@@ -169,6 +169,9 @@ export const clientScenariosApi = {
           ],
         },
         events: timeline,
+        imageUrl: info.img,
+        job: info.job,
+        description: info.description,
       };
     } catch (error) {
       console.error("시나리오 데이터 조회 실패:", error);

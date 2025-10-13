@@ -190,7 +190,7 @@ a:active,
 a:hover {
   outline: 0;
   text-decoration: none;
-  color: inherit;
+  /* color: inherit; */
 }
 
 .tooltip {
@@ -268,4 +268,16 @@ a:hover {
 .compare input[type="range"]::-webkit-slider-runnable-track {
   background-color: transparent;
   border: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

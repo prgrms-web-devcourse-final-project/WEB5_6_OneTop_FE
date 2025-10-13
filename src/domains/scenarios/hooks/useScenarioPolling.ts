@@ -24,7 +24,7 @@ export const useScenarioPolling = (scenarioId: number | null) => {
     };
 
     pollStatus();
-    const interval = setInterval(pollStatus, 2000); // 2초마다 폴링
+    const interval = setInterval(pollStatus, 1000); // 1초마다 폴링
 
     return () => clearInterval(interval);
   }, [scenarioId, isPolling]);

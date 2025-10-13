@@ -174,23 +174,23 @@ export const BaselineView = ({
         } transition-all duration-300`}
         style={{ bottom: `${bottomPosition}px` }}
       >
-        <button
-          onClick={onAddNode}
-          className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 bg-gray-400 text-white hover:scale-105"
+        <Tooltip
+          contents={
+            isGuest
+              ? "게스트는 분기점 추가가 불가능합니다. 로그인하면 최대 10개까지 작성할 수 있습니다."
+              : !canAddMore
+              ? `최대 ${maxNodes}개까지만 작성 가능합니다`
+              : `새 분기점을 추가합니다 (최대 ${maxNodes}개)`
+          }
+          className="w-[220px] ml-2 text-center"
         >
-          <Tooltip
-            contents={
-              isGuest
-                ? "게스트는 분기점 추가가 불가능합니다. 로그인하면 최대 10개까지 작성할 수 있습니다."
-                : !canAddMore
-                ? `최대 ${maxNodes}개까지만 작성 가능합니다`
-                : `새 분기점을 추가합니다 (최대 ${maxNodes}개)`
-            }
-            className="w-[220px] ml-2 text-center"
+          <button
+            onClick={onAddNode}
+            className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 bg-gray-400 text-white hover:scale-105"
           >
             <PiPlus size={24} />
-          </Tooltip>
-        </button>
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

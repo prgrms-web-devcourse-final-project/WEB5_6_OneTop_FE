@@ -26,16 +26,16 @@ const Feature = () => {
   const isMobile = useMobileDetection(768);
 
   return (
-    <section className="relative w-full py-[50px] md:py-25 px-5 md:px-0">
-      <div className="relative z-10 h-full flex flex-col items-center justify-center gap-[30px] md:gap-[155px]">
+    <section className="relative w-full py-[50px] md:py-25">
+      <div className="relative z-10 h-full flex flex-col items-center justify-center gap-10 md:gap-[155px]">
         <div className="flex flex-col items-center gap-2 md:gap-3 text-white text-center">
           <h2 className="text-2xl md:text-[32px] font-semibold">핵심 기능</h2>
           <p className="text-base md:text-lg">다른 선택이 만들어낸 평행우주</p>
         </div>
 
         {/* 카드 그룹 */}
-        <div className="w-full max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-8 md:gap-10">
-          <div className="w-full space-y-5 flex gap-4 md:block">
+        <div className="w-full max-w-[1440px] mx-auto px-5 min-[1440px]:px-0 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 break-keep">
+          <div className="w-full space-y-0 md:space-y-5 flex gap-4 md:block order-2 md:order-2">
             <FeatureCard
               icon={<PiNotePencilLight size={isMobile ? 48 : 62} />}
               title="인생 분기점 기록 시스템"
@@ -49,24 +49,24 @@ const Feature = () => {
           </div>
 
           {/* 중앙 이미지 */}
-          <div className="relative flex-1 mt-8 md:mt-0">
-            <h3 className="absolute -top-[60px] md:-top-[90px] left-1/2 -translate-x-1/2 text-buttercream text-[64px] md:text-[100px] font-family-logo z-10">
+          <div className="relative flex-1 mt-8 md:mt-0 order-1 md:order-2">
+            <h3 className="absolute -top-[45px] md:-top-[90px] left-1/2 -translate-x-1/2 text-buttercream text-[50px] md:text-[100px] font-family-logo z-10">
               Re:Life
             </h3>
-            <div className="relative w-full md:w-[40.6vw] min-h-[300px] md:min-h-[520px] aspect-[5/3] rounded-lg bg-[url('/feature_img.png')] bg-cover bg-center overflow-hidden">
+            <div className="relative w-full px-5 md:w-[40.6vw] min-h-[250px] md:min-h-[520px] aspect-[5/3] rounded-lg bg-[url('/feature_img.png')] bg-cover bg-center overflow-hidden">
               <div className="absolute inset-0 flex flex-col items-center justify-end text-center pb-6 md:pb-8">
                 <p className="text-white text-base md:text-xl leading-6 md:leading-8 px-4">
                   단순한 상상이 아닌,
-                  <br className="hidden md:block" />
+                  <br />
                   실제 데이터와 AI 분석을 통해
-                  <br className="hidden md:block" />
+                  <br />
                   당신만의 평행우주를 보여드립니다.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="w-full space-y-5 flex gap-4 md:block">
+          <div className="w-full space-y-0 md:space-y-5 flex gap-4 md:block order-3">
             <FeatureCard
               icon={<PiGitForkLight size={48} className="md:size-[62px]" />}
               title="AI 평행우주 시뮬레이션"

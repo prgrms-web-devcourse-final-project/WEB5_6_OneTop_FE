@@ -22,19 +22,23 @@ const Step = ({
 }: Props) => {
   return (
     <div
-      className="flex flex-col items-center text-center relative"
+      className="flex flex-col items-center text-center relative md:before:content-none before:content-[''] before:block before:w-[calc(100%+32px)] before:h-[1px] before:bg-white before:absolute before:top-[47%] before:left-0"
       ref={stepRef}
     >
-      <div className="text-white text-6xl font-bold mb-4">{number}</div>
+      <div className="text-white text-[42px] md:text-6xl font-bold mb-4">
+        {number}
+      </div>
       <div className="relative mb-7">
         <div
           onClick={onClick}
-          className={`w-7 h-7 rounded-full bg-ivory transition-all duration-300 cursor-pointer hover:scale-125`}
+          className={`w-5 md:w-7 h-5 md:h-7 rounded-full bg-ivory transition-all duration-300 cursor-pointer md:hover:scale-125`}
         ></div>
-        <span className="absolute top-[6px] left-[6px] inline-block w-4 h-4 rounded-full bg-deep-navy pointer-events-none" />
+        <span className="absolute top-1 md:top-[6px] left-1 md:left-[6px] inline-block w-3 md:w-4 h-3 md:h-4 rounded-full bg-deep-navy pointer-events-none" />
       </div>
-      <h3 className="text-white text-2xl font-semibold mb-4">{title}</h3>
-      <p className="text-gray-300 text-lg">{description}</p>
+      <h3 className="text-white text-lg md:text-2xl font-semibold mb-2 md:mb-4">
+        {title}
+      </h3>
+      <p className="text-gray-300 text-base md:text-lg">{description}</p>
     </div>
   );
 };
@@ -98,16 +102,16 @@ const Guide = () => {
   }, [activeStep]);
 
   return (
-    <section className="w-full h-screen relativ">
-      <div className="relative z-10 h-full py-25">
-        <div className="flex flex-col items-center gap-3 text-white">
-          <h2 className="text-[32px] font-semibold">
+    <section className="w-full h-auto md:h-screen relativ">
+      <div className="relative z-10 h-full py-[50px] md:py-25">
+        <div className="flex flex-col items-center gap-2 md:gap-3 text-white">
+          <h2 className="text-2xl md:text-[32px] font-semibold">
             <span className="font-family-logo">Re:Life</span> 가이드
           </h2>
-          <p className="text-lg">쉽고 간단한 시작 가이드</p>
+          <p className="text-base md:text-lg">쉽고 간단한 시작 가이드</p>
         </div>
         <div
-          className="max-w-[1440px] mx-auto relative mt-[25vh]"
+          className="max-w-[1440px] mx-auto relative my-[50px] md:mt-[25vh]"
           ref={containerRef}
         >
           <div className="absolute top-[90px] left-0 right-0 h-[1px] bg-white hidden md:block" />

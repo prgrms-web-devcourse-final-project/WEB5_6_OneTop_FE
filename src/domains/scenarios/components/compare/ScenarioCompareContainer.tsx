@@ -42,15 +42,12 @@ export const ScenarioCompareContainer = () => {
       setIsLoading(true);
       setError(null);
 
-      const data: ScenarioCompareResponse =
-        await clientCompareApi.compareScenarios(base, compare);
-
-      const [baseTimeline, compareTimeline]: [
-        TimelineResponse,
-        TimelineResponse
-      ] = await Promise.all([
+      // 최소 1초 로딩 시간 보장
+      const [data, baseTimeline, compareTimeline] = await Promise.all([
+        clientCompareApi.compareScenarios(base, compare),
         clientCompareApi.getScenarioTimeline(base),
         clientCompareApi.getScenarioTimeline(compare),
+        new Promise((resolve) => setTimeout(resolve, 1000)),
       ]);
 
       const combinedTimeline: CompareTimelineItem[] = [
@@ -99,7 +96,7 @@ export const ScenarioCompareContainer = () => {
           <p className="text-gray-600 mb-6">올바른 시나리오 ID가 필요합니다.</p>
           <Link
             href="/scenario-list"
-            className="w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
+            className="block w-full bg-deep-navy text-white px-6 py-3 rounded-lg"
           >
             시나리오 목록으로 돌아가기
           </Link>
@@ -142,7 +139,7 @@ export const ScenarioCompareContainer = () => {
             </button>
             <Link
               href="/scenario-list"
-              className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+              className="block w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               시나리오 목록으로 돌아가기
             </Link>
