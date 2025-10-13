@@ -5,7 +5,7 @@ import { AnalysisProps } from "../types";
 
 export const Analysis = ({ data }: AnalysisProps) => {
   return (
-    <div className="bg-white p-7 rounded-lg border border-gray-200">
+    <div className="bg-white p-5 md:p-7 rounded-lg border border-gray-200">
       <div className="flex items-center mb-7">
         <h3 className="flex items-center gap-1 text-[22px] font-semibold">
           AI 분석

@@ -27,7 +27,7 @@ export const Timeline = ({ data }: TimelineProps) => {
   };
 
   return (
-    <div className="max-w-[1440px] m-auto bg-white p-7 pb-[50px] rounded-lg border border-gray-200">
+    <div className="max-w-[1440px] m-auto bg-white p-5 md:p-7 pb-10 md:pb-[50px] rounded-lg border border-gray-200">
       <div className="flex items-center mb-7">
         <h3 className="text-[22px] font-semibold">타임라인</h3>
       </div>

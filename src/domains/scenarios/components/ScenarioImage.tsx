@@ -33,7 +33,7 @@ export const ScenarioImage = ({
 
   if (!processedImageUrl || imageError) {
     return (
-      <div className="bg-gray-50 rounded-lg p-8 h-full flex items-center justify-center">
+      <div className="bg-gray-50 rounded-lg p-5 md:p-7 h-full flex items-center justify-center">
         <div className="text-center text-gray-800">
           <p className="text-2xl font-semibold mb-2">{job || "당신의 미래"}</p>
         </div>
@@ -42,12 +42,12 @@ export const ScenarioImage = ({
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto p-7 rounded-lg border border-gray-200">
+    <div className="max-w-[1440px] mx-auto p-5 md:p-7 rounded-lg border border-gray-200">
       <h3 className="text-[22px] font-semibold mb-7">
         AI가 그린 당신의 미래 모습
       </h3>
-      <div className="flex items-stary justify-center gap-8">
-        <div className="relative w-[400px] h-[300px] raspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
+      <div className="flex flex-col md:flex-row items-stary justify-center gap-8">
+        <div className="relative w-full md:w-[400px] h-[300px] raspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse">
               <div className="text-gray-400">이미지 로딩 중...</div>

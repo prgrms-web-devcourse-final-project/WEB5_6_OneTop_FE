@@ -226,18 +226,18 @@ export const ScenarioContainer = () => {
   if (scenarioData) {
     return (
       <div className="min-h-screen">
-        <div className="max-w-[1440px] m-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 my-15">
+        <div className="max-w-[1440px] min-[1440px]:px-0 px-5 m-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 my-10 md:my-15">
             <Analysis data={scenarioData.analysis} />
             <RadarChart data={scenarioData.radarData} />
           </div>
         </div>
-        <div className="bg-gray-50 py-15">
+        <div className="bg-gray-50 py-10 md:py-15 min-[1440px]:px-0 px-5">
           <Timeline data={scenarioData.events} />
         </div>
         {/* AI 이미지 */}
         {scenarioData.imageUrl && (
-          <div className="my-15">
+          <div className="my-10 md:my-15 min-[1440px]:px-0 px-5">
             <ScenarioImage
               imageUrl={scenarioData.imageUrl}
               job={scenarioData.job}
