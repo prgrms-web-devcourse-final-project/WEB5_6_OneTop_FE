@@ -3,7 +3,14 @@ import tw from "@/share/utils/tw";
 import Image from "next/image";
 
 const getThemeByScore = (score: number) => {
-  if (score >= 400) {
+  if (score >= 460) {
+    return {
+      accent: "linear-gradient(135deg, #77E4D4, #A682FF, #FFD580)",
+      background:
+        "radial-gradient(circle at 20% 30%, #0A0F1A 0%, #150A33 100%)",
+      blendMode: "screen",
+    };
+  } else if (score >= 400) {
     return {
       accent: "#77E4D4",
       background: "#0A0F1A",
@@ -30,7 +37,7 @@ const dummyData = {
   scenarioId: 1001,
   status: "COMPLETED",
   job: "AI 연구원",
-  total: 450,
+  total: 480,
   summary:
     "당신은 성공적인 AI 연구자가 되어 학계와 업계에서 인정받으며, 균형 잡힌 삶을 살고 있습니다.",
   description:
@@ -71,7 +78,7 @@ function SharedScenarioItem({
   className?: string;
 }) {
   const data = scenarioInfo || dummyData;
-  const { accent, background } = getThemeByScore(data.total);
+  const { accent, background, blendMode } = getThemeByScore(data.total);
 
   return (
     <div
@@ -79,16 +86,22 @@ function SharedScenarioItem({
       style={{ background }}
     >
       {/* 애니메이션 색상 */}
-      <div className="absolute inset-0 opacity-60 pointer-events-none">
+      <div className="absolute inset-0 opacity-70 pointer-events-none">
         <div
           className="subtle-space-animation"
           style={{
-            background: `radial-gradient(
-            ellipse at center,
-            transparent 30%,
-            ${accent}50 50%,
-            transparent 70%
-          )`,
+            background:
+              data.total >= 460
+                ? accent
+                : `radial-gradient(
+                ellipse at center,
+                transparent 30%,
+                ${accent}40 50%,
+                transparent 70%
+              )`,
+            filter: data.total >= 460 ? "blur(40px)" : "none",
+            mixBlendMode: (blendMode ||
+              "normal") as React.CSSProperties["mixBlendMode"],
           }}
         />
       </div>

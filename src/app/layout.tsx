@@ -84,6 +84,21 @@ function RootLayout({ children }: { children: React.ReactNode }) {
           />
         </noscript>
 
+        {/* 임시 테스트: Clarity 직접 설치 */}
+        <Script
+          id="clarity-direct-test"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "tp9puimxhj");
+            `,
+          }}
+        />
+
         <TanstackProvider>
           <LoginModal />
           {children}
