@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import FormSlider from "@/domains/onboarding/components/FormSlider";
+import { getAuthUser } from "@/domains/auth/api/getAuthUser";
 
 // Protected 라우트라서 SEO는 간단하게
 export function generateMetadata() {
