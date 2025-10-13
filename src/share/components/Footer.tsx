@@ -10,6 +10,8 @@ function Footer() {
         <a
           href="https://github.com/prgrms-web-devcourse-final-project/WEB5_6_OneTop_FE"
           target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub 저장소 바로가기"
         >
           <FaGithub size={32} color="white" />
         </a>

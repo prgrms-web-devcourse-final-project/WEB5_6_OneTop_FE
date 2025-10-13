@@ -42,15 +42,12 @@ export const ScenarioCompareContainer = () => {
       setIsLoading(true);
       setError(null);
 
-      const data: ScenarioCompareResponse =
-        await clientCompareApi.compareScenarios(base, compare);
-
-      const [baseTimeline, compareTimeline]: [
-        TimelineResponse,
-        TimelineResponse
-      ] = await Promise.all([
+      // 최소 1초 로딩 시간 보장
+      const [data, baseTimeline, compareTimeline] = await Promise.all([
+        clientCompareApi.compareScenarios(base, compare),
         clientCompareApi.getScenarioTimeline(base),
         clientCompareApi.getScenarioTimeline(compare),
+        new Promise((resolve) => setTimeout(resolve, 1000)),
       ]);
 
       const combinedTimeline: CompareTimelineItem[] = [

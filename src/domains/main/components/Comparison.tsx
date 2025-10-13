@@ -27,9 +27,11 @@ const Comparison = () => {
 
   return (
     <div className="relative w-full h-[calc(100vh-80px)]">
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex flex-col items-center justify-center gap-6 text-center pt-10 z-10">
-        <p className="text-2xl text-white leading-9 text-shadow-2xs">
-          <span className="font-family-logo font-bold text-4xl">Re:Life</span>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex flex-col items-center justify-center gap-6 text-center pt-10 px-5 z-10">
+        <p className="text-lg md:text-2xl text-white leading-7 md:leading-9 text-shadow-2xs break-keep">
+          <span className="font-family-logo font-bold text-3xl md:text-4xl">
+            Re:Life
+          </span>
           는<br />
           당신의 인생 선택을 기록하고, 다른 선택을 했다면 어떤 평행우주가
           펼쳐질지 보여줍니다. <br />
@@ -66,7 +68,7 @@ const Comparison = () => {
 
           {/* Arrow Handle */}
           <div
-            className="absolute bottom-25 h-[50px] w-[50px] -translate-y-1/2 -translate-x-1/2 pointer-events-none bg-ivory rounded-full z-10 scale-100 hover:shadow-xl hover:scale-110 hover:bg-black transform transition-transform duration-300"
+            className="absolute bottom-15 md:bottom-25 h-[50px] w-[50px] -translate-y-1/2 -translate-x-1/2 pointer-events-none bg-ivory rounded-full z-10 scale-100 hover:shadow-xl hover:scale-110 hover:bg-black transform transition-transform duration-300"
             style={{ left: `${sliderPosition}%` }}
           >
             <BiSolidLeftArrow
@@ -81,13 +83,18 @@ const Comparison = () => {
         </figure>
 
         {/* Range Slider */}
+        <label htmlFor="compare-slider" className="sr-only">
+          평행우주 비교 슬라이더
+        </label>
         <input
+          id="compare-slider"
           type="range"
           min="0"
           max="100"
           value={sliderPosition}
+          aria-label="평행우주 비교 슬라이더"
           onChange={handleSliderChange}
-          className="absolute bottom-25 -translate-y-1/2 left-[-25px] w-[calc(100%+50px)] z-[5] bg-transparent appearance-none focus:outline-none"
+          className="absolute bottom-15 md:bottom-25 -translate-y-1/2 left-[-25px] w-[calc(100%+50px)] z-[5] bg-transparent appearance-none focus:outline-none"
         />
       </div>
     </div>

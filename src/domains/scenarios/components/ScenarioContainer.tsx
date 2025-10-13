@@ -11,6 +11,7 @@ import { Timeline } from "./Timeline";
 import { useScenarioPolling } from "../hooks/useScenarioPolling";
 import { clientScenariosApi } from "../api/clientScenariosApi";
 import { ScenarioData } from "../types";
+import { ScenarioImage } from "./ScenarioImage";
 
 export const ScenarioContainer = () => {
   const searchParams = useSearchParams();
@@ -93,7 +94,12 @@ export const ScenarioContainer = () => {
     try {
       setDataLoading(true);
       setError(null);
-      const data = await clientScenariosApi.getScenarioData(id);
+      // 최소 1초 로딩 시간 보장
+      const [data] = await Promise.all([
+        clientScenariosApi.getScenarioData(id),
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+      ]);
+
       setScenarioData(data);
     } catch (err) {
       console.error("시나리오 데이터 조회 실패:", err);
@@ -250,6 +256,16 @@ export const ScenarioContainer = () => {
         <div className="bg-gray-50 py-15">
           <Timeline data={scenarioData.events} />
         </div>
+        {/* AI 이미지 */}
+        {scenarioData.imageUrl && (
+          <div className="my-15">
+            <ScenarioImage
+              imageUrl={scenarioData.imageUrl}
+              job={scenarioData.job}
+              description={scenarioData.description}
+            />
+          </div>
+        )}
       </div>
     );
   }
