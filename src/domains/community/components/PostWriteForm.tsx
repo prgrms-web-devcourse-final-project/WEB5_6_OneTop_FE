@@ -12,12 +12,26 @@ import { postWriteSchema } from "../schemas/posts";
 import { IoClose } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import RepresentativeProfileModal from "@/domains/my-page/components/representativeprofile/RepresentativeProfileModal";
+import { clientScenariosApi } from "@/domains/scenarios/api/clientScenariosApi";
+import { useQuery } from "@tanstack/react-query";
+import SharedScenarioItem from "./SharedScenarioItem";
 
 function PostWriteForm() {
   const [pollItems, setPollItems] = useState<string[]>(["", ""]);
   const router = useRouter();
   const [isScenarioModalOpen, setIsScenarioModalOpen] = useState(false);
-  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(
+    null
+  );
+
+  const { data: scenarioInfo } = useQuery({
+    queryKey: ["scenarioInfo", selectedScenarioId],
+    queryFn: () => {
+      if (!selectedScenarioId) return null;
+      return clientScenariosApi.getScenarioInfo(selectedScenarioId as number);
+    },
+    retry: false,
+  });
 
   const handleCloseScenarioModal = () => {
     setIsScenarioModalOpen(false);
@@ -57,6 +71,8 @@ function PostWriteForm() {
   });
 
   const onSubmit = (data: PostWrite) => {
+    const submitData = { ...data };
+
     // Poll 모드일 때 poll 데이터 추가
     if (category === "POLL") {
       const pollOptions = pollItems
@@ -75,12 +91,30 @@ function PostWriteForm() {
         return;
       }
 
-      data.poll = {
+      submitData.poll = {
         options: pollOptions,
       };
     }
 
-    setPost(data);
+    if (category === "SCENARIO") {
+      if (!selectedScenarioId) {
+        Swal.fire({
+          title: "오류",
+          text: "시나리오를 선택해주세요.",
+          icon: "error",
+        });
+        return;
+      }
+      submitData.scenarioId = selectedScenarioId as number;
+    }
+
+    setPost(submitData);
+  };
+
+  const handleSelectScenario = (senarioId: number) => {
+    setSelectedScenarioId(senarioId);
+    console.log(senarioId);
+    setIsScenarioModalOpen(false);
   };
 
   const category = watch("category");
@@ -90,14 +124,15 @@ function PostWriteForm() {
       className="w-[80%] flex flex-col items-center gap-4 py-10"
       onSubmit={handleSubmit(onSubmit)}
     >
-      {/* {isScenarioModalOpen && (
+      {isScenarioModalOpen && (
         <RepresentativeProfileModal
           isOpen={isScenarioModalOpen}
           onClose={handleCloseScenarioModal}
           selectedScenarioId={selectedScenarioId}
           setSelectedScenarioId={setSelectedScenarioId}
+          onSubmit={handleSelectScenario}
         />
-      )} */}
+      )}
       {/* 태그 radio 영역 */}
       <div className="w-full flex gap-2">
         <div className="w-full flex flex-col gap-2">
@@ -249,16 +284,24 @@ function PostWriteForm() {
 
       {/* scenario 영역 */}
       {category === "SCENARIO" && (
-        <div className="w-full flex flex-col gap-2 items-center justify-center">
-          <h3 className="text-lg">시나리오 선택</h3>
-          <span>아직 선택된 시나리오가 없습니다! 시나리오를 선택해주세요.</span>
+        <div className="w-full flex flex-col gap-2">
+          <h3 className="text-lg">시나리오 선택*</h3>
           <button
             type="button"
-            className="bg-deep-navy text-white rounded-md px-4 py-2 w-32"
+            className="bg-deep-navy text-white rounded-md px-4 py-2 w-full"
             onClick={handleOpenScenarioModal}
           >
             시나리오 선택
           </button>
+          {scenarioInfo ? (
+            <SharedScenarioItem scenarioInfo={scenarioInfo} />
+          ) : (
+            <>
+              <span className="text-center">
+                아직 선택된 시나리오가 없습니다! 시나리오를 선택해주세요.
+              </span>
+            </>
+          )}
         </div>
       )}
 

@@ -14,7 +14,7 @@ interface RepresentativeProfileModalProps {
   selectedScenarioId: number | null;
   setSelectedScenarioId: (id: number) => void;
   onSubmit: (scenarioId: number) => void;
-  mutation: UseMutationResult<unknown, Error, number, unknown>;
+  mutation?: UseMutationResult<unknown, Error, number, unknown>;
   title?: string;
 }
 
@@ -51,10 +51,10 @@ export default function RepresentativeProfileModal({
           ? [
               { label: "취소", onClick: onClose, variant: "outline" },
               {
-                label: mutation.isPending ? "저장중..." : "선택",
+                label: mutation?.isPending ? "저장중..." : "선택",
                 onClick: handleSelect,
                 variant: "primary",
-                disabled: mutation.isPending || !selectedScenarioId,
+                disabled: mutation?.isPending || !selectedScenarioId,
               },
             ]
           : [{ label: "닫기", onClick: onClose, variant: "outline" }]

@@ -1,11 +1,10 @@
 "use client";
 
 import BackButton from "@/share/components/BackButton";
-import { useSetPost } from "../api/useSetPost";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PostDetail, PostWrite } from "../types";
+import { PostWrite } from "../types";
 import tw from "@/share/utils/tw";
 import Swal from "sweetalert2";
 import { postWriteSchema } from "../schemas/posts";
@@ -16,6 +15,10 @@ import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import { useEditPost } from "../api/useEditPost";
 import { queryKeys } from "@/share/config/queryKeys";
 import { refresh } from "@/app/api/actions/refresh";
+import SharedScenarioItem from "./SharedScenarioItem";
+import { clientScenariosApi } from "@/domains/scenarios/api/clientScenariosApi";
+import { useQuery } from "@tanstack/react-query";
+import RepresentativeProfileModal from "@/domains/my-page/components/representativeprofile/RepresentativeProfileModal";
 
 function PostEditForm() {
   const [pollItems, setPollItems] = useState<string[]>(["", ""]);
@@ -23,6 +26,10 @@ function PostEditForm() {
   const { id } = useParams<{ id: string }>();
   const { data: user, isSuccess: isUserSuccess } = useAuthUser();
   const { data: post, isSuccess: isPostSuccess } = useGetPost(id);
+  const [isScenarioModalOpen, setIsScenarioModalOpen] = useState(false);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(
+    null
+  );
 
   const {
     register,
@@ -36,6 +43,15 @@ function PostEditForm() {
     },
     mode: "onSubmit",
     reValidateMode: "onBlur",
+  });
+
+  const { data: scenarioInfo } = useQuery({
+    queryKey: ["scenarioInfo", selectedScenarioId],
+    queryFn: () => {
+      if (!selectedScenarioId) return null;
+      return clientScenariosApi.getScenarioInfo(selectedScenarioId as number);
+    },
+    retry: false,
   });
 
   const { mutate: editPost } = useEditPost({
@@ -77,6 +93,21 @@ function PostEditForm() {
     editPost({ data, id });
   };
 
+  const handleCloseScenarioModal = () => {
+    setIsScenarioModalOpen(false);
+    setSelectedScenarioId(null);
+  };
+
+  const handleOpenScenarioModal = () => {
+    setIsScenarioModalOpen(true);
+  };
+
+  const handleSelectScenario = (senarioId: number) => {
+    setSelectedScenarioId(senarioId);
+    console.log(senarioId);
+    setIsScenarioModalOpen(false);
+  };
+
   // 유저 정보 조회 성공 시 작성자 비교
   useEffect(() => {
     if (isUserSuccess && isPostSuccess) {
@@ -111,6 +142,15 @@ function PostEditForm() {
       className="w-[80%] flex flex-col items-center gap-4 py-10"
       onSubmit={handleSubmit(onSubmit)}
     >
+      {isScenarioModalOpen && (
+        <RepresentativeProfileModal
+          isOpen={isScenarioModalOpen}
+          onClose={handleCloseScenarioModal}
+          selectedScenarioId={selectedScenarioId}
+          setSelectedScenarioId={setSelectedScenarioId}
+          onSubmit={handleSelectScenario}
+        />
+      )}
       {/* 태그 radio 영역 */}
       <div className="w-full flex gap-2">
         <div className="w-full flex flex-col gap-2">
@@ -123,11 +163,15 @@ function PostEditForm() {
                   id="chat"
                   className="hidden peer"
                   value="CHAT"
+                  disabled={category !== "CHAT"}
                   {...register("category")}
                 />
                 <label
                   htmlFor="chat"
-                  className="px-4 py-2 rounded-full border border-deep-navy hover:bg-gray-100 transition-colors peer-checked:bg-deep-navy peer-checked:text-white peer-checked:hover:bg-deep-navy cursor-pointer block"
+                  className={tw(
+                    "px-4 py-2 rounded-full border border-deep-navy hover:bg-gray-100 transition-colors peer-checked:bg-deep-navy peer-checked:text-white peer-checked:hover:bg-deep-navy cursor-pointer block",
+                    category !== "CHAT" && "cursor-not-allowed"
+                  )}
                 >
                   잡담
                 </label>
@@ -136,13 +180,20 @@ function PostEditForm() {
                 <input
                   type="radio"
                   id="poll"
-                  className="hidden peer"
+                  className={tw(
+                    "hidden peer",
+                    category !== "POLL" && "cursor-not-allowed"
+                  )}
                   value="POLL"
                   {...register("category")}
+                  disabled={category !== "POLL"}
                 />
                 <label
                   htmlFor="poll"
-                  className="px-4 py-2 rounded-full border border-deep-navy hover:bg-gray-100 transition-colors peer-checked:bg-deep-navy peer-checked:text-white peer-checked:hover:bg-deep-navy cursor-pointer block"
+                  className={tw(
+                    "px-4 py-2 rounded-full border border-deep-navy hover:bg-gray-100 transition-colors peer-checked:bg-deep-navy peer-checked:text-white peer-checked:hover:bg-deep-navy cursor-pointer block",
+                    category !== "POLL" && "cursor-not-allowed"
+                  )}
                 >
                   투표
                 </label>
@@ -151,13 +202,20 @@ function PostEditForm() {
                 <input
                   type="radio"
                   id="scenario"
-                  className="hidden peer"
+                  className={tw(
+                    "hidden peer",
+                    category !== "SCENARIO" && "cursor-not-allowed"
+                  )}
                   value="SCENARIO"
                   {...register("category")}
+                  disabled={category !== "SCENARIO"}
                 />
                 <label
                   htmlFor="scenario"
-                  className="px-4 py-2 rounded-full border border-deep-navy hover:bg-gray-100 transition-colors peer-checked:bg-deep-navy peer-checked:text-white peer-checked:hover:bg-deep-navy cursor-pointer block"
+                  className={tw(
+                    "px-4 py-2 rounded-full border border-deep-navy hover:bg-gray-100 transition-colors peer-checked:bg-deep-navy peer-checked:text-white peer-checked:hover:bg-deep-navy cursor-pointer block",
+                    category !== "SCENARIO" && "cursor-not-allowed"
+                  )}
                 >
                   시나리오
                 </label>
@@ -167,8 +225,9 @@ function PostEditForm() {
               <input
                 type="checkbox"
                 id="hide"
-                className="hidden peer"
+                className={tw("hidden peer")}
                 {...register("hide")}
+                disabled={category !== "CHAT"}
               />
               <label
                 htmlFor="hide"
@@ -256,6 +315,32 @@ function PostEditForm() {
           </div>
           {errors.poll && (
             <span className="text-red-500">{errors.poll.message}</span>
+          )}
+        </div>
+      )}
+
+      {/* 시나리오 영역 */}
+      {/* scenario 영역 */}
+      {category === "SCENARIO" && (
+        <div className="w-full flex flex-col gap-2">
+          <h3 className="text-lg">시나리오 선택*</h3>
+          <button
+            type="button"
+            className="bg-deep-navy text-white rounded-md px-4 py-2 w-full"
+            onClick={handleOpenScenarioModal}
+          >
+            시나리오 선택
+          </button>
+          {post?.scenario && !selectedScenarioId ? (
+            <SharedScenarioItem scenarioInfo={post?.scenario} />
+          ) : selectedScenarioId && scenarioInfo ? (
+            <SharedScenarioItem scenarioInfo={scenarioInfo} />
+          ) : (
+            <>
+              <span className="text-center">
+                아직 선택된 시나리오가 없습니다! 시나리오를 선택해주세요.
+              </span>
+            </>
           )}
         </div>
       )}

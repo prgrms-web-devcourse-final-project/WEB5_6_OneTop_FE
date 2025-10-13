@@ -14,5 +14,9 @@ export const useGetPost = (
       return res.data;
     },
     enabled: !!id,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 10,
+    retry: 2,
+    retryDelay: 1000,
   });
 };

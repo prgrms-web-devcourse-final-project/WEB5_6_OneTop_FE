@@ -25,8 +25,8 @@ function PollCard({ className, postId }: PollCardProps) {
       >
         <div className="flex flex-col px-2 min-w-0">
           <div className="flex justify-between min-w-0">
-            <h3 className="text-lg font-bold min-w-0">{items?.title}</h3>
-            <p className="text-sm text-gray-500 min-w-0">{items?.author}</p>
+            <h3 className="text-lg font-bold min-w-0 line-clamp-1">{items?.title}</h3>
+            <p className="text-sm text-gray-500 min-w-0 text-nowrap">{items?.author}</p>
           </div>
           <p className="line-clamp-2 min-w-0 break-words whitespace-pre-wrap">
             {items?.content}
