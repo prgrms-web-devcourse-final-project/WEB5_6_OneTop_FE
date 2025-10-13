@@ -12,21 +12,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { useSetUserProfile } from "../api/useSetUserProfile";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/share/config/queryKeys";
-import { getMyInfo } from "@/domains/my-page/api/myInfoApi";
 
 function FormSlider({ initialStep }: { initialStep: number }) {
   // URL 정보 처리 HOOK
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
-
-  // 유저 프로필 설정을 이미 완료했다면 redirect
-  const query = useQuery({
-    queryKey: queryKeys.myInfo.get(),
-    queryFn: getMyInfo,
-  });
 
   // URL 정보를 안전한 값으로 처리
   const stepFromUrl = Number(sp.get("step") ?? initialStep);
