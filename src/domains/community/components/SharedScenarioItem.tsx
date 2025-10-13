@@ -2,15 +2,27 @@ import { ScenarioInfoResponse } from "@/domains/scenarios/types";
 import tw from "@/share/utils/tw";
 import Image from "next/image";
 
-const getColorByScore = (score: number) => {
+const getThemeByScore = (score: number) => {
   if (score >= 400) {
-    return "rgba(135, 206, 235, 0.6)";
+    return {
+      accent: "#77E4D4",
+      background: "#0A0F1A",
+    };
   } else if (score >= 300) {
-    return "rgba(176, 196, 222, 0.5)";
+    return {
+      accent: "#6A8FFF",
+      background: "#10172A",
+    };
   } else if (score >= 200) {
-    return "rgba(218, 165, 32, 0.5)";
+    return {
+      accent: "#FFCA5F",
+      background: "#1A1410",
+    };
   } else {
-    return "rgba(128, 128, 128, 0.4)";
+    return {
+      accent: "#FF6B6B",
+      background: "#1C0E0E",
+    };
   }
 };
 
@@ -18,7 +30,7 @@ const dummyData = {
   scenarioId: 1001,
   status: "COMPLETED",
   job: "AI 연구원",
-  total: 400,
+  total: 450,
   summary:
     "당신은 성공적인 AI 연구자가 되어 학계와 업계에서 인정받으며, 균형 잡힌 삶을 살고 있습니다.",
   description:
@@ -59,22 +71,28 @@ function SharedScenarioItem({
   className?: string;
 }) {
   const data = scenarioInfo || dummyData;
-  const dynamicColor = getColorByScore(data.total);
+  const { accent, background } = getThemeByScore(data.total);
 
   return (
     <div
-      className={tw(
-        `bg-deep-navy relative overflow-hidden rounded-md ${className}`
-      )}
-      style={
-        {
-          "--dynamic-color": dynamicColor,
-        } as React.CSSProperties
-      }
+      className={tw(`relative overflow-hidden rounded-md ${className}`)}
+      style={{ background }}
     >
-      <div className="absolute inset-0 opacity-70 pointer-events-none">
-        <div className="subtle-space-animation"></div>
+      {/* 애니메이션 색상 */}
+      <div className="absolute inset-0 opacity-60 pointer-events-none">
+        <div
+          className="subtle-space-animation"
+          style={{
+            background: `radial-gradient(
+            ellipse at center,
+            transparent 30%,
+            ${accent}50 50%,
+            transparent 70%
+          )`,
+          }}
+        />
       </div>
+
       <div className="grid grid-cols-10 h-full">
         <div className="relative h-full rounded-l-md overflow-hidden col-span-3">
           <Image
@@ -116,7 +134,9 @@ function SharedScenarioItem({
                   <p className="text-white">{indicator.point}</p>
                 </div>
                 <div className="w-0.5 h-full bg-white" />
-                <p className="text-white text-sm h-10 flex items-center">{indicator.analysis}</p>
+                <p className="text-white text-sm h-10 flex items-center">
+                  {indicator.analysis}
+                </p>
               </div>
             ))}
           </div>
