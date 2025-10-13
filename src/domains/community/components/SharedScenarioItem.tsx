@@ -74,7 +74,7 @@ function SharedScenarioItem({
   scenarioInfo,
   className,
 }: {
-  scenarioInfo: ScenarioInfoResponse;
+  scenarioInfo?: ScenarioInfoResponse;
   className?: string;
 }) {
   const data = scenarioInfo || dummyData;
