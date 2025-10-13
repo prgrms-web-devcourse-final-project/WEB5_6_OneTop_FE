@@ -19,7 +19,7 @@ function BaselineList({ baselines, currentPage, pageSize }: BaselineListProps) {
           description="먼저 베이스라인에서 인생 분기점을 입력해주세요."
           linkText="베이스라인 입력하러 가기"
           linkHref="/baselines"
-          showBackground={true}
+          showBackground={false}
         />
       );
     }
@@ -31,7 +31,7 @@ function BaselineList({ baselines, currentPage, pageSize }: BaselineListProps) {
         description="베이스라인이 삭제되었습니다."
         linkText="첫 페이지로 돌아가기"
         linkHref="/scenario-list?page=1"
-        showBackground={true}
+        showBackground={false}
       />
     );
   }
