@@ -62,6 +62,7 @@ export const postWriteSchema = z.object({
       ),
     })
     .optional(),
+  scenarioId: z.number().optional(),
 });
 
 // 검색 조건 스키마

@@ -15,6 +15,7 @@ interface RepresentativeProfileModalProps {
   setSelectedScenarioId: (id: number) => void;
   onSubmit: (scenarioId: number) => void;
   mutation: UseMutationResult<unknown, Error, number, unknown>;
+  title?: string;
 }
 
 export default function RepresentativeProfileModal({
@@ -24,6 +25,7 @@ export default function RepresentativeProfileModal({
   setSelectedScenarioId,
   onSubmit,
   mutation,
+  title = "대표 시나리오 선택",
 }: RepresentativeProfileModalProps) {
   const [page, setPage] = useState(1);
 
@@ -41,7 +43,7 @@ export default function RepresentativeProfileModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="대표 시나리오 선택"
+      title={title}
       actions={
         isLoading
           ? []

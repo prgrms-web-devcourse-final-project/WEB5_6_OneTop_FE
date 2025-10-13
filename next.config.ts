@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         source: "/api/v1/:path*",
         destination: "http://localhost:8080/api/v1/:path*",
       },
+      {
+        source: "/oauth2/authorization/:path*",
+        destination: "http://localhost:8080/oauth2/authorization/:path*",
+      }
     ];
   },
   images: {

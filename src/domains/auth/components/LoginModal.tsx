@@ -12,7 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
 import { loginSchema } from "../schemas/loginSchema";
 import { useRouter } from "next/navigation";
-import { api } from "@/share/config/api";
+import { api, getApiBaseUrl } from "@/share/config/api";
 
 // TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
@@ -75,11 +75,17 @@ function LoginModal() {
   };
 
   const handleGithubLogin = () => {
-    window.location.href = `http://localhost:8080/oauth2/authorization/github`;
+    // 현재 페이지 경로를 state로 전달
+    const currentPath = window.location.pathname + window.location.search;
+    const encodedState = encodeURIComponent(currentPath);
+    window.location.href = `${getApiBaseUrl()}/oauth2/authorization/github?state=${encodedState}`;
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `http://localhost:8080/oauth2/authorization/google`;
+    // 현재 페이지 경로를 state로 전달
+    const currentPath = window.location.pathname + window.location.search;
+    const encodedState = encodeURIComponent(currentPath);
+    window.location.href = `${getApiBaseUrl()}/oauth2/authorization/google?state=${encodedState}`;
   };
 
   return (

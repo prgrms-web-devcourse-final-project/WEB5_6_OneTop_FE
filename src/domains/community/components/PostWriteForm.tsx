@@ -11,10 +11,22 @@ import Swal from "sweetalert2";
 import { postWriteSchema } from "../schemas/posts";
 import { IoClose } from "react-icons/io5";
 import { useRouter } from "next/navigation";
+import RepresentativeProfileModal from "@/domains/my-page/components/representativeprofile/RepresentativeProfileModal";
 
 function PostWriteForm() {
   const [pollItems, setPollItems] = useState<string[]>(["", ""]);
   const router = useRouter();
+  const [isScenarioModalOpen, setIsScenarioModalOpen] = useState(false);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
+
+  const handleCloseScenarioModal = () => {
+    setIsScenarioModalOpen(false);
+    setSelectedScenarioId(null);
+  };
+
+  const handleOpenScenarioModal = () => {
+    setIsScenarioModalOpen(true);
+  };
 
   const {
     register,
@@ -78,6 +90,14 @@ function PostWriteForm() {
       className="w-[80%] flex flex-col items-center gap-4 py-10"
       onSubmit={handleSubmit(onSubmit)}
     >
+      {/* {isScenarioModalOpen && (
+        <RepresentativeProfileModal
+          isOpen={isScenarioModalOpen}
+          onClose={handleCloseScenarioModal}
+          selectedScenarioId={selectedScenarioId}
+          setSelectedScenarioId={setSelectedScenarioId}
+        />
+      )} */}
       {/* 태그 radio 영역 */}
       <div className="w-full flex gap-2">
         <div className="w-full flex flex-col gap-2">
@@ -224,6 +244,21 @@ function PostWriteForm() {
           {errors.poll && (
             <span className="text-red-500">{errors.poll.message}</span>
           )}
+        </div>
+      )}
+
+      {/* scenario 영역 */}
+      {category === "SCENARIO" && (
+        <div className="w-full flex flex-col gap-2 items-center justify-center">
+          <h3 className="text-lg">시나리오 선택</h3>
+          <span>아직 선택된 시나리오가 없습니다! 시나리오를 선택해주세요.</span>
+          <button
+            type="button"
+            className="bg-deep-navy text-white rounded-md px-4 py-2 w-32"
+            onClick={handleOpenScenarioModal}
+          >
+            시나리오 선택
+          </button>
         </div>
       )}
 

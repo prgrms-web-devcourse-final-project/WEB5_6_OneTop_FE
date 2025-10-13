@@ -89,11 +89,13 @@ async function Page({
             </>
           ) : (
             // 초기 메인 페이지
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 py-4">
+              <h2 className="text-2xl font-bold">투표 목록</h2>
               <PollCardList />
               <hr className="border-gray-300" />
               <TargetPostSection />
               <hr className="border-gray-300" />
+              <h2 className="text-2xl font-bold">유저 공유 시나리오</h2>
               <SharedScenarioItem />
               <SharedScenarioItem />
               <hr className="border-gray-300" />
