@@ -109,7 +109,7 @@ export default function RepresentativeProfileModal({
           title="생성된 시나리오가 없습니다"
           description="시나리오를 먼저 생성해주세요"
           linkText="시나리오 생성하기"
-          linkHref="/scenario/new"
+          linkHref="/scenario-list"
         />
       )}
     </Modal>
