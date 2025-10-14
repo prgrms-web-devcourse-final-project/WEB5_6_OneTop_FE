@@ -261,11 +261,12 @@ export const BaselineSetupForm = ({
             </label>
             <textarea
               rows={1}
-              placeholder="선택에 추가적인 배경이나 판단 기준이 있었다면 적어주세요"
+              placeholder="선택에 추가적인 배경이나 판단 기준이 있었다면 적어주세요(200자 이내)"
               {...register("context")}
               className="flex-1 bg-white rounded-lg text-gray-800 p-3 resize-none overflow-hidden min-h-12 max-h-[120px] disabled:opacity-50"
               onInput={(e) => adjustTextareaHeight(e.currentTarget)}
               disabled={isSubmitted}
+              maxLength={200}
             />
           </div>
 

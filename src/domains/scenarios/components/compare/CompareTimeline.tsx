@@ -1,7 +1,11 @@
+"use client";
 import { TimelineCore } from "@/share/components/TimelineCore";
 import { CompareTimelineProps } from "../../types";
+import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 
 export const CompareTimeline = ({ data }: CompareTimelineProps) => {
+  const isMobile = useMobileDetection(768);
+
   const groupedByYear = data.reduce((acc, item) => {
     if (!acc[item.year]) {
       acc[item.year] = { base: [], compare: [] };
@@ -18,7 +22,75 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
     .map(Number)
     .sort((a, b) => a - b);
 
-  const renderContent = (year: number, index: number) => {
+  // 모바일용 세로 레이아웃
+  const renderMobileContent = (year: number, index: number) => {
+    const yearData = groupedByYear[year];
+    const hasBase = yearData?.base.length > 0;
+    const hasCompare = yearData?.compare.length > 0;
+
+    return (
+      <div className="flex items-center gap-3 w-full">
+        <div className="flex-1 text-right">
+          {hasBase ? (
+            <div className="space-y-1">
+              {yearData.base.map((item, idx) => (
+                <p
+                  key={`base-${idx}`}
+                  className="text-base font-medium text-gray-800 break-keep"
+                >
+                  {item.title}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <div className="h-4"></div>
+          )}
+        </div>
+
+        <div className="relative flex flex-col items-center shrink-0">
+          <div className="relative flex items-center">
+            {hasBase && (
+              <>
+                <div className="w-6 h-[1px] bg-gray-300"></div>
+                <div className="relative w-[15px] h-[15px] bg-ivory rounded-full -mr-2 z-20 after:absolute after:left-1 after:top-1 after:content-[''] after:block after:w-[7px] after:h-[7px] after:bg-white after:rounded-full"></div>
+              </>
+            )}
+
+            <div className="flex items-center justify-center w-20 h-20 rounded-full border border-midnight-blue text-base font-semibold bg-white z-10">
+              {year}
+            </div>
+
+            {hasCompare && (
+              <>
+                <div className="relative w-[15px] h-[15px] bg-midnight-blue rounded-full -ml-2 z-10 after:absolute after:left-1 after:top-1 after:content-[''] after:block after:w-[7px] after:h-[7px] after:bg-white after:rounded-full"></div>
+                <div className="w-6 h-[1px] bg-gray-300"></div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 text-left">
+          {hasCompare ? (
+            <div className="space-y-1">
+              {yearData.compare.map((item, idx) => (
+                <p
+                  key={`compare-${idx}`}
+                  className="text-base font-medium text-gray-800 break-keep"
+                >
+                  {item.title}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <div className="h-4"></div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // PC용 가로 레이아웃
+  const renderDesktopContent = (year: number, index: number) => {
     const yearData = groupedByYear[year];
     const hasBase = yearData?.base.length > 0;
     const hasCompare = yearData?.compare.length > 0;
@@ -81,27 +153,54 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
   };
 
   return (
-    <div className="relative max-w-[1440px] m-auto bg-white p-7 pb-[50px] rounded-lg border border-gray-200">
-      <div className="flex items-center pb-25">
+    <div className="relative max-w-[1440px] m-auto bg-white p-5 md:p-7 pb-10 md:pb-[50px] rounded-lg border border-gray-200">
+      <div className="flex items-center justify-between mb-7">
         <h3 className="text-[22px] font-semibold">타임라인</h3>
       </div>
 
-      <div className="absolute right-7 bottom-7 flex flex-col justify-center gap-1">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-midnight-blue rounded-full"></div>
-          <span className="text-sm text-gray-800">평행우주</span>
+      {isMobile && (
+        <div className="flex items-center justify-between mb-6 px-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-ivory rounded-full"></div>
+            <span className="text-sm font-medium text-gray-800">현재</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-midnight-blue rounded-full"></div>
+            <span className="text-sm font-medium text-gray-800">평행우주</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-ivory rounded-full"></div>
-          <span className="text-sm text-gray-800">현재</span>
-        </div>
-      </div>
+      )}
 
-      <TimelineCore
-        years={years}
-        renderContent={renderContent}
-        height="h-[300px]"
-      />
+      {!isMobile && (
+        <div className="absolute right-7 bottom-7 flex flex-col justify-center gap-1">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-midnight-blue rounded-full"></div>
+            <span className="text-sm font-medium text-gray-800">평행우주</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-ivory rounded-full"></div>
+            <span className="text-sm font-medium text-gray-800">현재</span>
+          </div>
+        </div>
+      )}
+
+      {isMobile ? (
+        <div className="relative space-y-6 before:content-[''] before:block before:absolute before:w-1 before:h-full before:bg-deep-navy before:left-1/2 before:-translate-x-1/2">
+          {years.map((year, index) => (
+            <div key={`mobile-${year}`} className="relative">
+              {renderMobileContent(year, index)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <TimelineCore
+          years={years}
+          renderContent={renderDesktopContent}
+          layout="horizontal"
+          height="h-[400px]"
+          className="md:pt-[90px] md:mb-[30px]"
+        />
+      )}
     </div>
   );
 };

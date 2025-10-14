@@ -13,7 +13,6 @@ import {
   CompareTimelineItem,
   RadarData,
   ScenarioCompareResponse,
-  TimelineResponse,
 } from "../../types";
 import { clientCompareApi } from "../../api/clientCompareApi";
 
@@ -173,14 +172,14 @@ export const ScenarioCompareContainer = () => {
     return (
       <div className="min-h-screen">
         {/* 메인 콘텐츠 */}
-        <div className="max-w-[1440px] m-auto px-7 my-15">
+        <div className="max-w-[1440px] m-auto min-[1440px]:px-0 px-5 my-10 md:my-15">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 mb-7">
             <CompareBarChart indicators={compareData.indicators} />
             <CompareRadarChart data={radarData} />
           </div>
         </div>
 
-        <div className="bg-gray-50 py-15">
+        <div className="bg-gray-50 py-10 md:py-15 min-[1440px]:px-0 px-5">
           <div className="max-w-[1440px] m-auto">
             {/* 타임라인 */}
             <CompareTimeline data={timelineData} />
