@@ -15,6 +15,7 @@ export function useMyInfo() {
     mutationFn: putMyInfo,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.myInfo.get() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.usageStats.all() });
 
       Swal.fire({
         title: "저장 완료",

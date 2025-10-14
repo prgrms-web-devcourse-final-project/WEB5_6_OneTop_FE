@@ -15,6 +15,8 @@ import ScenarioLinkButtons from "./ScenarioLinkButtons";
 import EndingBaseNodeView from "./EndingBaseNodeVIew";
 import BaseNodeHeaderView from "./BaseNodeHeaderView";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/share/config/queryKeys";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -45,6 +47,7 @@ const Sidebar = ({
   const { data: user, isLoading } = useAuthUser();
   const { mutate: createNode, isPending } = useCreateNode();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const isHeaderNode = selectedNode?.data?.isHeaderNode ?? false;
   const isEndingNode = selectedNode?.data?.isEndingNode ?? false;
@@ -428,6 +431,18 @@ const Sidebar = ({
       });
 
       if (data?.scenarioId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.tree.detail(baselineId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.scenarios.list(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.myScenarios.all(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.usageStats.all(),
+        });
         router.push(`/scenarios?scenarioId=${data.scenarioId}`);
       } else {
         alert("시나리오 ID를 가져오지 못했습니다.");

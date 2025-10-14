@@ -86,7 +86,7 @@ export const useBaselineSubmit = (
         await submitBaseline(isGuest, user.id, finalBirthYear);
 
         queryClient.invalidateQueries({
-          queryKey: queryKeys.baselines.all,
+          queryKey: queryKeys.baselines.all(),
         });
         await Swal.fire({
           title: "제출 완료!",
