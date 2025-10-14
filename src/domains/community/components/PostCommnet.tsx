@@ -9,7 +9,6 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import { useUpdateComment } from "../api/useUpdateComment";
 import tw from "@/share/utils/tw";
-import { useQueryClient } from "@tanstack/react-query";
 import CommnetLikeButton from "./CommnetLikeButton";
 import ProfileAvatar from "./ProfileAvatar";
 

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 // Protected 라우트라서 SEO는 간단하게
 export function generateMetadata() {
   return {
-    title: "Re:Life | 프로필 설정",
+    title: "프로필 설정 | Re:Life",
     robots: { index: false, follow: false }, // Protected 라우트라서 인덱싱 안함
   };
 }
