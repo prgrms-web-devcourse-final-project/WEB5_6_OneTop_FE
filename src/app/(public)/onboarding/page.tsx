@@ -7,6 +7,8 @@ import gsap from "gsap";
 import { useLoginModalStore } from "@/domains/auth/stores/loginModalStore";
 import { guestLoginAction } from "@/app/api/actions/guest-login";
 import { useRouter, useSearchParams } from "next/navigation";
+import { queryKeys } from "@/share/config/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Page() {
   const leftPannelRef = useRef<HTMLButtonElement>(null);
@@ -18,7 +20,8 @@ function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
-
+  const qc = useQueryClient();
+  
   const open = (e: HTMLElement) => {
     gsap.to(e, {
       height: "auto",
@@ -34,6 +37,7 @@ function Page() {
       setGuestLoginLoading(true);
       await guestLoginAction();
       router.refresh();
+      qc.invalidateQueries({ queryKey: queryKeys.auth.all() });
       if (redirectTo) {
         router.push(redirectTo);
       } else {
