@@ -214,14 +214,15 @@ export const Hero = () => {
       />
       <div
         ref={planet1Ref}
-        className="absolute left-1/2 -translate-x-1/2 -bottom-28 md:-bottom-57 opacity-0"
+        className="absolute left-1/2 -translate-x-1/2 -bottom-33 md:-bottom-57 opacity-0"
       >
-        <div className="relative w-[280px] h-[280px] md:w-[450px] md:h-[450px]">
+        <div className="relative w-[280px] h-[260px] md:w-[450px] md:h-[437px]">
           <Image
             src="/parallel_universe01.png"
             alt=""
             fill
             sizes="(max-width:768px) 280px, 450px"
+            className="object-contain"
           />
         </div>
       </div>
@@ -229,12 +230,13 @@ export const Hero = () => {
         ref={planet2Ref}
         className="absolute left-1/2 -translate-x-1/2 -top-20 md:-top-40 opacity-0"
       >
-        <div className="relative w-[280px] h-[280px] md:w-[450px] md:h-[450px]">
+        <div className="relative w-[280px] h-[260px] md:w-[450px] md:h-[437px]">
           <Image
             src="/parallel_universe02.png"
             alt=""
             fill
             sizes="(max-width:768px) 280px, 450px"
+            className="object-contain"
           />
         </div>
       </div>

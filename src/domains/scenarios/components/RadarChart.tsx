@@ -13,7 +13,7 @@ export const RadarChart = ({ data }: RadarChartProps) => {
   }));
 
   return (
-    <div className="bg-white p-7 rounded-lg border border-gray-200">
+    <div className="bg-white p-5 md:p-7 rounded-lg border border-gray-200">
       <div className="flex items-center mb-7">
         <h2 className="text-[22px] font-semibold">레이더 차트</h2>
       </div>

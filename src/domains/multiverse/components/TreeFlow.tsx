@@ -4,8 +4,10 @@ import { ReactFlowProvider } from "@xyflow/react";
 import TreeFlowContent from "./TreeFlowContent";
 import "@xyflow/react/dist/style.css";
 import ParticleBackground from "./ParticleBackground";
-
-const TreeFlow = () => {
+interface TreeFlowProps {
+  baselineId: number;
+}
+const TreeFlow = ({ baselineId }: TreeFlowProps) => {
   return (
     <div
       className="relative w-full h-screen"
@@ -16,7 +18,7 @@ const TreeFlow = () => {
       <ParticleBackground />
 
       <ReactFlowProvider>
-        <TreeFlowContent />
+        <TreeFlowContent baselineId={baselineId} />
       </ReactFlowProvider>
     </div>
   );

@@ -3,8 +3,12 @@ import tw from "@/share/utils/tw";
 
 const CustomNode = ({ data, selected }: NodeProps) => {
   if (!data || typeof data.ageYear !== "number") {
-    return;
+    return null;
   }
+
+  const isHeaderNode = data.isHeaderNode === true;
+  const isEndingNode = data.isEndingNode === true;
+
   return (
     <div
       className={tw(
@@ -15,7 +19,7 @@ const CustomNode = ({ data, selected }: NodeProps) => {
       )}
       style={{ transformOrigin: "center" }}
     >
-      {data.ageYear}
+      {isHeaderNode ? "시작" : isEndingNode ? "결말" : data.ageYear}
       <Handle
         type="target"
         position={Position.Left}

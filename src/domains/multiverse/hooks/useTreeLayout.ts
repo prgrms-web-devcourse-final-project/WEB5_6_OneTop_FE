@@ -4,7 +4,7 @@ import {
   LayoutEdge,
   TreeStructure,
   NodeAnalysis,
-  DecisionNode,
+  TreeNode,
 } from "../types";
 
 const LAYOUT_CONFIG = {
@@ -14,6 +14,12 @@ const LAYOUT_CONFIG = {
   MIN_HEIGHT: 100,
   NODE_Y_SPACE: 150,
 } as const;
+
+const getNodeKey = (node: TreeNode): string => {
+  if (node.type === "VIRTUAL") return node.id;
+  if (node.type === "DECISION") return `dec-${node.id}`;
+  return `base-${node.id}`;
+};
 
 export const useTreeLayout = () => {
   // 트리 분석
@@ -27,37 +33,32 @@ export const useTreeLayout = () => {
     if (directChildren.length === 0) {
       return {
         nodeAnalysis: new Map<string, NodeAnalysis>(),
-        regions: { top: [], bottom: [] },
+        regions: { top: [] as string[], bottom: [] as string[] },
       };
     }
 
     const nodeAnalysis = new Map<string, NodeAnalysis>();
     const regions = { top: [] as string[], bottom: [] as string[] };
 
+    const dfs = (nodeKey: string, depth: number, region: "top" | "bottom") => {
+      const children = childrenMap.get(nodeKey) || [];
+      const isLeaf = children.length === 0;
+
+      nodeAnalysis.set(nodeKey, { depth, region, isLeaf });
+
+      if (isLeaf) {
+        regions[region].push(nodeKey);
+        return;
+      }
+
+      children.forEach((child) => {
+        dfs(getNodeKey(child), depth + 1, region);
+      });
+    };
+
     directChildren.forEach((child, index) => {
       const region = index === 0 ? "top" : "bottom";
-      const queue = [{ nodeId: child.id.toString(), depth: 1 }];
-      const visited = new Set([child.id.toString()]);
-
-      while (queue.length > 0) {
-        const { nodeId, depth } = queue.shift()!;
-        const children = childrenMap.get(nodeId) || [];
-        const isLeaf = children.length === 0;
-
-        nodeAnalysis.set(nodeId, { depth, region, isLeaf });
-
-        if (isLeaf) {
-          regions[region].push(nodeId);
-        }
-
-        children.forEach((childNode) => {
-          const childId = childNode.id.toString();
-          if (!visited.has(childId)) {
-            visited.add(childId);
-            queue.push({ nodeId: childId, depth: depth + 1 });
-          }
-        });
-      }
+      dfs(getNodeKey(child), 1, region);
     });
 
     return { nodeAnalysis, regions };
@@ -97,41 +98,45 @@ export const useTreeLayout = () => {
     layoutNodesMap: Map<string, LayoutNode>,
     analysis: NodeAnalysis,
     yRegions: ReturnType<typeof calculateRegions>,
-    childrenMap: Map<string, (BaseNode | DecisionNode)[]>
+    childrenMap: Map<string, TreeNode[]>
   ): number => {
-    // 리프 노드
     if (leafPositions.has(nodeId)) {
       return leafPositions.get(nodeId)!;
     }
 
-    // 내부 노드
     const children = childrenMap.get(nodeId) || [];
-    const childYPositions = children
-      .map((child) => layoutNodesMap.get(child.id.toString())?.y)
+    const childKeys = children.map(getNodeKey);
+
+    const childYPositions = childKeys
+      .map((childKey) => layoutNodesMap.get(childKey)?.y)
       .filter((posY): posY is number => posY !== undefined);
 
-    // 자식 1 - 자식의 Y
-    if (childYPositions.length === 1) {
-      return childYPositions[0];
+    if (childYPositions.length === 0) {
+      return analysis.region === "top"
+        ? yRegions.topRegion.start + yRegions.topRegion.height / 2
+        : yRegions.bottomRegion.start + yRegions.bottomRegion.height / 2;
     }
 
-    // 자식 2 - 자식들의 중앙
-    if (childYPositions.length === 2) {
-      return childYPositions.reduce((sum, pos) => sum + pos, 0) / 2;
+    const sortedYPositions = [...childYPositions].sort((a, b) => a - b);
+
+    if (sortedYPositions.length === 1) {
+      return sortedYPositions[0];
     }
 
-    // 자식 3개 - 가운데 자식의 Y
-    if (childYPositions.length === 3) {
-      return childYPositions[1];
+    if (sortedYPositions.length === 2) {
+      return (sortedYPositions[0] + sortedYPositions[1]) / 2;
     }
 
-    // 자식 없음 - 영역 중앙
-    return analysis.region === "top"
-      ? yRegions.topRegion.start + yRegions.topRegion.height / 2
-      : yRegions.bottomRegion.start + yRegions.bottomRegion.height / 2;
+    if (sortedYPositions.length === 3) {
+      return sortedYPositions[1];
+    }
+
+    return (
+      sortedYPositions.reduce((sum, pos) => sum + pos, 0) /
+      sortedYPositions.length
+    );
   };
 
-  // 노드 배치
   const positionNodes = (
     nodeAnalysis: Map<string, NodeAnalysis>,
     regions: { top: string[]; bottom: string[] },
@@ -148,7 +153,6 @@ export const useTreeLayout = () => {
     const bottomLeaves = regions.bottom.length;
     const yRegions = calculateRegions(topLeaves, bottomLeaves);
 
-    // 리프 노드 위치 계산
     const leafPositions = new Map<string, number>();
 
     regions.top.forEach((leafId, index) => {
@@ -174,18 +178,15 @@ export const useTreeLayout = () => {
 
     nodeAnalysis.forEach((analysis, nodeId) => {
       const { depth } = analysis;
-
       if (!nodesByDepth.has(depth)) {
         nodesByDepth.set(depth, []);
       }
       nodesByDepth.get(depth)!.push(nodeId);
-
       if (depth > maxDepth) {
         maxDepth = depth;
       }
     });
 
-    // 위치 계산 (리프 → 루트)
     for (let depth = maxDepth; depth >= 1; depth--) {
       const nodesAtDepth = nodesByDepth.get(depth) || [];
 
@@ -213,14 +214,14 @@ export const useTreeLayout = () => {
       });
     }
 
-    // edges 생성
     nodeAnalysis.forEach((_analysis, nodeId) => {
       const children = childrenMap.get(nodeId) || [];
       children.forEach((child) => {
+        const childKey = getNodeKey(child);
         layoutEdges.push({
-          id: `${nodeId}-${child.id}`,
+          id: `${nodeId}-${childKey}`,
           source: nodeId,
-          target: child.id.toString(),
+          target: childKey,
         });
       });
     });
@@ -238,57 +239,66 @@ export const useTreeLayout = () => {
     const edges: LayoutEdge[] = [];
     const { childrenMap } = treeStructure;
 
-    // 베이스라인 노드 배치
     const regions = calculateRegions(0, 0);
+
     baselineNodes.forEach((node, i) => {
+      const nodeKey = `base-${node.id}`;
       nodes.push({
-        id: node.id.toString(),
+        id: nodeKey,
         x: LAYOUT_CONFIG.START_X + i * LAYOUT_CONFIG.NODE_SPACING,
         y: regions.baselineY,
-        isAtMaxDepth: i === baselineNodes.length - 1,
+        isAtMaxDepth: i >= baselineNodes.length - 2,
       });
 
       if (i < baselineNodes.length - 1) {
+        const nextNodeKey = `base-${baselineNodes[i + 1].id}`;
         edges.push({
           id: `baseline-${i}`,
-          source: node.id.toString(),
-          target: baselineNodes[i + 1].id.toString(),
+          source: nodeKey,
+          target: nextNodeKey,
         });
       }
     });
 
-    if (!expandedNodeId) return { nodes, edges };
+    if (!expandedNodeId) {
+      return { nodes, edges };
+    }
 
     const baselineIndex = baselineNodes.findIndex(
-      (node) => node.id.toString() === expandedNodeId
+      (node) => `base-${node.id}` === expandedNodeId
     );
-    if (baselineIndex === -1) return { nodes, edges };
+
+    if (baselineIndex === -1) {
+      return { nodes, edges };
+    }
 
     const { nodeAnalysis, regions: leafRegions } = analyzeTree(
       expandedNodeId,
       treeStructure
     );
 
-    if (nodeAnalysis.size === 0) return { nodes, edges };
+    if (nodeAnalysis.size === 0) {
+      return { nodes, edges };
+    }
 
     const { nodes: expandedNodes, edges: expandedEdges } = positionNodes(
       nodeAnalysis,
       leafRegions,
       baselineIndex,
-      baselineNodes.length - 1,
+      baselineNodes.length - 2,
       treeStructure
     );
 
     nodes.push(...expandedNodes);
     edges.push(...expandedEdges);
 
-    // 베이스라인 → 첫 자식 연결
     const directChildren = childrenMap.get(expandedNodeId) || [];
     directChildren.forEach((child) => {
+      const childKey = getNodeKey(child);
       edges.push({
-        id: `${expandedNodeId}-${child.id}`,
+        id: `${expandedNodeId}-${childKey}`,
         source: expandedNodeId,
-        target: child.id.toString(),
+        target: childKey,
       });
     });
 

@@ -28,6 +28,9 @@ export interface ScenarioData {
   analysis: AnalysisData;
   radarData: RadarData;
   events: TimelineItem[];
+  imageUrl?: string;
+  job?: string;
+  description?: string;
 }
 
 export interface AnalysisProps {
