@@ -18,7 +18,8 @@ export const useBaselineSubmit = (
 ): BaselineSubmitState => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { events, isSubmitted, submitBaseline } = useBaselineStore();
+  const { events, isSubmitted, submitBaseline, startNewBaseline } =
+    useBaselineStore();
   const sortedEvents = [...events].sort((a, b) => a.year - b.year);
   const queryClient = useQueryClient();
 
@@ -96,6 +97,8 @@ export const useBaselineSubmit = (
           confirmButtonColor: "#10B981",
           confirmButtonText: "확인",
         });
+
+        startNewBaseline();
 
         router.push("/scenario-list");
       } catch (error) {

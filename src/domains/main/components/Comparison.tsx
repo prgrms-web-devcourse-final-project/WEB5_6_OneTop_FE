@@ -96,6 +96,9 @@ const Comparison = () => {
           onChange={handleSliderChange}
           className="absolute bottom-15 md:bottom-25 -translate-y-1/2 left-[-25px] w-[calc(100%+50px)] z-[5] bg-transparent appearance-none focus:outline-none"
         />
+        <p className="w-full absolute text-center bottom-10 md:bottom-[85px] text-gray-300 opacity-60">
+          마우스를 좌우로 드래그 해보세요
+        </p>
       </div>
     </div>
   );

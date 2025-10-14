@@ -54,7 +54,7 @@ export const Analysis = ({ data }: AnalysisProps) => {
       </ul>
 
       {/* AI 종합 분석 */}
-      <div className="bg-gray-50 p-5 rounded-lg">
+      <div className="bg-gray-50 p-4 md:p-5 rounded-lg">
         <h4 className="flex items-center gap-1 text-lg font-medium mb-2">
           <FaLightbulb size={20} color="#FFC823" />
           AI 종합 분석
