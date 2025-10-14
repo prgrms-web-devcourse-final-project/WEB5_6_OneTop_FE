@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { Post, PostFilterType, PostSortType } from "../types";
 import { getPostList } from "../api/getPostList";
-import { timeFormatter } from "@/share/utils/timeFormatter";
-import { BiCommentDetail, BiLike, BiTime } from "react-icons/bi";
-import { useMemo } from "react";
+import { BiCommentDetail, BiLike } from "react-icons/bi";
 
 interface TargetPostListProps {
   size?: number;

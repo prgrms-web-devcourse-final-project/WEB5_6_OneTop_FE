@@ -10,6 +10,7 @@ import PostPoll from "./PostPoll";
 import { useGetPost } from "../api/useGetPost";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import SharedScenarioItem from "./SharedScenarioItem";
+import ProfileAvatar from "./ProfileAvatar";
 
 function PostContent({ id }: { id: string }) {
   const post = useGetPost(id);
@@ -38,14 +39,13 @@ function PostContent({ id }: { id: string }) {
   }
 
   const isMine = user?.data?.data.nickname === author;
-  console.log(post.data);
 
   return (
     <>
       {/* 헤더 영역 */}
       <header className="w-full flex border-b border-gray-300 pb-4 items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="rounded-full w-10 h-10 bg-gray-300" />
+          <ProfileAvatar nickname={author || ""} />
           <div>
             <h3>{author}</h3>
           </div>
