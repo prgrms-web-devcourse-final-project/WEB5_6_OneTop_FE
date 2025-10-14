@@ -6,6 +6,8 @@ import { useSetComment } from "../api/useSetComment";
 import { BiSend } from "react-icons/bi";
 import { useForm } from "react-hook-form";
 import ProfileAvatar from "./ProfileAvatar";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/share/config/queryKeys";
 
 // TODO: dehydration 으로 변경해 성능 최적화.
 function CommentWrite({ id }: { id: string }) {
@@ -13,6 +15,7 @@ function CommentWrite({ id }: { id: string }) {
   const parsedAuthUser = userProfileSchema.safeParse(authUser?.data);
   const author = parsedAuthUser.success ? parsedAuthUser.data?.nickname : null;
   const { mutate: setComment } = useSetComment();
+  const qc = useQueryClient();
 
   const { register, handleSubmit, reset } = useForm<{
     content: string;
@@ -31,6 +34,7 @@ function CommentWrite({ id }: { id: string }) {
       {
         onSuccess: () => {
           reset(); // 폼 초기화
+          qc.invalidateQueries({ queryKey: queryKeys.myComments.all() });
         },
         onError: (error) => {
           console.error("댓글 작성 실패:", error);

@@ -17,7 +17,7 @@ import { queryKeys } from "@/share/config/queryKeys";
 import { refresh } from "@/app/api/actions/refresh";
 import SharedScenarioItem from "./SharedScenarioItem";
 import { clientScenariosApi } from "@/domains/scenarios/api/clientScenariosApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import RepresentativeProfileModal from "@/domains/my-page/components/representativeprofile/RepresentativeProfileModal";
 
 function PostEditForm() {
@@ -30,6 +30,7 @@ function PostEditForm() {
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(
     null
   );
+  const qc = useQueryClient();
 
   const {
     register,
@@ -62,6 +63,7 @@ function PostEditForm() {
         icon: "success",
       });
       refresh(queryKeys.post.nextId(id as string)[1]);
+      qc.invalidateQueries({ queryKey: queryKeys.myPosts.all() });
       router.push(`/community/detail/${id}`);
     },
   });

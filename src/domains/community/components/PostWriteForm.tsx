@@ -13,8 +13,9 @@ import { IoClose } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import RepresentativeProfileModal from "@/domains/my-page/components/representativeprofile/RepresentativeProfileModal";
 import { clientScenariosApi } from "@/domains/scenarios/api/clientScenariosApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SharedScenarioItem from "./SharedScenarioItem";
+import { queryKeys } from "@/share/config/queryKeys";
 
 function PostWriteForm() {
   const [pollItems, setPollItems] = useState<string[]>(["", ""]);
@@ -23,6 +24,7 @@ function PostWriteForm() {
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(
     null
   );
+  const qc = useQueryClient();
 
   const { data: scenarioInfo } = useQuery({
     queryKey: ["scenarioInfo", selectedScenarioId],
@@ -65,6 +67,8 @@ function PostWriteForm() {
           text: "글작성이 완료되었습니다.",
           icon: "success",
         });
+        qc.invalidateQueries({ queryKey: queryKeys.myPosts.all() });
+        qc.invalidateQueries({ queryKey: queryKeys.post.all() });
         router.push(`/community/detail/${data.postId}`);
       },
     },
