@@ -8,6 +8,8 @@ import type {
   UserInfoResponse,
   BaselineSubmitState,
 } from "../types";
+import { queryKeys } from "@/share/config/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useBaselineSubmit = (
   user: BaselineUser | null,
@@ -17,8 +19,8 @@ export const useBaselineSubmit = (
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { events, isSubmitted, submitBaseline } = useBaselineStore();
-
   const sortedEvents = [...events].sort((a, b) => a.year - b.year);
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (): Promise<void> => {
     if (!user || isSubmitting) return;
@@ -82,6 +84,9 @@ export const useBaselineSubmit = (
 
         await submitBaseline(isGuest, user.id, finalBirthYear);
 
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.baselines.all,
+        });
         await Swal.fire({
           title: "제출 완료!",
           html: isGuest
