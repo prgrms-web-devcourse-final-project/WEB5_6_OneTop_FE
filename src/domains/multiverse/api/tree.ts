@@ -72,21 +72,15 @@ export async function createScenarioWithDecision(
 export async function getScenarioByDecisionLine(
   decisionLineId: number
 ): Promise<{ scenarioId: number; baseScenarioId: number }> {
-  const response = await nextFetcher(
-    `${getApiBaseUrl()}/api/v1/scenarios/by-decision-line/${decisionLineId}`,
-    {
-      method: "GET",
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    }
-  );
+  try {
+    const response = await api.get<{
+      scenarioId: number;
+      baseScenarioId: number;
+    }>(`/api/v1/scenarios/by-decision-line/${decisionLineId}`);
 
-  if (!response.ok) {
-    throw new Error(`시나리오 아이디 조회 실패: ${response.status}`);
+    return response.data;
+  } catch (error) {
+    console.error("시나리오 아이디 조회 실패:", error);
+    throw error;
   }
-
-  return await response.json();
 }

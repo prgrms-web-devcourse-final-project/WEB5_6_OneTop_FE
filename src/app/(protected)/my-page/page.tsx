@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Re:Life | 마이페이지",
+  title: "마이페이지 | Re:Life",
   description: "당신의 정보를 확인해보세요.",
 };
 

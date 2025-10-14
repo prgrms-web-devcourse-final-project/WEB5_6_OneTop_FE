@@ -92,7 +92,7 @@ export default function MyScenarios() {
             title="아직 생성된 평행우주가 없습니다"
             description="새로운 시나리오를 만들어보세요."
             linkText="시나리오 만들기"
-            linkHref="/scenario/create"
+            linkHref="/scenario-list"
           />
         )}
       </div>
