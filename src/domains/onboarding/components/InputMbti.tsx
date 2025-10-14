@@ -33,7 +33,7 @@ function InputMbti({ control, className }: InputProps) {
       defaultValue="ESTJ"
       render={({ field }) => (
         <div className={tw("flex gap-20 items-center justify-center w-full py-5", className)}>
-          {field.value.split("").map((item, index) => (
+          {field.value.split("").map((item) => (
             <button
               className="w-20 text-center py-12 rounded-lg text-4xl font-medium transition-all duration-200 
               text-white border-1 border-white hover:bg-gray-900 overflow-hidden"

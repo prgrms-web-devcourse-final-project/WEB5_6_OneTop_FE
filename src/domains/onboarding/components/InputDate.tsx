@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import {getDefaultClassNames } from "react-day-picker";
 import { InputProps } from "../types";
 import tw from "@/share/utils/tw";
 
