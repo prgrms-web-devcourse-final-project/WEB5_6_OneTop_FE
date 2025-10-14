@@ -39,7 +39,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   });
 
   // useMutation으로 API 호출 관리
-  const {mutate, isPending} = useSetUserProfile()
+  const { mutate, isPending } = useSetUserProfile();
 
   // 해당 슬라이드로 이동 이벤트 핸들러
   const goto = (to: number) => {
