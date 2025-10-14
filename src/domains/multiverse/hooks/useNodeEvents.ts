@@ -25,16 +25,16 @@ export const useNodeEvents = ({
   setNodes,
   fitView,
 }: UseNodeEventsProps) => {
-  // 베이스노드 클릭 시
-  const handleBaselineNodeClick = useCallback(
+  // BaseNode 클릭 시
+  const handleBaseNodeClick = useCallback(
     (node: Node) => {
-      const isCurrentlyExpanded = expandedNodeId === node.id;
-      const isCurrentlySelected = selectedNodeId === node.id;
+      const isExpanded = expandedNodeId === node.id;
+      const isSelected = selectedNodeId === node.id;
 
-      if (isCurrentlyExpanded && isCurrentlySelected) {
+      if (isExpanded && isSelected) {
         setExpandedNodeId(null);
         setSelectedNodeId(null);
-      } else if (isCurrentlyExpanded && !isCurrentlySelected) {
+      } else if (isExpanded && !isSelected) {
         setSelectedNodeId(node.id);
         fitView({ nodes: [{ id: node.id }], duration: 800, maxZoom: 0.7 });
       } else {
@@ -43,10 +43,16 @@ export const useNodeEvents = ({
         fitView({ nodes: [{ id: node.id }], duration: 800, maxZoom: 0.7 });
       }
     },
-    [expandedNodeId, selectedNodeId, fitView]
+    [
+      expandedNodeId,
+      selectedNodeId,
+      setExpandedNodeId,
+      setSelectedNodeId,
+      fitView,
+    ]
   );
 
-  // 결정노드 클릭 시
+  // DecisionNode/VirtualNode 클릭 시
   const handleDecisionNodeClick = useCallback(
     (node: Node) => {
       setSelectedNodeId(node.id);
@@ -55,36 +61,38 @@ export const useNodeEvents = ({
     [setSelectedNodeId, fitView]
   );
 
-  // 노드 타입 별 처리
-  const handleNodeClick = (_: React.MouseEvent, node: Node) => {
-    if (!treeData) return;
+  // 노드 타입 별 클릭
+  const handleNodeClick = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      if (!treeData) return;
 
-    setNodes((prevNodes) =>
-      prevNodes.map((n) => ({
-        ...n,
-        selected: n.id === node.id,
-      }))
-    );
+      setNodes((prevNodes) =>
+        prevNodes.map((n) => ({ ...n, selected: n.id === node.id }))
+      );
 
-    setSelectedNodeId(node.id);
+      if (node.id.startsWith("base-") || node.data?.isBaselineNode) {
+        handleBaseNodeClick(node);
+      } else {
+        handleDecisionNodeClick(node);
+      }
+    },
+    [treeData, setNodes, handleBaseNodeClick, handleDecisionNodeClick]
+  );
 
-    if (node.data?.isBaselineNode) {
-      handleBaselineNodeClick(node);
-    } else {
-      handleDecisionNodeClick(node);
-    }
-  };
+  // 해당 선택지로 이동 클릭 시
+  const navigateToNode = useCallback(
+    (nodeId: string) => {
+      if (!treeData) return;
 
-  // 해당 선택지로 이동 클릭
-  const navigateToNode = (nodeId: string) => {
-    if (!treeData) return;
+      setNodes((prevNodes) =>
+        prevNodes.map((n) => ({ ...n, selected: n.id === nodeId }))
+      );
 
-    setSelectedNodeId(nodeId);
-    fitView({ nodes: [{ id: nodeId }], duration: 800, maxZoom: 1.0 });
-  };
+      setSelectedNodeId(nodeId);
+      fitView({ nodes: [{ id: nodeId }], duration: 800, maxZoom: 1.0 });
+    },
+    [treeData, setNodes, setSelectedNodeId, fitView]
+  );
 
-  return {
-    handleNodeClick,
-    navigateToNode,
-  };
+  return { handleNodeClick, navigateToNode };
 };
