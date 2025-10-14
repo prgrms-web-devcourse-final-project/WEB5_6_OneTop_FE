@@ -13,12 +13,13 @@ interface PageProps {
 
 const Page = async ({ params }: PageProps) => {
   const { baselineId } = await params;
+  const baselineIdNum = Number(baselineId);
 
-  if (!baselineId) {
+  if (!baselineId || isNaN(baselineIdNum)) {
     notFound();
   }
 
-  return <TreeFlow baselineId={baselineId} />;
+  return <TreeFlow baselineId={baselineIdNum} />;
 };
 
 export default Page;
