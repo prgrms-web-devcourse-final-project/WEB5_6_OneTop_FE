@@ -32,7 +32,6 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     handleSubmit,
     formState: { errors },
     setValue,
-    getValues,
     control,
   } = useForm<UserOnboardingData>({
     resolver: zodResolver(FormSchema),
@@ -160,7 +159,6 @@ function FormSlider({ initialStep }: { initialStep: number }) {
           className="cursor-pointer absolute right-10 -translate-y-1/2 z-20"
           onClick={() => {
             onNext();
-            console.log(getValues());
           }}
           disabled={safeIdx === steps.length - 1}
         >

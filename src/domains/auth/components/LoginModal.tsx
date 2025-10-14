@@ -61,7 +61,8 @@ function LoginModal() {
       }
     } else {
       // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
-      setError(result.data.message);
+      console.log("로그인 실패", result.data);
+      setError(result.data.data.message);
     }
   };
 

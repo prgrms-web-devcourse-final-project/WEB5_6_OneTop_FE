@@ -1,7 +1,6 @@
 "use client";
 
-import { BiLike, BiSolidTrash } from "react-icons/bi";
-import { getComments } from "../api/getComments";
+import { BiSolidTrash } from "react-icons/bi";
 import { commentsResponseSchema } from "../schemas/comments";
 import { PiNotePencil } from "react-icons/pi";
 import { useGetComments } from "../api/useGetComments";
@@ -12,6 +11,7 @@ import { useUpdateComment } from "../api/useUpdateComment";
 import tw from "@/share/utils/tw";
 import { useQueryClient } from "@tanstack/react-query";
 import CommnetLikeButton from "./CommnetLikeButton";
+import ProfileAvatar from "./ProfileAvatar";
 
 export function PostCommnet({ id }: { id: string }) {
   // state 선언
@@ -97,7 +97,7 @@ export function PostCommnet({ id }: { id: string }) {
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="rounded-full w-8 h-8 bg-gray-300" />
+                <ProfileAvatar nickname={author || ""} size={24} />
                 <div>{author}</div>
               </div>
               <div className="flex items-center gap-2">

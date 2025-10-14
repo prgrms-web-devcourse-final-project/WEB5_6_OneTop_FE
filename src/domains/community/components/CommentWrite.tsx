@@ -5,6 +5,7 @@ import { userProfileSchema } from "@/domains/auth/schemas/loginResponseSchema";
 import { useSetComment } from "../api/useSetComment";
 import { BiSend } from "react-icons/bi";
 import { useForm } from "react-hook-form";
+import ProfileAvatar from "./ProfileAvatar";
 
 // TODO: dehydration 으로 변경해 성능 최적화.
 function CommentWrite({ id }: { id: string }) {
@@ -44,7 +45,7 @@ function CommentWrite({ id }: { id: string }) {
       {author && (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="rounded-full w-8 h-8 bg-gray-300" />
+            <ProfileAvatar nickname={author || ""} size={24} />
             <div>{author}</div>
           </div>
           <div className="flex items-center gap-2">

@@ -104,7 +104,6 @@ function PostEditForm() {
 
   const handleSelectScenario = (senarioId: number) => {
     setSelectedScenarioId(senarioId);
-    console.log(senarioId);
     setIsScenarioModalOpen(false);
   };
 
