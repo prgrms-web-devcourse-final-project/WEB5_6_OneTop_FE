@@ -19,6 +19,7 @@ export function useUpdateComment({ postId }: { postId: string }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.comment.get(postId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myComments.all() });
     },
     onError: (error) => {
       console.error(error);
