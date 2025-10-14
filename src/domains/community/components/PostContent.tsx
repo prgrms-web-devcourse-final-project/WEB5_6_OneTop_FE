@@ -73,6 +73,7 @@ function PostContent({ id }: { id: string }) {
                 voteCount: option.voteCount || 0,
                 isVoted: polls.selected?.[0] === option.index || false,
               }))}
+              itemlineClamp={3}
             />
           </div>
         )}

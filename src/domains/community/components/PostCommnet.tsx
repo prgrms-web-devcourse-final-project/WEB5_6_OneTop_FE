@@ -18,10 +18,9 @@ export function PostCommnet({ id }: { id: string }) {
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState<string>("");
   const [editHide, setEditHide] = useState<boolean>(false);
-  const queryClient = useQueryClient();
 
   // 조회 query
-  const { data: comments, isLoading } = useGetComments({ id });
+  const { data: comments, isLoading } = useGetComments({ id, page: 1, size: 30 });
 
   // 수정, 삭제 mutation
   const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment({

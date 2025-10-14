@@ -48,7 +48,7 @@ async function Page({
       keyword,
       category,
       searchType,
-      sort: "createdDate",
+      sortType: "LATEST",
     });
 
     const data = response;

@@ -15,7 +15,7 @@ async function PollCardList() {
     size: 10,
     category: "POLL",
     searchType: "TITLE",
-    sort: "LIKES",
+    sortType: "LIKES",
     keyword: "",
   });
 

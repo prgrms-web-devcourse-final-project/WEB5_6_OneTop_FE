@@ -1,14 +1,22 @@
-import { api, getApiBaseUrl } from "@/share/config/api";
+import { getApiBaseUrl } from "@/share/config/api";
 import { nextFetcher } from "@/share/utils/nextFetcher";
-import { headers } from "next/headers";
 
-
-export async function getComments({ id }: { id: string }) {
-
-  const res = await nextFetcher(`${getApiBaseUrl()}/api/v1/posts/${id}/comments`, {
-    method: "GET",
-    cache: "no-store",
-  });
+export async function getComments({
+  id,
+  page = 1,
+  size = 30,
+}: {
+  id: string;
+  page?: number;
+  size?: number;
+}) {
+  const res = await nextFetcher(
+    `${getApiBaseUrl()}/api/v1/posts/${id}/comments?page=${page}&size=${size}`,
+    {
+      method: "GET",
+      cache: "no-store",
+    }
+  );
 
   return res.json();
 }
