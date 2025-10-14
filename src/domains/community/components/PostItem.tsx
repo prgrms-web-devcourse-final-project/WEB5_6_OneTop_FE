@@ -8,13 +8,6 @@ interface PostItemProps {
   post: Post;
 }
 
-const categoryColor = {
-  CHAT: "bg-blue-500",
-  NOTICE: "bg-green-500",
-  POLL: "bg-yellow-500",
-  SCENARIO: "bg-purple-500",
-};
-
 const categoryText = {
   CHAT: "잡담",
   NOTICE: "공지",

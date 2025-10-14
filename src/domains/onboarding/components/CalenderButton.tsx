@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { BiCalendarAlt } from "react-icons/bi";
 import { ko } from "react-day-picker/locale";

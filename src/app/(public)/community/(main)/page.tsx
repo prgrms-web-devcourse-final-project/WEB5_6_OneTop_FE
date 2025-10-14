@@ -9,7 +9,6 @@ import Pagination from "@/share/components/Pagination";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import TargetPostList from "@/domains/community/components/TargetPostList";
 import TargetPostSection from "@/domains/community/components/TargetPostSection";
 import SharedScenarioItem from "@/domains/community/components/SharedScenarioItem";
 
@@ -48,7 +47,7 @@ async function Page({
       keyword,
       category,
       searchType,
-      sort: "createdDate",
+      sortType: "LATEST",
     });
 
     const data = response;

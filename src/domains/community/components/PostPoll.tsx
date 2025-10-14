@@ -16,7 +16,7 @@ interface PostPollProps {
   items: PostPollType[];
   className?: string;
   viewLength?: number;
-  optionTextLength?: number;
+  itemlineClamp?: number;
   postId?: string;
 }
 
@@ -24,8 +24,8 @@ function PostPoll({
   items,
   className,
   viewLength = 50,
-  optionTextLength = 100,
   postId,
+  itemlineClamp = 1,
 }: PostPollProps) {
   // 초기 설정
   const { id } = useParams();
@@ -89,25 +89,31 @@ function PostPoll({
         .map((item, index) => (
           <li key={index} className="cursor-pointer">
             <button
-              className={tw("relative overflow-hidden w-full")}
+              className={tw(
+                "relative overflow-hidden w-full px-4 py-3 rounded border min-h-[44px]",
+                "flex items-center justify-center text-center",
+                "bg-white text-deep-navy border-deep-navy",
+                whatEverVoted && "border-ivory bg-ivory/30",
+                item.isVoted && "bg-ivory"
+              )}
               onClick={() => handleVote(index)}
               disabled={whatEverVoted ? true : false}
             >
-              <input
-                type="button"
-                className={tw(
-                  "px-4 py-2 bg-white text-deep-navy rounded h-11 w-full border border-deep-navy",
-                  whatEverVoted && "border-ivory bg-ivory/30",
-                  item.isVoted && "bg-ivory"
-                )}
-              />
               <div
                 className={tw(
-                  "text-deep-navy absolute right-[50%] bottom-[50%] translate-y-[50%] translate-x-[50%] z-20 max-w-[80%]",
-                  "truncate overflow-hidden",
-                  item.isVoted
-                    ? "text-white drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
-                    : "text-slate-700"
+                  `w-fulltext-slate-700 px-10`,
+                  item.isVoted &&
+                    "text-white drop-shadow-[0_0_1px_rgba(0,0,0,1)] relative z-20",
+                  itemlineClamp === 1 && "line-clamp-1",
+                  itemlineClamp === 2 && "line-clamp-2",
+                  itemlineClamp === 3 && "line-clamp-3",
+                  itemlineClamp === 4 && "line-clamp-4",
+                  itemlineClamp === 5 && "line-clamp-5",
+                  itemlineClamp === 6 && "line-clamp-6",
+                  itemlineClamp === 7 && "line-clamp-7",
+                  itemlineClamp === 8 && "line-clamp-8",
+                  itemlineClamp === 9 && "line-clamp-9",
+                  itemlineClamp === 10 && "line-clamp-10"
                 )}
                 style={
                   item.isVoted
@@ -122,8 +128,8 @@ function PostPoll({
               </div>
               <div
                 className={tw(
-                  "absolute top-0 left-0 h-full flex items-center justify-end",
-                  "transition-all duration-700 ease-in-out rounded-md px-4 z-10",
+                  "absolute inset-y-0 left-0 flex items-center justify-end rounded z-10",
+                  "transition-all duration-700 ease-in-out px-4",
                   whatEverVoted ? "opacity-100" : "opacity-0",
                   item.isVoted
                     ? "bg-gradient-to-r from-deep-navy/70 to-deep-navy/90"

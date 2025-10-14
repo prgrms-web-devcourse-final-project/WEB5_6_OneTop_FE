@@ -48,6 +48,7 @@ function PollCard({ className, postId }: PollCardProps) {
               })) || []
             }
             viewLength={3}
+            itemlineClamp={1}
             postId={items?.postId.toString()}
           />
         </div>

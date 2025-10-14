@@ -6,7 +6,7 @@ import { BiCommentDetail, BiLike } from "react-icons/bi";
 interface TargetPostListProps {
   size?: number;
   category?: PostFilterType;
-  sort?: PostSortType;
+  sortType?: PostSortType;
   keyword?: string;
   title?: string;
 }
@@ -14,7 +14,7 @@ interface TargetPostListProps {
 async function TargetPostList({
   size = 8,
   category = "ALL",
-  sort = "LIKES",
+  sortType = "LIKES",
   keyword = "",
   title = "게시글",
 }: TargetPostListProps) {
@@ -23,7 +23,7 @@ async function TargetPostList({
     searchType: "TITLE",
     size,
     category,
-    sort,
+    sortType,
     keyword,
   });
 
