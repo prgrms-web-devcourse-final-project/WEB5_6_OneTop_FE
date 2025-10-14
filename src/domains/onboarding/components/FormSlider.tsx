@@ -32,7 +32,6 @@ function FormSlider({ initialStep }: { initialStep: number }) {
     handleSubmit,
     formState: { errors },
     setValue,
-    getValues,
     control,
   } = useForm<UserOnboardingData>({
     resolver: zodResolver(FormSchema),
@@ -40,7 +39,7 @@ function FormSlider({ initialStep }: { initialStep: number }) {
   });
 
   // useMutation으로 API 호출 관리
-  const {mutate, isPending} = useSetUserProfile()
+  const { mutate, isPending } = useSetUserProfile();
 
   // 해당 슬라이드로 이동 이벤트 핸들러
   const goto = (to: number) => {
@@ -160,7 +159,6 @@ function FormSlider({ initialStep }: { initialStep: number }) {
           className="cursor-pointer absolute right-10 -translate-y-1/2 z-20"
           onClick={() => {
             onNext();
-            console.log(getValues());
           }}
           disabled={safeIdx === steps.length - 1}
         >

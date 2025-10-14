@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import FormSlider from "@/domains/onboarding/components/FormSlider";
-import { getAuthUser } from "@/domains/auth/api/getAuthUser";
+import { getMyInfo } from "@/domains/onboarding/api/getMyInfo";
+import { redirect } from "next/navigation";
 
 // Protected 라우트라서 SEO는 간단하게
 export function generateMetadata() {
@@ -10,7 +11,13 @@ export function generateMetadata() {
   };
 }
 
-function Page() {
+async function Page() {
+  const data = await getMyInfo();
+
+  if (typeof data?.mbti === "string") {
+    redirect("/baselines");
+  }
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <FormSlider initialStep={0} />

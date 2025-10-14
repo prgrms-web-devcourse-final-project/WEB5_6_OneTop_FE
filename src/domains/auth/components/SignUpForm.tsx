@@ -57,19 +57,16 @@ function SignUpForm() {
     }
     formData.append("agree", data.agree.toString());
 
-    try {
-      const result = await signupAction(formData);
-      console.log(result);
+    const result = await signupAction(formData);
+
+    if (result.success) {
+      console.log("회원가입 성공", result.data);
       router.push("/");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "회원가입 중 오류가 발생했습니다.";
-      setError(errorMessage);
-    } finally {
-      setIsPending(false);
+    } else {
+      setError(result.data.message);
     }
+    
+    setIsPending(false);
   };
 
   return (

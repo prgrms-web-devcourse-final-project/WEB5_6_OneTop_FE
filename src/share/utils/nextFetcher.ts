@@ -47,12 +47,24 @@ export async function nextFetcher(url: string, options?: RequestInit) {
       const errorBody = await response.json();
 
       switch (response.status) {
+        case 400:
+          throw new Error(errorBody.message);
         case 401:
+          throw new Error(errorBody.message);
+        case 402:
           throw new Error(errorBody.message);
         case 403:
           throw new Error(errorBody.message);
+        case 404:
+          throw new Error(errorBody.message);
+        case 405:
+          throw new Error(errorBody.message);
+        case 406:
+          throw new Error(errorBody.message);
         default:
-          throw new Error(`${response.status} - ${errorBody.message}`);
+          throw new Error(
+            `${response.status} - ${response.statusText}: ${errorBody.message}`
+          );
       }
     } catch (error) {
       console.error("Error fetching data:", error);

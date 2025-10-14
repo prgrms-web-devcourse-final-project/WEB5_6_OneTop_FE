@@ -62,12 +62,11 @@ export async function signupAction(formData: FormData) {
     // 에러 상세 내용 확인
     const errorData = await res.text();
     console.log("에러 상세 내용:", res);
-    return null;
-    throw new Error(errorData);
+    return { success: false, data: { message: errorData } };
   }
 
   revalidatePath("/");
 
   // 임시로 안전한 객체 반환
-  return res.json()
+  return { success: true, data: await res.json() };
 }

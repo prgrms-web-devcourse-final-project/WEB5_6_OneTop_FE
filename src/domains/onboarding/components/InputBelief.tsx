@@ -24,7 +24,12 @@ function InputBelief({ control, className }: InputProps) {
       name={"beliefs"}
       render={({ field }) => (
         <>
-          <div className={tw("flex flex-col items-center justify-center", className)}>
+          <div
+            className={tw(
+              "flex flex-col items-center justify-center",
+              className
+            )}
+          >
             <div className="grid grid-cols-5 gap-x-8 gap-y-10">
               {NORMAL_BELIEFS.map((belief) => (
                 <button
