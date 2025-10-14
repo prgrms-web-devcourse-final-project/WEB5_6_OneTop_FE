@@ -11,9 +11,9 @@ import {
   Cell,
   Tooltip as RechartsTooltip,
 } from "recharts";
-import { IndicatorComparison } from "../../types";
-import { Tooltip } from "@/share/components/Tooltip";
 import { PiWarningCircleFill } from "react-icons/pi";
+import { Tooltip } from "@/share/components/Tooltip";
+import { IndicatorComparison } from "../../types";
 
 interface CompareBarChartProps {
   indicators: IndicatorComparison[];
@@ -54,14 +54,14 @@ export const CompareBarChart = ({ indicators }: CompareBarChartProps) => {
   ];
 
   return (
-    <div className="bg-white p-7 rounded-lg border border-gray-200">
+    <div className="bg-white p-5 md:p-7 rounded-lg border border-gray-200">
       {/* 탭 메뉴 */}
       <div className="flex items-center justify-evenly gap-2 mb-8 bg-gray-50 rounded-full">
         {tabs.map((tab, index) => (
           <button
             key={tab}
             onClick={() => setActiveTab(index)}
-            className={`flex-1 h-[50px] text-lg rounded-full transition-all ${
+            className={`flex-1 h-[50px] text-base md:text-lg rounded-full transition-all ${
               activeTab === index
                 ? "bg-deep-navy text-white"
                 : "bg-transparent text-gray-400 hover:text-gray-600"
@@ -121,7 +121,7 @@ export const CompareBarChart = ({ indicators }: CompareBarChartProps) => {
       </div>
 
       {/* AI 분석 */}
-      <div className="bg-gray-50 p-5 rounded-lg">
+      <div className="bg-gray-50 p-4 md:p-5 rounded-lg">
         <h4 className="flex items-center gap-1 text-lg font-medium mb-2">
           AI 분석
           <Tooltip

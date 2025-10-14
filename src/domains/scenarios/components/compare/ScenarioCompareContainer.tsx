@@ -173,7 +173,7 @@ export const ScenarioCompareContainer = () => {
     return (
       <div className="min-h-screen">
         {/* 메인 콘텐츠 */}
-        <div className="max-w-[1440px] m-auto px-7 my-15">
+        <div className="max-w-[1440px] m-auto min-[1440px]:px-0 px-5 my-10 md:my-15">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 mb-7">
             <CompareBarChart indicators={compareData.indicators} />
             <CompareRadarChart data={radarData} />
