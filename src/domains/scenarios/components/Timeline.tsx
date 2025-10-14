@@ -16,22 +16,14 @@ export const Timeline = ({ data }: TimelineProps) => {
     return (
       <div className="flex items-center gap-4 w-full">
         <div className="relative flex flex-col items-center shrink-0">
-          {/* {index !== 0 && <div className="w-[2px] h-8 bg-gray-300"></div>} */}
-
           <div className="relative flex items-center">
             <div className="flex items-center justify-center w-20 h-20 rounded-full border border-midnight-blue text-base font-semibold bg-white z-10">
               {year}
             </div>
 
-            <div className="relative w-[15px] h-[15px] bg-midnight-blue rounded-full -ml-2 z-10 after:absolute after:left-1 after:top-1 after:content-[''] after:block after:w-[7px] after:h-[7px] after:bg-white after:rounded-full">
-              {/* <div className="w-2 h-2 bg-ivory rounded-full"></div> */}
-            </div>
+            <div className="relative w-[15px] h-[15px] bg-midnight-blue rounded-full -ml-2 z-10 after:absolute after:left-1 after:top-1 after:content-[''] after:block after:w-[7px] after:h-[7px] after:bg-white after:rounded-full"></div>
             <div className="w-6 h-[1px] bg-gray-300"></div>
           </div>
-
-          {/* {index !== years.length - 1 && (
-            <div className="w-[2px] h-8 bg-gray-300"></div>
-          )} */}
         </div>
 
         <div className="flex-1 text-left">

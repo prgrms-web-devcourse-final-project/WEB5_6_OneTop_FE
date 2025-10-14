@@ -13,7 +13,6 @@ import {
   CompareTimelineItem,
   RadarData,
   ScenarioCompareResponse,
-  TimelineResponse,
 } from "../../types";
 import { clientCompareApi } from "../../api/clientCompareApi";
 

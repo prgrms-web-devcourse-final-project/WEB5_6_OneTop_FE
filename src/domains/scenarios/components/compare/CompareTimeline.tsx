@@ -48,8 +48,6 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
         </div>
 
         <div className="relative flex flex-col items-center shrink-0">
-          {/* {index !== 0 && <div className="w-[2px] h-8 bg-gray-300"></div>} */}
-
           <div className="relative flex items-center">
             {hasBase && (
               <>
@@ -69,10 +67,6 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
               </>
             )}
           </div>
-
-          {/* {index !== years.length - 1 && (
-            <div className="w-[2px] h-8 bg-gray-300"></div>
-          )} */}
         </div>
 
         <div className="flex-1 text-left">
@@ -107,6 +101,7 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
           index % 2 !== 0 ? "-top-[10px]" : "top-19"
         }`}
       >
+        {/* 평행우주 (위쪽) */}
         {hasCompare && (
           <div className="flex items-end justify-center absolute -top-20 w-[135px] h-18">
             {yearData.compare.map((item, idx) => (
@@ -120,6 +115,7 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
           </div>
         )}
 
+        {/* 연결점 (평행우주가 있을 때) */}
         {hasCompare && (
           <div
             className={`absolute left-1/2 -translate-x-1/2 transform w-[15px] h-[15px] bg-white border-4 border-ivory rounded-full z-10 ${
@@ -128,14 +124,18 @@ export const CompareTimeline = ({ data }: CompareTimelineProps) => {
           ></div>
         )}
 
+        {/* 연결선 (평행우주가 있을 때) */}
         {hasCompare && <div className="w-[1px] h-5 bg-gray-300"></div>}
 
+        {/* 연도 원형 */}
         <div className="flex items-center justify-center w-20 h-20 rounded-full border border-midnight-blue text-xl font-semibold bg-white">
           {year}
         </div>
 
+        {/* 연결선 (현재가 있을 때) */}
         {hasBase && <div className="w-[1px] h-5 bg-gray-300 mt-1"></div>}
 
+        {/* 현재 (아래) */}
         {hasBase && (
           <div className="flex items-start justify-center mt-1 w-[135px]">
             {yearData.base.map((item, idx) => (
