@@ -57,4 +57,9 @@ export const queryKeys = {
     all: ["baselines"] as const,
     list: (page: number, size: number) => ["baselines", page, size] as const,
   },
+  tree: {
+    all: ["tree"] as const,
+    detail: (baselineId: number) =>
+      [...queryKeys.tree.all, baselineId] as const,
+  },
 };
