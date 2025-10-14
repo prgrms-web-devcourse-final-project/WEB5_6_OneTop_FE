@@ -3,12 +3,7 @@
 import tw from "@/share/utils/tw";
 import { InputProps, isValidFormKey } from "../types";
 
-function InputText({
-  id,
-  placeholder,
-  register,
-  className,
-}: InputProps) {
+function InputText({ id, placeholder, register, className }: InputProps) {
   if (!isValidFormKey(id)) {
     return <>해당 키 값에 해당하는 입력란이 없습니다.</>;
   }
