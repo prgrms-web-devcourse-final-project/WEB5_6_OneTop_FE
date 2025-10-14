@@ -111,6 +111,7 @@ export function PostCommnet({ id }: { id: string }) {
                 <textarea
                   className="flex-14 h-20 rounded-md border border-gray-300 p-4"
                   value={editContent || ""}
+                  maxLength={500}
                   onChange={(e) => setEditContent(e.target.value)}
                 />
                 <button

@@ -137,6 +137,7 @@ function SearchBar() {
         type="text"
         className="w-full rounded-full px-4 py-3 bg-white placeholder:text-gray-500 flex items-center text-slate-800"
         placeholder="검색어를 입력해주세요."
+        maxLength={50}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

@@ -41,9 +41,10 @@ function LoginModal() {
     formData.append("email", data.email);
     formData.append("password", data.password);
 
-    try {
-      await loginAction(formData);
+    const result = await loginAction(formData);
 
+    if (result.success) {
+      console.log("로그인 성공", result.data);
       // 로그인 성공
       const urlParams = new URLSearchParams(window.location.search);
       const redirectTo = urlParams.get("redirectTo");
@@ -58,13 +59,9 @@ function LoginModal() {
       } else {
         router.push("/");
       }
-    } catch (error) {
+    } else {
       // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "로그인 중 오류가 발생했습니다.";
-      setError(errorMessage);
+      setError(result.data.message);
     }
   };
 

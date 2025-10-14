@@ -15,6 +15,7 @@ function HeaderLoginButton({ variant = "default" }: Props) {
   const { data: authUser } = useAuthUser();
   // safeParse를 이용해 오류 방지
   const parsedAuthUser = userProfileSchema.safeParse(authUser?.data);
+  console.log(parsedAuthUser.data);
   const isLogin = parsedAuthUser.success && !!parsedAuthUser.data?.username;
 
   const { logout } = useLogout();
@@ -38,18 +39,20 @@ function HeaderLoginButton({ variant = "default" }: Props) {
         <button
           type="button"
           className={tw(
-            `w-25 h-10 text-white rounded-full border border-white hover:bg-white hover:text-black transition-all duration-300`,
+            `min-w-22 h-10 text-white rounded-full border border-white hover:bg-white hover:text-black transition-all duration-300 px-3`,
             loginButtonStyles
           )}
           onClick={() => logout()}
         >
-          로그아웃
+          {parsedAuthUser.data?.authProvider === "GUEST"
+            ? "게스트 로그아웃"
+            : "로그아웃"}
         </button>
       ) : (
         <button
           type="button"
           className={tw(
-            `w-25 h-10 text-white rounded-full border border-white hover:bg-white hover:text-black transition-all duration-300`,
+            `min-w-25 h-10 text-white rounded-full border border-white hover:bg-white hover:text-black transition-all duration-300`,
             loginButtonStyles
           )}
           onClick={() => setIsOpen(true)}

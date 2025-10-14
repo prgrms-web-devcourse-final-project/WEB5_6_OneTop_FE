@@ -251,6 +251,7 @@ function PostEditForm() {
         <h3 className="text-lg">제목 *</h3>
         <input
           type="text"
+          maxLength={50}
           placeholder="제목을 입력해주세요."
           className="w-full p-4 border border-gray-300 rounded-md font-medium bg-gray-50 focus:bg-white trasition-colors"
           {...register("title")}
@@ -264,6 +265,7 @@ function PostEditForm() {
       <div className="w-full flex flex-col gap-2">
         <h3 className="text-lg">내용 *</h3>
         <textarea
+          maxLength={2000}
           placeholder="내용을 입력해주세요."
           className="w-full p-4 border border-gray-300 rounded-md font-medium bg-gray-50 min-h-80 focus:bg-white trasition-colors"
           {...register("content")}
@@ -285,6 +287,7 @@ function PostEditForm() {
                   placeholder="투표 항목을 입력해주세요."
                   className="w-full p-4 border border-gray-300 rounded-md font-medium bg-gray-50 focus:bg-white trasition-colors"
                   value={item}
+                  maxLength={100}
                   onChange={(e) => {
                     const newItems = [...pollItems];
                     newItems[index] = e.target.value;

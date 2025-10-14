@@ -3,8 +3,8 @@ import { Metadata } from "next";
 
 
 export const metadata: Metadata = {
-  title: "Re:Life | 로그인/게스트 선택",
-  description: "Re:Life | 로그인/게스트 선택",
+  title: "로그인/게스트 선택 | Re:Life",
+  description: "로그인/게스트 선택 | Re:Life",
   icons: {
     icon: "/logo_64.svg",
   },

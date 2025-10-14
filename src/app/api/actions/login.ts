@@ -20,37 +20,50 @@ export async function loginAction(formData: FormData) {
   const protocol = host?.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  const res = await nextFetcher(`${getApiBaseUrl()}/api/v1/users-auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-    cache: "no-store",
-  });
+  try {
+    const res = await nextFetcher(
+      `${getApiBaseUrl()}/api/v1/users-auth/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+        cache: "no-store",
+      }
+    );
 
-  if (res.status !== 200) {
-    throw new Error(res.statusText);
+    const data = await res.json();
+
+    // Set-Cookie 헤더로 자동으로 JSESSIONID가 설정됨
+    const setCookieHeaders = res.headers.get("set-cookie");
+    console.log("Set-Cookie headers:", setCookieHeaders);
+
+    if (setCookieHeaders) {
+      const jsessionid = setCookieHeaders.match(/JSESSIONID=([^;]+)/)?.[1];
+      const cookieStore = await cookies();
+      cookieStore.set("JSESSIONID", jsessionid || "", {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+
+    // 성공 시 쿼리 갱신
+    revalidatePath("/");
+
+    return { success: true, data };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다.",
+    };
   }
-
-  const data = await res.json();
-  console.log("Login response data:", data);
-
-  // Set-Cookie 헤더로 자동으로 JSESSIONID가 설정됨
-  const setCookieHeaders = res.headers.get("set-cookie");
-  console.log("Set-Cookie headers:", setCookieHeaders);
-
-  if (setCookieHeaders) {
-    const jsessionid = setCookieHeaders.match(/JSESSIONID=([^;]+)/)?.[1];
-    const cookieStore = await cookies();
-    cookieStore.set("JSESSIONID", jsessionid || "", {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-  }
-
-  // 성공 시 쿼리 갱신
-  revalidatePath("/");
 }
