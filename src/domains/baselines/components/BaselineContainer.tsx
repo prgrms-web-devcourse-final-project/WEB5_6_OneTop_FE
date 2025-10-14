@@ -286,7 +286,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
                           &quot;{event.eventTitle}&quot;
                         </h4>
-                        <p className="mt-1 text-xl line-clamp-2">
+                        <p className="flex-1 pr-5 mt-1 text-xl line-clamp-2">
                           {event.actualChoice}
                         </p>
                       </li>

@@ -45,13 +45,6 @@ export const clientBaselineApi = {
     birthYear?: number
   ): Promise<{ baseLineId: number; events: LifeEvent[] }> => {
     try {
-      console.log("베이스라인 생성 시작:", {
-        events,
-        title,
-        userId,
-        birthYear,
-      });
-
       const request: BaseLineBulkCreateRequest = {
         userId,
         title: title || "",
@@ -63,14 +56,10 @@ export const clientBaselineApi = {
         })),
       };
 
-      console.log("백엔드 요청 데이터:", request);
-
       const response = await api.post<BaseLineBulkCreateResponse>(
         "/api/v1/base-lines/bulk",
         request
       );
-
-      console.log("백엔드 응답:", response.data);
 
       if (response.data && response.data.baseLineId) {
         const nodes = await clientBaselineApi.getBaseLineNodes(
@@ -83,8 +72,6 @@ export const clientBaselineApi = {
           ...node,
           baseLineId: response.data.baseLineId,
         }));
-
-        console.log("조회된 노드들:", eventsWithBaseLineId);
 
         return {
           baseLineId: response.data.baseLineId,
@@ -128,8 +115,6 @@ export const clientBaselineApi = {
   > => {
     try {
       const response = await api.get<BaselineListResponse>("/scenario-list");
-
-      console.log("베이스라인 목록 조회:", response.data);
 
       if (response.data && Array.isArray(response.data.data)) {
         return response.data.data.map((item: BaseLineListItemDto) => ({

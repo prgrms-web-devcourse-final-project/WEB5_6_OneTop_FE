@@ -180,7 +180,7 @@ export const ScenarioCompareContainer = () => {
           </div>
         </div>
 
-        <div className="bg-gray-50 py-15">
+        <div className="bg-gray-50 py-10 md:py-15 min-[1440px]:px-0 px-5">
           <div className="max-w-[1440px] m-auto">
             {/* 타임라인 */}
             <CompareTimeline data={timelineData} />

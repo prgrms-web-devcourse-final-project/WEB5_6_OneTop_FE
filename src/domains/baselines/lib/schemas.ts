@@ -11,9 +11,20 @@ export const createEventSchema = (
 
   return z.object({
     category: z.enum(["교육", "직업", "관계", "경제", "건강", "행복", "기타"]),
-    eventTitle: z.string().min(1, "선택 상황을 입력해주세요"),
-    actualChoice: z.string().min(1, "실제 선택을 입력해주세요"),
-    context: z.string().optional(),
+    eventTitle: z
+      .string()
+      .min(1, "선택 상황을 입력해주세요")
+      .max(100, "선택 상황은 100자 이내로 입력해주세요"),
+    actualChoice: z
+      .string()
+      .min(1, "실제 선택을 입력해주세요")
+      .max(100, "실제 선택은 100자 이내로 입력해주세요"),
+    context: z
+      .string()
+      .optional()
+      .refine((val) => !val || val.length <= 200, {
+        message: "추가 설명은 200자 이내로 입력해주세요",
+      }),
     ageAtEvent: z
       .string()
       .min(1, "나이를 입력해주세요")

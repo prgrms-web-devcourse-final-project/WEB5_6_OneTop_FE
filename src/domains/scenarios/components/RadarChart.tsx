@@ -19,11 +19,11 @@ export const RadarChart = ({ data }: RadarChartProps) => {
       </div>
 
       {/* 차트 영역 */}
-      <div className="h-[430px] w-full mb-6">
+      <div className="h-[350px] sm:h-[430px] w-full mb-6">
         <RadarChartCore
           data={chartData}
           showIdeal={!!data.datasets[1]}
-          showLegend={true}
+          showLegend={false}
           currentLabel={data.datasets[0]?.label || "현재"}
           idealLabel={data.datasets[1]?.label || "평행우주"}
         />

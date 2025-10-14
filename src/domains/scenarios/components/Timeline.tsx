@@ -16,25 +16,27 @@ export const Timeline = ({ data }: TimelineProps) => {
     return (
       <div className="flex items-center gap-4 w-full">
         <div className="relative flex flex-col items-center shrink-0">
-          {index !== 0 && <div className="w-[2px] h-8 bg-gray-300"></div>}
+          {/* {index !== 0 && <div className="w-[2px] h-8 bg-gray-300"></div>} */}
 
           <div className="relative flex items-center">
-            <div className="flex items-center justify-center w-14 h-14 rounded-full border-2 border-midnight-blue text-base font-semibold bg-white shadow-sm z-10">
+            <div className="flex items-center justify-center w-20 h-20 rounded-full border border-midnight-blue text-base font-semibold bg-white z-10">
               {year}
             </div>
 
-            <div className="w-6 h-[2px] bg-gray-300 ml-1"></div>
-            <div className="w-[10px] h-[10px] bg-midnight-blue border-2 border-midnight-blue rounded-full ml-1"></div>
+            <div className="relative w-[15px] h-[15px] bg-midnight-blue rounded-full -ml-2 z-10 after:absolute after:left-1 after:top-1 after:content-[''] after:block after:w-[7px] after:h-[7px] after:bg-white after:rounded-full">
+              {/* <div className="w-2 h-2 bg-ivory rounded-full"></div> */}
+            </div>
+            <div className="w-6 h-[1px] bg-gray-300"></div>
           </div>
 
-          {index !== years.length - 1 && (
+          {/* {index !== years.length - 1 && (
             <div className="w-[2px] h-8 bg-gray-300"></div>
-          )}
+          )} */}
         </div>
 
-        <div className="flex-1 text-left pl-2">
+        <div className="flex-1 text-left">
           <div className="space-y-1">
-            <h4 className="text-base font-semibold text-gray-800 break-keep">
+            <h4 className="text-base font-medium text-gray-800 break-keep">
               {item.title}
             </h4>
           </div>
@@ -67,12 +69,12 @@ export const Timeline = ({ data }: TimelineProps) => {
 
   return (
     <div className="max-w-[1440px] m-auto bg-white p-5 md:p-7 pb-10 md:pb-[50px] rounded-lg border border-gray-200">
-      <div className="flex items-center mb-5 md:mb-7">
-        <h3 className="text-lg md:text-[22px] font-semibold">타임라인</h3>
+      <div className="flex items-center mb-7">
+        <h3 className="text-[22px] font-semibold">타임라인</h3>
       </div>
 
       {isMobile ? (
-        <div className="space-y-6 pl-4">
+        <div className="relative space-y-6 before:content-[''] before:block before:absolute before:left-[40px] before:w-1 before:h-full before:bg-deep-navy">
           {years.map((year, index) => (
             <div key={`mobile-${year}`} className="relative">
               {renderMobileContent(year, index)}
