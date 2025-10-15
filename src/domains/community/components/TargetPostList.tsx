@@ -18,6 +18,7 @@ async function TargetPostList({
   keyword = "",
   title = "게시글",
 }: TargetPostListProps) {
+  
   const { items } = await getPostList({
     page: 1,
     searchType: "TITLE",

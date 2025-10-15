@@ -40,5 +40,5 @@ export async function getPostList({
   });
 
 
-  return await response.json();
+  return await response.json() || { items: [] };
 }

@@ -39,7 +39,7 @@ const Comparison = () => {
         </p>
         <button
           type="button"
-          onClick={() => (window.location.href = "/onboarding")}
+          onClick={() => (window.location.href = "/onboarding/profile-settings")}
           className="h-[55px] px-[50px] bg-deep-navy rounded-full text-white text-xl font-medium transition-all duration-300 hover:scale-105"
         >
           시작하기

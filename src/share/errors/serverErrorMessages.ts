@@ -16,6 +16,7 @@ export const ERROR_MESSAGES = {
   INVALID_PASSWORD: "비밀번호가 올바르지 않습니다.",
   UNAUTHORIZED_USER: "로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.",
   NICKNAME_DUPLICATION: "이미 사용 중인 닉네임입니다.",
+  BAD_CREDENTIALS: "아이디 또는 비밀번호가 올바르지 않습니다.",
 
   // ===== Post Errors =====
   POST_NOT_FOUND: "게시글을 찾을 수 없습니다.",
