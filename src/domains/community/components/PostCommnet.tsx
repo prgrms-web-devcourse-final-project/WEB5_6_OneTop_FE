@@ -99,8 +99,8 @@ export function PostCommnet({ id }: { id: string }) {
                 <div>{author}</div>
               </div>
               <div className="flex items-center gap-2">
-                <div>{isMine ? "내 댓글" : ""}</div>
-                <div>{createdDate}</div>
+                <div className="text-sm text-gray-500">{isMine ? "내 댓글" : ""}</div>
+                <div className="text-sm">{createdDate}</div>
               </div>
             </div>
 

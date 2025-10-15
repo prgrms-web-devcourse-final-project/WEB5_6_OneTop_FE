@@ -1,4 +1,5 @@
 import { ScenarioInfoResponse } from "@/domains/scenarios/types";
+import { getImageUrl } from "@/share/utils/getImageUrl";
 import tw from "@/share/utils/tw";
 import Image from "next/image";
 
@@ -68,8 +69,6 @@ const dummyData = {
   ],
 };
 
-const img = "https://cdn.edujin.co.kr/news/photo/202310/43954_86537_5933.png";
-
 function SharedScenarioItem({
   scenarioInfo,
   className,
@@ -79,6 +78,8 @@ function SharedScenarioItem({
 }) {
   const data = scenarioInfo || dummyData;
   const { accent, background, blendMode } = getThemeByScore(data.total);
+
+  const processedImageUrl = getImageUrl(data.img);
 
   return (
     <div
@@ -106,20 +107,20 @@ function SharedScenarioItem({
         />
       </div>
 
-      <div className="grid grid-cols-10 h-full">
-        <div className="relative h-full rounded-l-md overflow-hidden col-span-3">
+      <div className="flex flex-col md:grid md:grid-cols-10 h-full">
+        <div className="relative w-full h-48 md:h-full rounded-t-md md:rounded-l-md md:rounded-t-none overflow-hidden md:col-span-3">
           <Image
-            src={img}
+            src={processedImageUrl || ""}
             alt="scenario"
             fill
-            sizes="(max-width: 768px) 20%, 200px"
+            sizes="(max-width: 768px) 100vw, 300px"
             className="object-cover"
             priority={false}
           />
         </div>
 
         <div
-          className="w-full h-full p-4 rounded-md flex flex-col gap-2 col-span-7"
+          className="w-full h-full p-4 rounded-b-md md:rounded-r-md md:rounded-b-none flex flex-col gap-2 md:col-span-7"
           style={{
             background:
               "linear-gradient(246deg, rgba(217, 217, 217, 0.00) 15%, rgba(130, 79, 147, 0.25) 95%)",
@@ -134,20 +135,21 @@ function SharedScenarioItem({
           <div className="flex flex-col gap-2">
             <h3 className="text-white">{data.description}</h3>
           </div>
-          <div className="grid grid-cols-2 gap-2 my-2">
+          <div className="grid grid-cols-1 gap-2 my-2">
             {data.indicators.map((indicator) => (
               <div
-                className="flex gap-4 items-center border border-white py-2 px-4 rounded-md"
+                className="flex gap-2 md:gap-4 items-center border border-white py-4 px-4 rounded-md flex-col md:flex-row "
                 key={indicator.type}
               >
-                <div className="flex items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-1 ">
                   <h3 className="text-white font-semibold text-nowrap">
                     {indicator.type}
                   </h3>
                   <p className="text-white">{indicator.point}</p>
                 </div>
-                <div className="w-0.5 h-full bg-white" />
-                <p className="text-white text-sm h-10 flex items-center">
+                <div className="w-0.5 h-full bg-white shrink-0 md:block hidden" />
+                <div className="w-full h-0.5 bg-white shrink-0 md:hidden block" />
+                <p className="text-white text-sm flex items-center line-clamp-2">
                   {indicator.analysis}
                 </p>
               </div>

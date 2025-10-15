@@ -7,6 +7,13 @@ interface PostListProps {
 }
 
 function PostList({ posts, className }: PostListProps) {
+  if (posts.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        관련 게시글이 없습니다.
+      </div>
+    );
+  }
 
   return (
     <ul className={`flex flex-col w-full ${className}`}>

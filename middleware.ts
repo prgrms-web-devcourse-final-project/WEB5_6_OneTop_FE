@@ -14,7 +14,6 @@ export async function middleware(req: NextRequest) {
     const meRes = await fetch(`${origin}/api/v1/users-auth/me`, {
       method: "GET",
       headers: {
-        // forward cookies to backend so session is recognized
         cookie: req.headers.get("cookie") ?? "",
         accept: "application/json",
       },
