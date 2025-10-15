@@ -40,12 +40,12 @@ export interface AnalysisProps {
     relationships: string;
     jobs: string;
     happiness: string;
-    aiInsight: string;
   };
 }
 
 export interface RadarChartProps {
   data: RadarData;
+  aiInsight?: string;
 }
 
 export interface ChartDataPoint {

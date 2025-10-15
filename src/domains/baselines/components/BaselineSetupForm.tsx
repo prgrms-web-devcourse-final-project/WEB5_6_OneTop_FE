@@ -100,7 +100,7 @@ export const BaselineSetupForm = ({
 
   return (
     <div className="flex-1 bg-[linear-gradient(246deg,_rgba(217,217,217,0)_41.66%,_rgba(130,79,147,0.15)_98.25%)]">
-      <div className="fixed top-[60px] w-[54.5vw] ml-[155px] mt-30">
+      <div className="min-[980px]:fixed top-[60px] w-full min-[980px]:w-[54.5vw] min-[980px]:ml-[155px] min-[980px]:mt-30 px-5 min-[980px]:px-0 py-[50px] min-[980px]:py-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <span className="flex items-center justify-center w-[150px] h-11 bg-gray-300 rounded-4xl">
@@ -136,10 +136,10 @@ export const BaselineSetupForm = ({
         >
           {/* 카테고리 선택 */}
           <div className="relative flex items-center border border-white rounded-lg py-3 pl-7 pr-5">
-            <label className="block w-[115px] text-white text-lg mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
+            <label className="block w-20 md:w-[115px] text-white text-lg mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[110px] md:before:left-[140px] before:top-4 before:rounded-full">
               카테고리
             </label>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 flex-1">
               {(["교육", "직업", "관계", "경제", "기타"] as const).map(
                 (category) => (
                   <label key={category} className="flex items-center">
@@ -151,7 +151,7 @@ export const BaselineSetupForm = ({
                       disabled={isSubmitted}
                     />
                     <div
-                      className={`flex items-center justify-center w-[90px] h-[40px] rounded-lg border text-white text-base cursor-pointer transition-colors ${
+                      className={`flex items-center justify-center w-20 md:w-[90px] h-[40px] rounded-lg border text-white text-base cursor-pointer transition-colors ${
                         isSubmitted ? "opacity-50 cursor-not-allowed" : ""
                       } ${
                         watch("category") === category
@@ -174,7 +174,7 @@ export const BaselineSetupForm = ({
 
           {/* 선택 시기 */}
           <div className="relative flex items-center min-h-[70px] border border-white rounded-lg py-3 pl-7 pr-5">
-            <span className="block w-[115px] text-lg text-white mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
+            <span className="block w-20 md:w-[115px] text-lg text-white mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[110px] md:before:left-[140px] before:top-4 before:rounded-full">
               선택 시기
             </span>
             <div className="flex flex-col text-white">
@@ -188,7 +188,7 @@ export const BaselineSetupForm = ({
                   disabled={isSubmitted}
                 />
                 <span className="inline-block ml-2 mr-4">세</span>
-                <span className="text-gray-300 text-sm">
+                <span className="text-gray-300 text-sm hidden sm:inline-block">
                   {watchAge &&
                   /^\d+$/.test(watchAge) &&
                   Number(watchAge) > 0 &&
@@ -209,7 +209,7 @@ export const BaselineSetupForm = ({
           <div className="relative border border-white rounded-lg py-3 pl-7 pr-5">
             {/* 선택 상황 */}
             <div className="flex items-start text-white mb-3">
-              <label className="block w-[115px] text-lg pt-2 mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
+              <label className="block w-20 md:w-[115px] text-lg pt-2 mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[110px] md:before:left-[140px] before:top-4 before:rounded-full">
                 선택 상황
               </label>
               <div className="flex-1">
@@ -233,7 +233,7 @@ export const BaselineSetupForm = ({
 
             {/* 실제 선택 */}
             <div className="flex items-center text-white">
-              <label className="block w-[115px] text-lg mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
+              <label className="block w-20 md:w-[115px] text-lg mr-5 before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[110px] md:before:left-[140px] before:top-4 before:rounded-full">
                 실제 선택
               </label>
               <div className="flex-1">
@@ -255,7 +255,7 @@ export const BaselineSetupForm = ({
 
           {/* 추가 설명 */}
           <div className="relative flex items-start border border-white rounded-lg py-3 pl-7 pr-5">
-            <label className="block w-[115px] pt-2 mr-5 text-white before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[140px] before:top-4 before:rounded-full">
+            <label className="block w-20 md:w-[115px] pt-2 mr-5 text-white before:absolute before:content-[''] before:inline-block before:w-[2px] before:h-[calc(100%-32px)] before:bg-white before:left-[110px] md:before:left-[140px] before:top-4 before:rounded-full">
               추가 설명 <br />
               (선택사항)
             </label>

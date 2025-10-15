@@ -52,15 +52,6 @@ export const Analysis = ({ data }: AnalysisProps) => {
           <p className="text-gray-800 text-base">{data.happiness}</p>
         </li>
       </ul>
-
-      {/* AI 종합 분석 */}
-      <div className="bg-gray-50 p-4 md:p-5 rounded-lg">
-        <h4 className="flex items-center gap-1 text-lg font-medium mb-2">
-          <FaLightbulb size={20} color="#FFC823" />
-          AI 종합 분석
-        </h4>
-        <p className="text-gray-800 text-base break-keep">{data.aiInsight}</p>
-      </div>
     </div>
   );
 };
