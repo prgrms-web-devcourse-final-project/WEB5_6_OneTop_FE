@@ -324,3 +324,12 @@ a:hover {
   white-space: nowrap;
   border-width: 0;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-500);
+  border-radius: 10px;
+}

@@ -17,6 +17,7 @@ import BaseNodeHeaderView from "./BaseNodeHeaderView";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
+import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ const Sidebar = ({
   const { mutate: createNode, isPending } = useCreateNode();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isMobile = useMobileDetection();
 
   const isHeaderNode = selectedNode?.data?.isHeaderNode ?? false;
   const isEndingNode = selectedNode?.data?.isEndingNode ?? false;
@@ -488,108 +490,107 @@ const Sidebar = ({
   }
 
   if (isHeaderNode) {
-    return <BaseNodeHeaderView isOpen={isOpen} onClose={onClose} />;
+    return (
+      <BaseNodeHeaderView
+        isOpen={isOpen}
+        onClose={onClose}
+        isMobile={isMobile}
+      />
+    );
   }
 
   if (isEndingNode && selectedNode.data.type === "BASE") {
-    return <EndingBaseNodeView isOpen={isOpen} onClose={onClose} />;
+    return (
+      <EndingBaseNodeView
+        isOpen={isOpen}
+        onClose={onClose}
+        isMobile={isMobile}
+      />
+    );
   }
 
   return (
     <>
       <div
-        className={`fixed left-0 top-15 h-[calc(100vh-64px)] w-100 bg-midnight-blue text-white z-10 transition-transform duration-300 overflow-y-auto ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        key={isOpen ? "modal-open" : "modal-closed"}
+        className={`
+        fixed bg-midnight-blue text-white z-10 transition-transform duration-300
+        ${
+          isMobile
+            ? `left-0 bottom-0 w-full h-[50vh] rounded-t-2xl ${
+                isOpen ? "translate-y-0" : "translate-y-full"
+              }`
+            : `left-0 top-15 h-[calc(100vh-64px)] w-100 ${
+                isOpen ? "translate-x-0" : "-translate-x-full"
+              }`
+        }
+      `}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-slate-700 rounded-lg transition-colors"
-        >
-          <IoClose className="w-6 h-6" />
-        </button>
+        <div className="relative">
+          <div className="h-12 flex items-center justify-end px-4">
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <IoClose className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
 
-        <div className="p-10 h-full flex flex-col">
-          <div className="flex-1 space-y-6">
-            {/* 선택상황 섹션 */}
+        <div
+          className="px-8 pb-8 h-[calc(100%-3rem)] overflow-y-auto custom-scrollbar"
+          onWheel={(e) => {
+            // 스크롤 영역 내부에서만 전파 차단
+            e.stopPropagation();
+          }}
+        >
+          <div className="space-y-6">
+            {/* 선택상황 */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">선택상황</h4>
-              <p className="text-xs text-slate-400 mb-2">
+              <h4 className="text-sm sm:text-lg font-semibold mb-4">
+                선택상황
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-400 mb-2">
                 나이: {selectedNode.data.ageYear}세
               </p>
-
               {selectedNode.data.situation && (
-                <p>{selectedNode.data.situation}</p>
+                <p className="sm:text-sm">{selectedNode.data.situation}</p>
               )}
-
               {selectedNode.data.type === "VIRTUAL" &&
                 !selectedNode.data.situation && (
-                  <p className="text-slate-400 italic">
+                  <p className="text-slate-400 italic sm:text-sm">
                     다음 선택을 기다리고 있습니다...
                   </p>
-                )}
-
-              {/* AI 추천 - VirtualNode */}
-              {selectedNode.data.type === "VIRTUAL" &&
-                virtualRecommendation && (
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-400 mb-2">
-                      💡 AI 추천 선택지
-                    </p>
-                    <button
-                      onClick={() =>
-                        handleRecommendationClick(virtualRecommendation)
-                      }
-                      disabled={isPending}
-                      className="w-full p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-sm text-left transition-colors disabled:opacity-50"
-                    >
-                      {virtualRecommendation}
-                    </button>
-                  </div>
-                )}
-
-              {/* AI 추천 - DecisionNode */}
-              {selectedNode.data.type === "DECISION" &&
-                parentRecommendation &&
-                !usedDecisions.has(parentRecommendation) && (
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-400 mb-2">
-                      💡 AI 추천 선택지
-                    </p>
-                    <button
-                      onClick={() =>
-                        handleRecommendationClick(parentRecommendation)
-                      }
-                      disabled={isPending}
-                      className="w-full p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-sm text-left transition-colors disabled:opacity-50"
-                    >
-                      {parentRecommendation}
-                    </button>
-                  </div>
                 )}
               <hr className="border-gray-500 mt-4" />
             </div>
 
-            {/* 이전선택 섹션 */}
+            {/* 이전선택 */}
             {actualParent && (
               <div>
-                <h4 className="text-lg font-semibold mb-4">이전선택</h4>
+                <h4 className="text-sm sm:text-lg font-semibold mb-4">
+                  이전선택
+                </h4>
                 <div className="p-3 bg-slate-700 rounded-lg border-1 border-slate-600">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-slate-400 mb-1">
+                    <div className="flex-1">
+                      <p className="text-xs sm:text-sm text-slate-400 mb-1">
                         {actualParent.ageYear}세
                       </p>
-                      {actualParent.decision && <p>{actualParent.decision}</p>}
+                      {actualParent.decision && (
+                        <p className="text-xs sm:text-sm">
+                          {actualParent.decision}
+                        </p>
+                      )}
                       {actualParent.situation && (
-                        <p className="text-sm text-slate-300 mt-1">
+                        <p className="text-xs sm:text-sm text-slate-300 mt-1">
                           {actualParent.situation}
                         </p>
                       )}
                     </div>
                     <button
                       onClick={handleGoToParent}
-                      className="text-gray-400 hover:text-gray-200 text-xs transition-colors"
+                      className="text-gray-400 hover:text-gray-200 text-xs sm:text-sm transition-colors whitespace-nowrap ml-2"
                     >
                       이전 선택으로 이동
                     </button>
@@ -605,12 +606,14 @@ const Sidebar = ({
                 {/* BaseNode 현재 결정 */}
                 {isBaselineNode && selectedNode.data.decision && (
                   <div>
-                    <h4 className="text-lg font-semibold mb-4">현재 결정</h4>
+                    <h4 className="text-sm sm:text-lg font-semibold mb-4">
+                      현재 결정
+                    </h4>
                     <div className="p-3 bg-slate-700 rounded-lg border-1 border-slate-600">
-                      <p className="text-xs text-slate-400 mb-1">
+                      <p className="text-xs sm:text-sm text-slate-400 mb-1">
                         {selectedNode.data.ageYear}세
                       </p>
-                      <p>{selectedNode.data.decision}</p>
+                      <p className="sm:text-sm">{selectedNode.data.decision}</p>
                     </div>
                     <hr className="border-gray-600 mt-4" />
                   </div>
@@ -619,7 +622,9 @@ const Sidebar = ({
                 {/* 선택지 슬롯 */}
                 {!isPreEndingBaseNode && (
                   <div>
-                    <h4 className="text-lg font-semibold mb-4">선택지</h4>
+                    <h4 className="text-sm sm:text-lg font-semibold mb-4">
+                      선택지
+                    </h4>
                     <div className="space-y-3">
                       {displayChoices.map((choice, index) => (
                         <div
@@ -633,18 +638,22 @@ const Sidebar = ({
                           {choice ? (
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
-                                {choice.decision && <p>{choice.decision}</p>}
+                                {choice.decision && (
+                                  <p className="text-xs sm:text-sm">
+                                    {choice.decision}
+                                  </p>
+                                )}
                               </div>
                               <button
                                 onClick={() => handleSlotNavigation(choice)}
-                                className="text-gray-400 hover:text-gray-200 text-xs transition-colors ml-2"
+                                className="text-gray-400 hover:text-gray-200 text-xs sm:text-sm transition-colors ml-2"
                               >
                                 해당 선택으로 이동
                               </button>
                             </div>
                           ) : (
                             <div className="w-full text-center">
-                              <p className="text-gray-500 text-sm">
+                              <p className="text-gray-500 text-xs sm:text-sm">
                                 빈 슬롯 {index + 1}
                               </p>
                             </div>
@@ -656,15 +665,55 @@ const Sidebar = ({
                   </div>
                 )}
 
+                {/* AI 추천 */}
+                {showInputSection() &&
+                  selectedNode.data.type === "VIRTUAL" &&
+                  virtualRecommendation && (
+                    <div className="mt-3">
+                      <p className="text-sm sm:text-lg font-semibold mb-2">
+                        💡 AI 추천 선택지
+                      </p>
+                      <button
+                        onClick={() =>
+                          handleRecommendationClick(virtualRecommendation)
+                        }
+                        disabled={isPending}
+                        className="w-full p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-xs sm:text-sm text-left transition-colors disabled:opacity-50"
+                      >
+                        {virtualRecommendation}
+                      </button>
+                    </div>
+                  )}
+
+                {showInputSection() &&
+                  selectedNode.data.type === "DECISION" &&
+                  parentRecommendation &&
+                  !usedDecisions.has(parentRecommendation) && (
+                    <div className="mt-3">
+                      <p className="text-sm sm:text-lg font-semibold mb-2">
+                        💡 AI 추천 선택지
+                      </p>
+                      <button
+                        onClick={() =>
+                          handleRecommendationClick(parentRecommendation)
+                        }
+                        disabled={isPending}
+                        className="w-full p-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-xs sm:text-sm text-left transition-colors disabled:opacity-50"
+                      >
+                        {parentRecommendation}
+                      </button>
+                    </div>
+                  )}
+
                 {/* 추가선택지 입력 */}
                 {!isPreEndingBaseNode && (
                   <div>
-                    <h4 className="text-lg font-semibold mb-4">
-                      추가선택지 입력
+                    <h4 className="text-xs sm:text-sm mb-2">
+                      선택지 직접 입력
                     </h4>
                     {showInputSection() ? (
                       <>
-                        <p className="text-xs text-slate-400 mb-3">
+                        <p className="text-xs sm:text-sm text-slate-400 mb-3">
                           {isAtMaxDepth
                             ? "마지막 선택을 입력하세요."
                             : "선택을 결정한다면 선택지는 수정할 수 없습니다."}
@@ -672,26 +721,24 @@ const Sidebar = ({
                         <form
                           onSubmit={(e) => {
                             e.preventDefault();
-                            if (isAtMaxDepth) {
-                              handleCreateScenario();
-                            } else {
-                              handleChoiceSubmit();
-                            }
+                            if (isAtMaxDepth) handleCreateScenario();
+                            else handleChoiceSubmit();
                           }}
                           className="space-y-3"
                         >
                           <input
                             ref={inputRef}
                             type="text"
-                            placeholder="선택지를 입력하세요"
+                            maxLength={100}
+                            placeholder="선택지를 입력하세요 (100자 이하)"
                             disabled={isPending}
-                            className="w-full p-2 bg-slate-700 border-1 border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-slate-500 disabled:opacity-50"
+                            className="w-full p-2 text-xs sm:text-sm bg-slate-700 border-1 border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-slate-500 disabled:opacity-50"
                           />
                           {!isAtMaxDepth && (
                             <button
                               type="submit"
                               disabled={isPending}
-                              className="w-full p-2 bg-gray-400 hover:bg-gray-500 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="w-full p-2 text-xs sm:text-sm bg-gray-400 hover:bg-gray-500 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {isPending ? "AI 분석 중..." : "결정하기"}
                             </button>
@@ -699,7 +746,7 @@ const Sidebar = ({
                         </form>
                       </>
                     ) : (
-                      <p className="text-slate-400 text-sm">
+                      <p className="text-slate-400 text-xs sm:text-sm">
                         모든 선택지를 입력했습니다.
                       </p>
                     )}
@@ -708,28 +755,28 @@ const Sidebar = ({
                 )}
               </>
             )}
+
+            {/* 결말 노드 전용 버튼 */}
+            {isEndingNode && (
+              <ScenarioLinkButtons
+                decisionLineId={
+                  (selectedNode.data as DecisionNode).decisionLineId
+                }
+              />
+            )}
+
+            {/* 시나리오 생성 버튼 */}
+            {!isEndingNode && isAtMaxDepth && showInputSection() && (
+              <div className="mt-6">
+                <button
+                  onClick={handleCreateScenario}
+                  className="w-full p-2 bg-deep-navy rounded-lg text-xs sm:text-sm transition-colors"
+                >
+                  시나리오 생성
+                </button>
+              </div>
+            )}
           </div>
-
-          {/* 결말 노드 전용 버튼 */}
-          {isEndingNode && (
-            <ScenarioLinkButtons
-              decisionLineId={
-                (selectedNode.data as DecisionNode).decisionLineId
-              }
-            />
-          )}
-
-          {/* 시나리오 생성 버튼 */}
-          {!isEndingNode && isAtMaxDepth && showInputSection() && (
-            <div className="mt-6">
-              <button
-                onClick={handleCreateScenario}
-                className="w-full p-2 bg-deep-navy rounded-lg text-sm transition-colors"
-              >
-                시나리오 생성
-              </button>
-            </div>
-          )}
         </div>
       </div>
 

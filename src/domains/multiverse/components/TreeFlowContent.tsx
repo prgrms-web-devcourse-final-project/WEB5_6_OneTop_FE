@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ReactFlow, Node, Edge, useReactFlow } from "@xyflow/react";
 import { useTreeLayout } from "../hooks/useTreeLayout";
 import { useNodeEvents } from "../hooks/useNodeEvents";
@@ -81,6 +81,8 @@ const TreeFlowContent = ({ baselineId }: TreeFlowContentProps) => {
     string | null
   >(null);
 
+  const memoizedNodeTypes = useMemo(() => NODE_TYPES, []);
+  const memoizedEdgeTypes = useMemo(() => EDGE_TYPES, []);
   const { data: treeData, isLoading, refetch } = useTreeDataQuery(baselineId);
   const { fitView } = useReactFlow();
   const { calculateLayout } = useTreeLayout();
@@ -208,8 +210,8 @@ const TreeFlowContent = ({ baselineId }: TreeFlowContentProps) => {
         nodes={nodes}
         edges={edges}
         onNodeClick={handleNodeClick}
-        nodeTypes={NODE_TYPES}
-        edgeTypes={EDGE_TYPES}
+        nodeTypes={memoizedNodeTypes}
+        edgeTypes={memoizedEdgeTypes}
         fitView
         defaultViewport={DEFAULT_VIEWPORT}
         minZoom={0.2}
