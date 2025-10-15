@@ -44,7 +44,8 @@ export const RadarChartCore = ({
         />
         <PolarRadiusAxis
           angle={2}
-          domain={[0, 10]}
+          domain={[0, 100]}
+          tickCount={6}
           tick={{ fontSize: 10, fill: "#9CA3AF" }}
         />
         {/* 현재 */}

@@ -145,11 +145,11 @@ export const BaselineNode = ({
           </div>
 
           {/* 이벤트 제목 또는 기본 안내 텍스트 */}
-          <div className="relative text-[24px] max-w-[210px] text-right line-clamp-1">
+          <div className="relative text-[24px] max-w-[250px] text-right line-clamp-1">
             {event?.eventTitle ? (
               <span className="block text-white">{event.eventTitle}</span>
             ) : (
-              <span className="block text-gray-400 text-base">
+              <span className="text-gray-400 text-base">
                 {isTemp
                   ? "노드를 클릭해 분기점을 입력해 주세요"
                   : "노드를 클릭해 분기점을 입력해 주세요"}
