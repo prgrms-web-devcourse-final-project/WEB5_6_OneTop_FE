@@ -25,7 +25,7 @@ export default function MyPosts() {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold flex items-center">
+        <h2 className="text-xl sm:text-2xl font-semibold flex items-center">
           내 작성글
           {data && data.totalElements > 0 && (
             <span className="ml-2">({data.totalElements})</span>
