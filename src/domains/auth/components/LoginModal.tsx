@@ -12,7 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
 import { loginSchema } from "../schemas/loginSchema";
 import { useRouter } from "next/navigation";
-import { api, getApiBaseUrl } from "@/share/config/api";
+import { getApiBaseUrl } from "@/share/config/api";
 
 // TODO : 알림 영역이 나올 영역을 지정하고 덜컥거리지 않게 변경. 폼 검증과 서버 에러를 한개씩만 표시. ( 로그인은 좀 불친절해도 괜찮음. )
 function LoginModal() {
@@ -60,9 +60,9 @@ function LoginModal() {
         router.push("/");
       }
     } else {
-      // Error 객체에서 메시지 추출 (loginAction에서 이미 처리됨)
-      console.log("로그인 실패", result.data);
-      setError(result.data.data.message);
+      // loginAction에서 이미 한글 메시지로 변환되어 옴
+      console.log("로그인 실패", result);
+      setError(result.data?.data?.message || "로그인에 실패했습니다.");
     }
   };
 

@@ -46,26 +46,13 @@ export async function nextFetcher(url: string, options?: RequestInit) {
     try {
       const errorBody = await response.json();
 
-      switch (response.status) {
-        case 400:
-          throw new Error(errorBody.message);
-        case 401:
-          throw new Error(errorBody.message);
-        case 402:
-          throw new Error(errorBody.message);
-        case 403:
-          throw new Error(errorBody.message);
-        case 404:
-          throw new Error(errorBody.message);
-        case 405:
-          throw new Error(errorBody.message);
-        case 406:
-          throw new Error(errorBody.message);
-        default:
-          throw new Error(
-            `${response.status} - ${response.statusText}: ${errorBody.message}`
-          );
-      }
+      console.log("errorBody", errorBody);
+
+      // errorBody.title에 에러 코드가 있음 (예: "NICKNAME_DUPLICATION")
+      // title이 있으면 우선 사용, 없으면 message 사용
+      const errorMessage = errorBody.title || errorBody.message || "Unknown error";
+
+      throw new Error(errorMessage);
     } catch (error) {
       console.error("Error fetching data:", error);
       throw error;
