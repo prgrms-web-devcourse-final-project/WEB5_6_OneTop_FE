@@ -145,7 +145,7 @@ export const BaselineNode = ({
           </div>
 
           {/* 이벤트 제목 또는 기본 안내 텍스트 */}
-          <div className="relative text-[24px] max-w-[250px] text-right line-clamp-1">
+          <div className="relative text-[24px] max-w-[210px] text-right line-clamp-1">
             {event?.eventTitle ? (
               <span className="block text-white">{event.eventTitle}</span>
             ) : (
