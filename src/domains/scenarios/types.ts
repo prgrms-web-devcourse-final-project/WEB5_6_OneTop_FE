@@ -45,7 +45,7 @@ export interface AnalysisProps {
 
 export interface RadarChartProps {
   data: RadarData;
-  aiInsight: string;
+  aiInsight?: string;
 }
 
 export interface ChartDataPoint {
