@@ -250,7 +250,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
   return (
     <div className="min-h-[calc(100vh-140px)]">
-      <div className="w-full min-h-[calc(100vh-140px)] flex overflow-hidden">
+      <div className="w-full min-h-[calc(100vh-140px)] flex flex-col min-[980px]:flex-row overflow-hidden">
         <BaselineView
           onNodeClick={handleNodeClick}
           onAddNode={handleAddNode}
@@ -273,8 +273,8 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
           />
         )}
         {!isFormOpen && (
-          <div className="flex flex-col flex-1 justify-start pl-[16.15vw] bg-[linear-gradient(246deg,_rgba(217,217,217,0)_41.66%,_rgba(130,79,147,0.15)_98.25%)]">
-            <div className="text-white pt-[116px]">
+          <div className="flex flex-col flex-1 justify-start min-[980px]:pl-[16.15vw] bg-[linear-gradient(246deg,_rgba(217,217,217,0)_41.66%,_rgba(130,79,147,0.15)_98.25%)]">
+            <div className="text-white px-5 min-[980px]:px-0 pt-[50px] min-[980px]:pt-[116px]">
               {sortedEvents.length > 0 ? (
                 <div>
                   <ul className="flex flex-col gap-[200px]">
@@ -283,10 +283,10 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                         key={event.id}
                         className="flex items-start gap-[6.8vw]"
                       >
-                        <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
+                        <h4 className="w-[40vw] min-[980px]:w-[26.6vw] h-19 text-lg min-[980px]:text-[24px] line-clamp-2">
                           &quot;{event.eventTitle}&quot;
                         </h4>
-                        <p className="flex-1 pr-5 mt-1 text-xl line-clamp-2">
+                        <p className="flex-1 pr-5 mt-1 text-base min-[980px]:text-xl line-clamp-2">
                           {event.actualChoice}
                         </p>
                       </li>
@@ -298,7 +298,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                           key={`temp-${temp.year}-${i}`}
                           className="flex items-center gap-[6.8vw] text-gray-500"
                         >
-                          <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
+                          <h4 className="w-[40vw] min-[980px]:w-[26.6vw] h-19 text-lg min-[980px]:text-[24px] line-clamp-2">
                             노드를 클릭해 분기를 입력해 주세요
                           </h4>
                         </li>
@@ -309,7 +309,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                           key={`empty-${i}`}
                           className="flex items-center gap-[6.8vw] text-gray-500"
                         >
-                          <h4 className="w-[26.6vw] h-19 text-[24px] line-clamp-2">
+                          <h4 className="w-[40vw] min-[980px]:w-[26.6vw] h-19 text-lg min-[980px]:text-[24px] line-clamp-2">
                             노드를 클릭해 분기를 입력해 주세요
                           </h4>
                         </li>
@@ -318,7 +318,7 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
 
                   {!isSubmitted && (
                     <div
-                      className={`flex justify-end fixed right-[130px] ${
+                      className={`flex justify-end fixed right-[100px] min-[980px]:right-[130px] ${
                         isMobile ? "left-4" : "left-8"
                       } transition-all duration-300`}
                       style={{ bottom: `${bottomPosition}px` }}
@@ -336,16 +336,18 @@ export const BaselineContainer = ({ footerHeight = 80 }: Props) => {
                   )}
                 </div>
               ) : (
-                <div className="fixed left-[45%] top-[23%] text-center">
-                  <h2 className="text-3xl font-semibold mb-5">
+                <div className="min-[980px]:fixed min-[980px]:left-[45%] min-[980px]:top-[23%] text-center">
+                  <h2 className="text-2xl md:text-3xl font-semibold mb-3 md:mb-5">
                     인생 분기점 기록하기
                   </h2>
-                  <p className="text-lg text-gray-400 mb-12">
+                  <p className="text-base md:text-lg text-gray-400 mb-8 md:mb-12">
                     왼쪽 노드를 클릭해서 당신의 중요한 선택들을 기록해보세요
                   </p>
-                  <div className="bg-black/30 rounded-lg p-8 w-[500px] border border-white">
-                    <h3 className="text-2xl mb-6 text-white">시작하는 방법</h3>
-                    <ol className="text-lg text-left text-gray-300 space-y-2">
+                  <div className="bg-black/30 rounded-lg p-5 md:p-8 w-full min-[980px]:w-[500px] border border-white">
+                    <h3 className="text-lg md:text-2xl mb-6 text-white">
+                      시작하는 방법
+                    </h3>
+                    <ol className="text-base md:text-lg text-left text-gray-300 space-y-2">
                       <li className="flex items-center gap-2">
                         <PiNumberCircleOneLight size={32} />
                         왼쪽 타임라인의 노드를 클릭하세요

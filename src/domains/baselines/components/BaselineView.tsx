@@ -110,9 +110,11 @@ export const BaselineView = ({
   }, [selectedYear]);
 
   const [bottomPosition, setBottomPosition] = useState(30);
-  const isMobile = useMobileDetection(768);
+  const isMobile = useMobileDetection(980);
 
   useEffect(() => {
+    if (isMobile) return;
+
     const handleScroll = () => {
       const scrollTop = window.pageYOffset;
       const windowHeight = window.innerHeight;
@@ -133,8 +135,8 @@ export const BaselineView = ({
   }, [footerHeight]);
 
   return (
-    <div className="relative w-[21.5vw] py-[60px] bg-[#292929]">
-      <div className="flex flex-col gap-[120px]">
+    <div className="relative w-full min-[980px]:w-[21.5vw] py-7 min-[980px]:py-[60px] bg-[#292929] overflow-x-auto min-[980px]:overflow-visible">
+      <div className="flex flex-row min-[980px]:flex-col gap-5 min-[980px]:gap-[120px]">
         {allNodes.map((node, idx) => {
           const isSelected = node.year !== null && selectedYear === node.year;
           const isLastNode = idx === allNodes.length - 1;
