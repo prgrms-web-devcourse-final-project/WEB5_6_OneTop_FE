@@ -63,7 +63,7 @@ function SignUpForm() {
       console.log("회원가입 성공", result.data);
       router.push("/");
     } else {
-      setError(result.data.message);
+      setError(result.data?.data?.message || "회원가입에 실패했습니다.");
     }
     
     setIsPending(false);

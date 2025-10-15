@@ -1,5 +1,6 @@
 "use server";
 
+import { ERROR_MESSAGES } from "@/domains/types";
 import { nextFetcher } from "@/share/utils/nextFetcher";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -37,36 +38,45 @@ export async function signupAction(formData: FormData) {
     throw new Error("모든 필수 항목을 입력해주세요.");
   }
 
-  //121212a*
-  const headersList = await headers();
-  const host = headersList.get("host");
-  const protocol = host?.includes("localhost") ? "http" : "https";
-  const baseUrl = `${protocol}://${host}`;
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host");
+    const protocol = host?.includes("localhost") ? "http" : "https";
+    const baseUrl = `${protocol}://${host}`;
 
-  const res = await nextFetcher(`${baseUrl}/api/v1/users-auth/signup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    // 여기는 필요 없을 수도.
-    credentials: "include",
-    body: JSON.stringify({
-      email,
-      password,
-      username,
-      nickname,
-      birthdayAt,
-    }),
-    cache: "no-store",
-  });
+    const res = await nextFetcher(`${baseUrl}/api/v1/users-auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      // 여기는 필요 없을 수도.
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        password,
+        username,
+        nickname,
+        birthdayAt,
+      }),
+      cache: "no-store",
+    });
 
-  if (!res.ok) {
-    // 에러 상세 내용 확인
-    const errorData = await res.text();
-    console.log("에러 상세 내용:", res);
-    return { success: false, data: { message: errorData } };
+    revalidatePath("/");
+
+    return { success: true, data: await res.json() };
+  } catch (error) {  
+    // Error 객체에서 메시지를 추출
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    
+    // 서버에서 온 에러 코드를 ERROR_MESSAGES 키로 매칭
+    const parsedMessage = ERROR_MESSAGES[errorMessage as keyof typeof ERROR_MESSAGES] 
+      || ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
+    
+    return {
+      success: false,
+      data: {
+        data: {
+          message: parsedMessage,
+        },
+      },
+    };
   }
-
-  revalidatePath("/");
-
-  // 임시로 안전한 객체 반환
-  return { success: true, data: await res.json() };
 }
