@@ -245,13 +245,16 @@ export const Hero = () => {
       <div className="absolute w-full left-1/2 top-[40%] -translate-x-1/2 flex flex-col items-center gap-6 md:gap-8 text-white z-30 px-5">
         <h2
           ref={titleRef}
-          className="relative px-8 md:px-12.5 text-[28px] md:text-[42px] font-semibold text-center leading-snug break-keep"
+          className="relative px-8 md:px-12.5 text-[28px] md:text-[42px] font-semibold text-center leading-snug break-keep opacity-0"
         >
           <span className="absolute top-0 left-0 w-[25px] md:w-[35px] h-5 md:h-7 bg-[url('/quote_left.png')] bg-cover bg-center"></span>
           만약 그때 다른 선택을 했더라면?
           <span className="absolute top-0 right-0 w-[25px] md:w-[35px] h-5 md:h-7 bg-[url('/quote_right.png')] bg-cover bg-center"></span>
         </h2>
-        <p ref={subtitleRef} className="text-lg md:text-2xl text-center">
+        <p
+          ref={subtitleRef}
+          className="text-lg md:text-2xl text-center opacity-0"
+        >
           AI와 실제 통계로 확인하는 나만의 평행우주
         </p>
       </div>
@@ -259,7 +262,7 @@ export const Hero = () => {
       {/* 통계 */}
       <div
         ref={statsRef}
-        className="max-w-[1440px] w-full absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 px-5"
+        className="max-w-[1440px] w-full absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 px-5 opacity-0"
       >
         <Statistics startCounting={startCounting} />
       </div>
