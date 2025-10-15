@@ -167,7 +167,7 @@ const SpaceLoading = ({ progress = 0 }: Props) => {
     };
 
     let shootingStarTimer = 0;
-    const shootingStarInterval = 30;
+    const shootingStarInterval = 40;
 
     const planets: Planet[] = [];
 
