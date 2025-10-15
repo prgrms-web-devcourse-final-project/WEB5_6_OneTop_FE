@@ -21,7 +21,7 @@ function Page() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
   const qc = useQueryClient();
-  
+
   const open = (e: HTMLElement) => {
     gsap.to(e, {
       height: "auto",
@@ -30,7 +30,6 @@ function Page() {
       ease: "power3.inOut",
     });
   };
-
 
   const onGuestLogin = async () => {
     try {
@@ -112,8 +111,8 @@ function Page() {
       {/* 왼쪽 패널 */}
       <button
         ref={leftPannelRef}
-        className="absolute top-0 left-0 w-1/2 h-full bg-deep-navy z-20 overflow-hidden cursor-pointer 
-        -translate-x-full will-change-transform"
+        className="absolute top-0 left-0 w-full h-1/2 md:w-1/2 md:h-full bg-deep-navy z-20 overflow-hidden cursor-pointer 
+        -translate-x-full will-change-transform "
         // 나중에 토큰 발급 로직으로 변경하고 router.push로 이동.
         onClick={onGuestLogin}
         disabled={guestLoginLoading}
@@ -152,7 +151,7 @@ function Page() {
       {/* 오른쪽 패널 */}
       <button
         ref={rightPannelRef}
-        className="absolute top-0 right-0 w-1/2 h-full bg-white z-20 overflow-hidden cursor-pointer 
+        className="absolute bottom-0 md:top-0 right-0 w-full h-1/2 md:w-1/2 md:h-full bg-white z-20 overflow-hidden cursor-pointer 
         translate-x-full will-change-transform"
         onClick={() => setLoginModalOpen(true)}
         onMouseEnter={() =>
@@ -167,10 +166,10 @@ function Page() {
         }
       >
         <div className="flex flex-col items-center justify-center h-full p-8">
-          <h2 className="!text-4xl font-bold mb-4">
+          <h2 className="!text-4xl font-bold mb-4 wrap-break-word">
             로그인하여 모든 기능 사용
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 mb-8 break-keep">
             완전한 서비스를 경험하세요
           </p>
 
@@ -198,8 +197,8 @@ function Page() {
         <div className="flex flex-col gap-4 items-center justify-center text-4xl font-bold text-gray-800">
           <Image src="/logo_64.svg" alt="logo" width={64} height={64} />
           <h1 className="text-xl font-bold font-family-logo">Re:Life</h1>
-          <div>당신은 선택지에 있습니다.</div>
-          <div className="text-gray-600 text-xl">
+          <div className="wrap-break-word text-sm md:text-lg">당신은 선택지에 있습니다.</div>
+          <div className="text-gray-600 text-sm md:text-lg break-keep">
             결정적 선택을 시뮬레이션하세요.
           </div>
         </div>

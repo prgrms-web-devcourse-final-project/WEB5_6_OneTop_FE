@@ -1,6 +1,5 @@
 import { getPostList } from "@/domains/community/api/getPostList";
 import PostFilter from "@/domains/community/components/PostFilter";
-import PollCardList from "@/domains/community/components/PollCardList";
 import PostList from "@/domains/community/components/PostList";
 import SearchBar from "@/domains/community/components/SearchBar";
 import { PostFilterType } from "@/domains/community/types";
@@ -9,8 +8,7 @@ import Pagination from "@/share/components/Pagination";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import TargetPostSection from "@/domains/community/components/TargetPostSection";
-import SharedScenarioItem from "@/domains/community/components/SharedScenarioItem";
+import CommunityMain from "@/domains/community/components/CommunityMain";
 
 export const metadata: Metadata = {
   title: "커뮤니티 | Re:Life",
@@ -88,17 +86,7 @@ async function Page({
             </>
           ) : (
             // 초기 메인 페이지
-            <div className="flex flex-col gap-8 py-4">
-              <h2 className="text-2xl font-bold">투표 목록</h2>
-              <PollCardList />
-              <hr className="border-gray-300" />
-              <TargetPostSection />
-              <hr className="border-gray-300" />
-              <h2 className="text-2xl font-bold">유저 공유 시나리오</h2>
-              <SharedScenarioItem />
-              <SharedScenarioItem />
-              <hr className="border-gray-300" />
-            </div>
+            <CommunityMain />
           )}
         </div>
       </div>

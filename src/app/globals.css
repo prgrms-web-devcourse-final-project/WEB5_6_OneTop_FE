@@ -161,7 +161,50 @@
     rgba(130, 79, 147, 0.3) 50%,
     transparent 70%
   );
-  animation: subtleSpace 8s ease-in-out infinite;
+  animation: subtleSpace 6s ease-in-out infinite;
+}
+
+.stars-small {
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 
+    100px 100px #fff, 200px 200px #fff, 300px 150px #fff,
+    400px 300px #fff, 500px 50px #fff, 600px 250px #fff,
+    700px 180px #fff, 800px 320px #fff, 900px 80px #fff,
+    1000px 220px #fff, 50px 350px #fff, 150px 280px #fff,
+    250px 120px #fff, 350px 380px #fff, 450px 160px #fff,
+    550px 290px #fff, 650px 90px #fff, 750px 330px #fff,
+    850px 200px #fff, 950px 140px #fff;
+  animation: animStar 50s linear infinite;
+}
+
+.stars-medium {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 
+    120px 180px #fff, 280px 120px #fff, 380px 280px #fff,
+    480px 80px #fff, 580px 320px #fff, 680px 160px #fff,
+    780px 240px #fff, 880px 40px #fff, 980px 300px #fff,
+    80px 260px #fff;
+  animation: animStar 100s linear infinite;
+}
+
+.stars-large {
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 
+    160px 240px #fff, 320px 80px #fff, 480px 200px #fff,
+    640px 320px #fff, 800px 120px #fff, 960px 280px #fff,
+    40px 160px #fff, 200px 360px #fff;
+  animation: animStar 150s linear infinite;
+}
+
+@keyframes animStar {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-2000px); }
 }
 
 body {

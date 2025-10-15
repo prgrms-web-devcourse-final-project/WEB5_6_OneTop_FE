@@ -144,6 +144,8 @@ function SearchBar() {
       <button
         type="submit"
         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+        name="search"
+        aria-label="검색"
       >
         <FaSearch size={20} />
       </button>

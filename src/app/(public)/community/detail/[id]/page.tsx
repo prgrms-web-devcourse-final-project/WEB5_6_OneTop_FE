@@ -61,6 +61,13 @@ export async function generateMetadata({
         type: "article",
         authors: [author],
         siteName: "Re:Life",
+        images: [
+          {
+            url: post.image || "/logo_128.svg",
+            width: 1200,
+            height: 630,
+          },
+        ],
       },
       twitter: {
         card: "summary",
@@ -99,7 +106,7 @@ async function Page({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="w-full flex flex-col items-center min-h-[calc(100vh-140px)] pt-4">
-      <div className="w-[60%] flex flex-col min-h-[calc(100vh-140px)] py-15 gap-4">
+      <div className="w-[80%] md:w-[60%] flex flex-col min-h-[calc(100vh-140px)] py-15 gap-4">
         {/* 게시글 영역 */}
         <HydrationBoundary state={dehydrate(queryClient)}>
           <PostContent id={id} />

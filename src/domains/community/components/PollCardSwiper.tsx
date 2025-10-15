@@ -40,7 +40,7 @@ export default function PollCardSwiper({ items }: PollCardSwiperProps) {
           nextEl: ".swiper-button-next-custom",
         }}
         breakpoints={{
-          640: {
+          768: {
             slidesPerView: 2,
             slidesPerGroup: 1,
           },
