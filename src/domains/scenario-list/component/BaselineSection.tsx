@@ -36,7 +36,7 @@ export default function BaselineSection({ page, size }: BaselineSectionProps) {
   }
 
   return (
-    <>
+    <div className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-10 m-auto">
       {baselines.length > 0 && !isGuest && (
         <div className="flex justify-end mt-6">
           <Link
@@ -56,6 +56,6 @@ export default function BaselineSection({ page, size }: BaselineSectionProps) {
           totalPages={pageInfo.totalPages}
         />
       )}
-    </>
+    </div>
   );
 }

@@ -23,6 +23,21 @@ export function useBaselines(page: number, size: number = 10) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.baselines.list(page, size),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.scenarios.list(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.myScenarios.all(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.usageStats.all(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.representativeProfile.all(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tree.all(),
+      });
 
       Swal.fire({
         title: "삭제 완료",

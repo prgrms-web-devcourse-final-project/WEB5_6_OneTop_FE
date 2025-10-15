@@ -19,63 +19,73 @@ export default function MyScenarios() {
   if (error) {
     showErrorToast(error);
   }
-
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold flex items-center">
+      <div className="flex justify-between items-center mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-2xl font-bold flex items-center">
           내 평행우주 목록
           {data && data.totalElements > 0 && (
-            <span className="ml-2">({data.totalElements})</span>
+            <span className="ml-2 text-sm sm:text-base">
+              ({data.totalElements})
+            </span>
           )}
         </h2>
       </div>
 
       {/* 시나리오 리스트 */}
-      <div className="px-8">
+      <div className="px-4 sm:px-8">
         {data?.items && data.items.length > 0 ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             {data.items.map((scenario, idx) => (
               <div
                 key={scenario.scenarioId}
                 className="border-3 border-deep-navy rounded-xl"
               >
-                <div className="flex p-8 items-center text-xl">
+                <div className="flex flex-col sm:flex-row p-4 sm:p-8 items-center text-base sm:text-xl gap-3 sm:gap-0">
                   {/* 직업 */}
-                  <div className="flex-[3] flex flex-col justify-center px-4">
-                    <p className="mb-2">{idx + 1}번째 우주의 나</p>
-                    <p className="font-semibold">{scenario.job}</p>
+                  <div className="flex-[3] flex flex-col justify-center px-2 sm:px-4 text-center sm:text-left">
+                    <p className="mb-1 sm:mb-2 text-sm sm:text-base">
+                      {idx + 1}번째 우주의 나
+                    </p>
+                    <p className="font-semibold text-sm sm:text-base">
+                      {scenario.job}
+                    </p>
                   </div>
 
-                  {/* 구분선 */}
-                  <div className="w-px bg-deep-navy self-stretch mx-2"></div>
+                  {/* 구분선 (데스크탑) */}
+                  <div className="hidden sm:block w-px bg-deep-navy self-stretch mx-2"></div>
 
-                  {/* 점수들 */}
-                  <div className="flex-[4] flex justify-center px-6">
-                    <div className="flex gap-6 text-center">
+                  {/* 점수 + 총점 + 요약 */}
+                  <div className="flex-[8] flex flex-col lg:flex-row items-center gap-4 lg:gap-6 w-full">
+                    <div className="flex flex-wrap lg:flex-row justify-center gap-4 lg:gap-8 text-center w-full">
                       {Object.entries(scenario.typeScores).map(
                         ([key, value]) => (
                           <div key={key}>
-                            <p className="mb-2">{key}</p>
-                            <p className="font-semibold">{value}</p>
+                            <p className="mb-1 sm:mb-2 text-sm sm:text-base">
+                              {key}
+                            </p>
+                            <p className="font-semibold text-sm sm:text-base">
+                              {value}
+                            </p>
                           </div>
                         )
                       )}
                     </div>
-                  </div>
 
-                  {/* 구분선 */}
-                  <div className="w-px bg-deep-navy self-stretch mx-2"></div>
+                    {/* 중간 구분선 (데스크탑) */}
+                    <div className="hidden lg:block w-px bg-deep-navy self-stretch mx-2"></div>
 
-                  <div className="flex-[4] flex justify-center px-6">
-                    <div className="flex gap-8 text-center items-center">
-                      {/* 총점 */}
+                    {/* 총점 + 요약 */}
+                    <div className="flex flex-col lg:flex-row gap-2 lg:gap-8 items-center text-center lg:text-left">
                       <div>
-                        <p className="mb-2">총점</p>
-                        <p className="font-semibold">{scenario.total}</p>
+                        <p className="mb-1 sm:mb-2 text-sm sm:text-base">
+                          총점
+                        </p>
+                        <p className="font-semibold text-sm sm:text-base">
+                          {scenario.total}
+                        </p>
                       </div>
 
-                      {/* 요약 */}
                       <div className="break-words break-all whitespace-normal">
                         <p className="font-medium">
                           &ldquo;{scenario.summary}&rdquo;
@@ -97,7 +107,6 @@ export default function MyScenarios() {
         )}
       </div>
 
-      {/* 페이지네이션 */}
       {data && data.items.length > 0 && (
         <Pagination
           currentPage={page}
