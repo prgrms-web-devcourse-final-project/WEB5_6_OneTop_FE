@@ -43,10 +43,10 @@ export const ScenarioContainer = () => {
     let timeoutId: NodeJS.Timeout;
 
     if (isPolling && status !== "COMPLETED") {
-      // 1.5초 후에 로딩 페이지 표시
+      // 1초 후에 로딩 페이지 표시
       timeoutId = setTimeout(() => {
         setShowLoader(true);
-      }, 1500);
+      }, 1000);
     } else {
       setShowLoader(false);
     }
@@ -229,7 +229,10 @@ export const ScenarioContainer = () => {
         <div className="max-w-[1440px] min-[1440px]:px-0 px-5 m-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 my-10 md:my-15">
             <Analysis data={scenarioData.analysis} />
-            <RadarChart data={scenarioData.radarData} />
+            <RadarChart
+              data={scenarioData.radarData}
+              aiInsight={scenarioData.analysis.aiInsight}
+            />
           </div>
         </div>
         <div className="bg-gray-50 py-10 md:py-15 min-[1440px]:px-0 px-5">

@@ -24,9 +24,14 @@ export const ScenarioImage = ({
       return url;
     }
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:8080";
-    return `${baseUrl}${url.startsWith("/") ? url : `/${url}`}`;
+    // CDN URL과 조합
+    const cdnUrl =
+      process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:8080/images";
+
+    const baseUrl = cdnUrl.endsWith("/") ? cdnUrl.slice(0, -1) : cdnUrl;
+    const fileName = url.startsWith("/") ? url : `/${url}`;
+
+    return `${baseUrl}${fileName}`;
   };
 
   const processedImageUrl = getImageUrl(imageUrl);

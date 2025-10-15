@@ -3,6 +3,7 @@
 import { LifeEvent } from "../types";
 import { IoCloseOutline } from "react-icons/io5";
 import { PiPlus } from "react-icons/pi";
+import { useMobileDetection } from "@/share/hooks/useMobileDetection";
 
 interface Props {
   year: number;
@@ -28,11 +29,97 @@ export const BaselineNode = ({
   isTemp = false,
   innerRef,
 }: Props) => {
+  const isMobile = useMobileDetection(980);
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete?.();
   };
 
+  // 모바일 가로 레이아웃
+  if (isMobile) {
+    return (
+      <div className="relative flex-shrink-0" data-node>
+        <div className="flex flex-col items-center gap-3 w-[200px]">
+          {/* 노드 버튼 */}
+          <div className="relative flex items-center" ref={innerRef}>
+            {/* 임시 노드 삭제 버튼 */}
+            {isTemp && onDelete && (
+              <button
+                onClick={handleDelete}
+                className="absolute -top-2 -right-2 w-5 h-5 bg-[#E76F51] text-white rounded-full flex items-center justify-center text-xs z-20"
+                title="노드 삭제"
+              >
+                <IoCloseOutline size={14} />
+              </button>
+            )}
+
+            {/* 연결선 - 왼쪽 */}
+            {showConnector && (
+              <div className="absolute w-[115px] h-1 bg-white rounded-full -left-[135px] top-1/2 -translate-y-1/2" />
+            )}
+
+            {/* 노드 */}
+            <button
+              type="button"
+              onClick={onClick}
+              className={`relative flex items-center justify-center w-16 h-16 rounded-full text-lg hover:bg-dusty-blue hover:text-white transition-colors z-10 before:absolute before:content-[''] before:inline-block before:w-[6px] before:h-[6px] before:bg-gray-50 before:-left-3 before:-translate-y-[50%] before:top-1/2 before:rounded-full after:absolute after:content-[''] after:inline-block after:w-[6px] after:h-[6px] after:bg-gray-50 after:-right-3 after:-translate-y-[50%] after:top-1/2 after:rounded-full ${
+                isSelected
+                  ? "bg-dusty-blue text-white"
+                  : hasEvent
+                  ? "bg-[#B8A082] text-white"
+                  : "bg-white text-gray-400"
+              }`}
+            >
+              {hasEvent && event ? age : <PiPlus size={20} />}
+            </button>
+
+            {/* 연결선 - 오른쪽 (마지막 노드가 아닐 때) */}
+            {!showConnector && (
+              <div className="absolute w-[115px] h-1 bg-white rounded-full -right-[135px] top-1/2 -translate-y-1/2 before:absolute before:content-[''] before:inline-block before:w-[115px] before:h-1 before:bg-white before:-left-[218px] before:top-1/2 before:-translate-y-1/2 before:rounded-full" />
+            )}
+          </div>
+
+          {/* 이벤트 정보 */}
+          <div className="flex flex-col items-center gap-2 text-center w-full px-2">
+            {/* 연도 */}
+            <div
+              className={`text-lg font-semibold ${
+                hasEvent ? "text-white" : "text-gray-400"
+              }`}
+            >
+              {hasEvent && event?.year ? `${event.year}` : "년도 입력"}
+            </div>
+
+            {/* 이벤트 제목 */}
+            <div className="text-sm w-3/4 min-[980px]:w-full line-clamp-1 min-[980px]:line-clamp-2 min-[980px]:min-h-[40px]">
+              {event?.eventTitle ? (
+                <span className="block text-white">{event.eventTitle}</span>
+              ) : (
+                <span className="block text-gray-400 text-xs">
+                  노드를 클릭해 분기점을 입력해 주세요
+                </span>
+              )}
+            </div>
+
+            {/* 이벤트 세부 정보 */}
+            {event && hasEvent && (
+              <div className="text-center w-full">
+                <div className="inline-block bg-dusty-blue text-white text-sm px-2 py-1 mb-1 rounded">
+                  {event.category}
+                </div>
+                <div className="text-gray-300 text-sm line-clamp-2">
+                  {event.actualChoice}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // PC 세로 레이아웃
   return (
     <div className="relative -right-10" data-node>
       <div
