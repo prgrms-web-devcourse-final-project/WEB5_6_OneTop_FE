@@ -215,7 +215,7 @@ src/
 프로젝트에 대한 문의사항이나 제안이 있으시면 언제든 연락해주세요!
 
 - **이슈 등록**: [GitHub Issues](https://github.com/your-username/relife_fe/issues)
-- **이메일**: your-email@example.com
+- **이메일**: dbseodnd356@gmail.com
 
 ---
 
