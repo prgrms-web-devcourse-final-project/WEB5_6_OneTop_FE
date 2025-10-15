@@ -222,6 +222,7 @@ const TreeFlowContent = ({ baselineId }: TreeFlowContentProps) => {
         nodesConnectable={false}
         elementsSelectable={false}
         selectNodesOnDrag={false}
+        zoomOnPinch={true}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 import {
   TbCircleNumber1,
@@ -19,11 +19,36 @@ const BaseNodeHeaderView = ({
   onClose,
   isMobile,
 }: BaseNodeHeaderViewProps) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const modalEl = modalRef.current;
+    if (!modalEl || !isOpen) return;
+
+    // 휠 이벤트 격리
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation();
+    };
+
+    // 터치 이벤트 격리
+    const handleTouchMove = (e: TouchEvent) => {
+      e.stopPropagation();
+    };
+
+    modalEl.addEventListener("wheel", handleWheel, { passive: true });
+    modalEl.addEventListener("touchmove", handleTouchMove, { passive: true });
+
+    return () => {
+      modalEl.removeEventListener("wheel", handleWheel);
+      modalEl.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [isOpen]);
+
   return (
     <div
-      key={isOpen ? "modal-open" : "modal-closed"}
+      ref={modalRef}
       className={`
-        fixed bg-midnight-blue text-white z-10 transition-transform duration-300
+        fixed bg-midnight-blue text-white z-50 transition-transform duration-300
         ${
           isMobile
             ? `left-0 bottom-0 w-full h-[50vh] rounded-t-2xl ${
@@ -46,12 +71,7 @@ const BaseNodeHeaderView = ({
         </div>
       </div>
 
-      <div
-        className="px-8 pb-8 h-[calc(100%-3rem)] overflow-y-auto custom-scrollbar"
-        onWheel={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <div className="px-8 pb-8 h-[calc(100%-3rem)] overflow-y-auto custom-scrollbar">
         <div className="flex flex-col gap-6">
           {/* 제목 */}
           <h2 className="text-white text-xl font-bold">시나리오 기록 사용법</h2>
