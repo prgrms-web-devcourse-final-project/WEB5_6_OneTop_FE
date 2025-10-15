@@ -21,7 +21,13 @@ async function SharedScenarioList() {
     })
   );
 
-  console.log(data.items);
+  if (data.items.length === 0) {
+    return (
+      <div className="flex text-center text-gray-500 h-30 items-center justify-center p-4">
+        <span className="font-bold">게시글이 없습니다.</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 ">
