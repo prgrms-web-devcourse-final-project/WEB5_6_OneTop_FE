@@ -83,7 +83,12 @@ const TreeFlowContent = ({ baselineId }: TreeFlowContentProps) => {
 
   const memoizedNodeTypes = useMemo(() => NODE_TYPES, []);
   const memoizedEdgeTypes = useMemo(() => EDGE_TYPES, []);
-  const { data: treeData, isLoading, refetch } = useTreeDataQuery(baselineId);
+  const {
+    data: treeData,
+    isLoading,
+    refetch,
+    error,
+  } = useTreeDataQuery(baselineId);
   const { fitView } = useReactFlow();
   const { calculateLayout } = useTreeLayout();
   const { treeStructure, getBranchChoices, isBaselineNode } =

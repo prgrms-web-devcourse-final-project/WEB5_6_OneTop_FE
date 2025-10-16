@@ -17,7 +17,7 @@ export default function MyScenarios() {
   }
 
   if (error) {
-    showErrorToast(error);
+    showErrorToast("데이터를 불러오지 못했습니다. 다시 시도해주세요.");
   }
   return (
     <div className="w-full">

@@ -47,15 +47,6 @@ export function useBaselines(page: number, size: number = 10) {
         confirmButtonText: "확인",
       });
     },
-    onError: (error) => {
-      Swal.fire({
-        title: "삭제 실패",
-        text: error instanceof Error ? error.message : "삭제에 실패했습니다.",
-        icon: "error",
-        confirmButtonColor: "#0f1a2b",
-        confirmButtonText: "확인",
-      });
-    },
   });
 
   return { query, deleteMutation };
