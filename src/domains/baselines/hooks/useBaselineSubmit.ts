@@ -88,6 +88,7 @@ export const useBaselineSubmit = (
         queryClient.invalidateQueries({
           queryKey: queryKeys.baselines.all(),
         });
+
         await Swal.fire({
           title: "제출 완료!",
           html: isGuest
@@ -99,6 +100,13 @@ export const useBaselineSubmit = (
         });
 
         startNewBaseline();
+
+        if (isGuest) {
+          sessionStorage.setItem("justSubmitted", "true");
+          setTimeout(() => {
+            sessionStorage.removeItem("justSubmitted");
+          }, 5000);
+        }
 
         router.push("/scenario-list");
       } catch (error) {
