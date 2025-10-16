@@ -43,6 +43,11 @@ export const useGuestLimits = ({
 
   // 이미 제출한 게스트 체크
   useEffect(() => {
+    const justSubmitted = sessionStorage.getItem("justSubmitted");
+    if (justSubmitted) {
+      return;
+    }
+
     if (!isAuthLoading && isGuest && hasGuestSubmitted && eventCount === 0) {
       Swal.fire({
         title: "게스트 모드 제한",
