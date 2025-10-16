@@ -27,12 +27,8 @@ export default function BaselineSection({ page, size }: BaselineSectionProps) {
     totalPages: baselineData?.totalPages || 1,
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   if (error) {
-    showErrorToast(error);
+    showErrorToast("데이터를 불러오지 못했습니다. 다시 시도해주세요.");
   }
 
   return (
@@ -48,13 +44,23 @@ export default function BaselineSection({ page, size }: BaselineSectionProps) {
         </div>
       )}
 
-      <BaselineList baselines={baselines} currentPage={page} pageSize={size} />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          <BaselineList
+            baselines={baselines}
+            currentPage={page}
+            pageSize={size}
+          />
 
-      {baselines.length > 0 && (
-        <Pagination
-          currentPage={pageInfo.currentPage}
-          totalPages={pageInfo.totalPages}
-        />
+          {baselines.length > 0 && (
+            <Pagination
+              currentPage={pageInfo.currentPage}
+              totalPages={pageInfo.totalPages}
+            />
+          )}
+        </>
       )}
     </div>
   );

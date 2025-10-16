@@ -9,6 +9,9 @@ export function useDeletePost() {
     mutationFn: (id: string) => api.delete(`/api/v1/posts/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["usageStats"] });
+      queryClient.invalidateQueries({ queryKey: ["myPosts"] });
+      queryClient.invalidateQueries({ queryKey: ["myComments"] });
       Swal.fire({
         title: "게시글이 삭제되었습니다.",
         icon: "success",

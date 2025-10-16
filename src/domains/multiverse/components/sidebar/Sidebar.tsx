@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/share/config/queryKeys";
 import { useMobileDetection } from "@/share/hooks/useMobileDetection";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -472,11 +473,10 @@ const Sidebar = ({
         });
         router.push(`/scenarios?scenarioId=${data.scenarioId}`);
       } else {
-        alert("시나리오 ID를 가져오지 못했습니다.");
+        showErrorToast("조회에 실패했습니다. 다시 시도해주세요");
       }
     } catch (error) {
-      console.error("시나리오 생성 실패:", error);
-      alert("시나리오 생성 중 오류가 발생했습니다.");
+      showErrorToast("시나리오 생성에 실패했습니다. 다시 시도해주세요");
     }
   };
 

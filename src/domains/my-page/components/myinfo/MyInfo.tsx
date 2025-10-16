@@ -28,7 +28,7 @@ export default function MyInfo() {
   }
 
   if (error) {
-    showErrorToast(error);
+    showErrorToast("데이터를 불러오지 못했습니다. 다시 시도해주세요.");
   }
 
   const handleModalClose = () => {
@@ -41,7 +41,7 @@ export default function MyInfo() {
   return (
     <div className="w-full">
       <div className="flex justify-between mb-6 gap-2 sm:gap-0">
-        <h2 className="text-xl sm:text-2xl font-bold">내 정보</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold">내 정보</h2>
         {data &&
           (hasAllBasicInfo ? (
             <button
