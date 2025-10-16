@@ -176,7 +176,8 @@ src/
 ### 🔐 인증 시스템
 - 소셜 로그인 지원 (OAuth2)
 - 게스트 모드 제공으로 진입 장벽 최소화
-- JWT 기반 토큰 인증
+- JSESSION 기반 토큰 인증
+- CSRF 이중화 인증 시스템
 
 ### 📱 반응형 디자인
 - 모바일, 태블릿, 데스크톱 최적화
@@ -215,7 +216,7 @@ src/
 프로젝트에 대한 문의사항이나 제안이 있으시면 언제든 연락해주세요!
 
 - **이슈 등록**: [GitHub Issues](https://github.com/your-username/relife_fe/issues)
-- **이메일**: your-email@example.com
+- **이메일**: dbseodnd356@gmail.com
 
 ---
 
