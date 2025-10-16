@@ -35,6 +35,7 @@ function CommentWrite({ id }: { id: string }) {
         onSuccess: () => {
           reset(); // 폼 초기화
           qc.invalidateQueries({ queryKey: queryKeys.myComments.all() });
+          qc.invalidateQueries({ queryKey: queryKeys.usageStats.all() });
         },
         onError: (error) => {
           console.error("댓글 작성 실패:", error);

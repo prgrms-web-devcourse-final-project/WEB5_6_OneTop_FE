@@ -26,6 +26,12 @@ export function useDeleteComment({
       queryClient.invalidateQueries({
         queryKey: queryKeys.comment.get(postId),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.myComments.all(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.usageStats.all(),
+      });
     },
     onError: (error) => {
       console.error(error);
