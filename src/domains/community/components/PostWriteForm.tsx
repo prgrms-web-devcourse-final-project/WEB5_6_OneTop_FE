@@ -69,6 +69,7 @@ function PostWriteForm() {
         });
         qc.invalidateQueries({ queryKey: queryKeys.myPosts.all() });
         qc.invalidateQueries({ queryKey: queryKeys.post.all() });
+        qc.invalidateQueries({ queryKey: queryKeys.usageStats.all() });
         router.push(`/community/detail/${data.postId}`);
       },
     },

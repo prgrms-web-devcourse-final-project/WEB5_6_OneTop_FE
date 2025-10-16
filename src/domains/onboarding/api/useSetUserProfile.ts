@@ -15,6 +15,8 @@ export function useSetUserProfile() {
     mutationFn: setUserProfile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.all() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.usageStats.all() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.myInfo.all() });
       router.push("/baselines");
     },
     onError: (error) => {

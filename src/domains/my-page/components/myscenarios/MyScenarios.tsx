@@ -17,17 +17,15 @@ export default function MyScenarios() {
   }
 
   if (error) {
-    showErrorToast(error);
+    showErrorToast("데이터를 불러오지 못했습니다. 다시 시도해주세요.");
   }
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-4 sm:mb-6">
-        <h2 className="text-lg sm:text-2xl font-bold flex items-center">
+        <h2 className="text-lg sm:text-2xl font-semibold flex items-center">
           내 평행우주 목록
           {data && data.totalElements > 0 && (
-            <span className="ml-2 text-sm sm:text-base">
-              ({data.totalElements})
-            </span>
+            <span className="ml-2">({data.totalElements})</span>
           )}
         </h2>
       </div>
@@ -87,7 +85,7 @@ export default function MyScenarios() {
                       </div>
 
                       <div className="break-words break-all whitespace-normal">
-                        <p className="font-medium">
+                        <p className="font-medium text-sm sm:text-base">
                           &ldquo;{scenario.summary}&rdquo;
                         </p>
                       </div>

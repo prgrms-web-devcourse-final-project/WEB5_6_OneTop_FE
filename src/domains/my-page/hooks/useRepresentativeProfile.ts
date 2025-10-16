@@ -5,6 +5,7 @@ import {
   putRepresentativeProfile,
 } from "../api/representativeProfileApi";
 import Swal from "sweetalert2";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 export function useRepresentativeProfile() {
   const queryClient = useQueryClient();
@@ -29,14 +30,8 @@ export function useRepresentativeProfile() {
         confirmButtonText: "확인",
       });
     },
-    onError: (error) => {
-      Swal.fire({
-        title: "저장 실패",
-        text: error instanceof Error ? error.message : "저장에 실패했습니다.",
-        icon: "error",
-        confirmButtonColor: "#0f1a2b",
-        confirmButtonText: "확인",
-      });
+    onError: () => {
+      showErrorToast("프로필 설정에 실패했습니다. 다시 시도해주세요.");
     },
   });
 

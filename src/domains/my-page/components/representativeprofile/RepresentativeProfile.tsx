@@ -22,7 +22,7 @@ export default function RepresentativeProfile() {
   }
 
   if (error) {
-    showErrorToast(error);
+    showErrorToast("데이터를 불러오지 못했습니다. 다시 시도해주세요.");
   }
 
   const handleSubmit = (scenarioId: number) => {
@@ -50,7 +50,7 @@ export default function RepresentativeProfile() {
   return (
     <div className="w-full">
       <div className="flex justify-between mb-6 gap-2 sm:gap-0">
-        <h2 className="text-xl sm:text-2xl font-bold">대표 프로필</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold">대표 프로필</h2>
         <button
           onClick={handleOpenModal}
           className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-sm sm:text-base"

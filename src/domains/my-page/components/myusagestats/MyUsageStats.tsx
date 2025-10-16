@@ -12,7 +12,7 @@ export default function MyUsageStats() {
   }
 
   if (error) {
-    showErrorToast(error);
+    showErrorToast("데이터를 불러오지 못했습니다. 다시 시도해주세요.");
   }
 
   return (
@@ -29,7 +29,7 @@ export default function MyUsageStats() {
             {/* 평행우주 생성 */}
             <div className="text-center">
               <p className="text-xl sm:text-3xl font-bold">
-                {data?.scenarioCount || "-"}
+                {data?.scenarioCount}
               </p>
               <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">
                 평행우주
@@ -48,9 +48,7 @@ export default function MyUsageStats() {
 
             {/* 게시글 수 */}
             <div className="text-center">
-              <p className="text-xl sm:text-3xl font-bold">
-                {data?.postCount || "-"}
-              </p>
+              <p className="text-xl sm:text-3xl font-bold">{data?.postCount}</p>
               <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">
                 게시글 수
               </p>
@@ -59,7 +57,7 @@ export default function MyUsageStats() {
             {/* 댓글 수 */}
             <div className="text-center">
               <p className="text-xl sm:text-3xl font-bold">
-                {data?.commentCount || "-"}
+                {data?.commentCount}
               </p>
               <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">
                 댓글 수

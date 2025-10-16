@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getScenarioByDecisionLine } from "../../api/tree";
+import { showErrorToast } from "@/share/components/ErrorToast";
 
 interface ScenarioLinkButtonsProps {
   decisionLineId: number;
@@ -25,7 +26,7 @@ const ScenarioLinkButtons = ({ decisionLineId }: ScenarioLinkButtonsProps) => {
 
       router.push(`/scenarios?scenarioId=${data.scenarioId}`);
     } catch (error) {
-      console.error("시나리오 조회 실패:", error);
+      showErrorToast("조회에 실패했습니다. 다시 시도해주세요");
     } finally {
       setIsLoadingScenario(false);
     }
@@ -45,7 +46,7 @@ const ScenarioLinkButtons = ({ decisionLineId }: ScenarioLinkButtonsProps) => {
         `/scenarios/compare?baseId=${data.baseScenarioId}&compareId=${data.scenarioId}`
       );
     } catch (error) {
-      console.error("분석 페이지 이동 실패:", error);
+      showErrorToast("조회에 실패했습니다. 다시 시도해주세요");
     } finally {
       setIsLoadingAnalysis(false);
     }
