@@ -37,7 +37,7 @@ export const scenarioInfoResponseSchema = z.object({
   total: z.number(),
   summary: z.string(),
   description: z.string(),
-  img: z.string(),
+  img: z.string().optional(),
   createdDate: z.string(),
   indicators: z.array(
     z.object({

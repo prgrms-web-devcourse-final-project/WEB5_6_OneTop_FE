@@ -1,18 +1,18 @@
-
 import axios from "axios";
 
 // API 베이스 URL을 환경에 따라 동적으로 설정
 
 export const getApiBaseUrl = () => {
   // 개발 환경 판별
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   // 브라우저 환경에서 localhost 확인
-  const isLocalhost = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || 
-     window.location.hostname === '127.0.0.1' ||
-     window.location.hostname.startsWith('192.168.') ||
-     window.location.hostname.endsWith('.local'));
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname.startsWith("192.168.") ||
+      window.location.hostname.endsWith(".local"));
 
   // 개발 환경이거나 localhost에서 실행 중인 경우
   if (isDevelopment || isLocalhost) {
@@ -25,14 +25,13 @@ export const getApiBaseUrl = () => {
   }
 
   // 기본값은 현재 호스트 기준 (fallback)
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     return `${window.location.protocol}//${window.location.host}`;
   }
 
   // 서버 사이드에서는 기본 localhost 반환
   return "http://localhost:3000";
-}
-
+};
 
 export const api = axios.create({
   baseURL: getApiBaseUrl(),
@@ -66,7 +65,7 @@ api.interceptors.response.use(
     const status = error?.response?.status;
 
     // CSRF 토큰 관련 403 에러인 경우 토큰 재발급 시도
-    if (status === 403) {
+    if (status === 403 && !error.config._isRetry) {
       console.log("403 에러 - CSRF 토큰 재발급 시도");
       try {
         // GET 요청으로 새 CSRF 토큰 받아오기
@@ -77,6 +76,7 @@ api.interceptors.response.use(
 
         const token = getCsrfTokenFromCookie();
         if (token && error.config) {
+          error.config._isRetry = true;
           error.config.headers["X-XSRF-TOKEN"] = token;
           console.log("새 CSRF 토큰으로 재시도:", token);
           return api.request(error.config);

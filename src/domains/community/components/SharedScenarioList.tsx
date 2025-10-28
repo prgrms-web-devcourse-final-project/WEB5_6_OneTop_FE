@@ -1,3 +1,4 @@
+import { ScenarioInfoResponse } from "@/domains/scenarios/types";
 import { getPost } from "../api/getPost";
 import { getPostList } from "../api/getPostList";
 import { Post, PostDetail } from "../types";
@@ -46,7 +47,7 @@ async function SharedScenarioList() {
           <div className="mb-4 line-clamp-2 px-4">{scenario.content}</div>
           <SharedScenarioItem
             key={scenario.postId}
-            scenarioInfo={scenario.scenario}
+            scenarioInfo={scenario.scenario as ScenarioInfoResponse}
           />
 
           <Link

@@ -44,7 +44,6 @@ function LoginModal() {
     const result = await loginAction(formData);
 
     if (result.success) {
-      console.log("로그인 성공", result.data);
       // 로그인 성공
       const urlParams = new URLSearchParams(window.location.search);
       const redirectTo = urlParams.get("redirectTo");

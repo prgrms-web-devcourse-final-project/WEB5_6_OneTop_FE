@@ -56,7 +56,7 @@
 - **Data Fetching**: TanStack Query 5.89.0
 - **HTTP Client**: Axios 1.12.2
 - **Form Handling**: React Hook Form 7.63.0
-- **Validation**: Zod 4.1.11
+- **Validation**: Zod 4.1.1 1
 
 ### UI/UX
 - **3D Graphics**: Three.js 0.180.0
