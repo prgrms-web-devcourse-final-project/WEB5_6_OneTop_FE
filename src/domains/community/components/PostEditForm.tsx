@@ -19,6 +19,7 @@ import SharedScenarioItem from "./SharedScenarioItem";
 import { clientScenariosApi } from "@/domains/scenarios/api/clientScenariosApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import RepresentativeProfileModal from "@/domains/my-page/components/representativeprofile/RepresentativeProfileModal";
+import { ScenarioInfoResponse } from "@/domains/scenarios/types";
 
 function PostEditForm() {
   const [pollItems, setPollItems] = useState<string[]>(["", ""]);
@@ -336,7 +337,7 @@ function PostEditForm() {
             시나리오 선택
           </button>
           {post?.scenario && !selectedScenarioId ? (
-            <SharedScenarioItem scenarioInfo={post?.scenario} />
+            <SharedScenarioItem scenarioInfo={post?.scenario as ScenarioInfoResponse} />
           ) : selectedScenarioId && scenarioInfo ? (
             <SharedScenarioItem scenarioInfo={scenarioInfo} />
           ) : (

@@ -10,6 +10,7 @@ import { useGetPost } from "../api/useGetPost";
 import { useAuthUser } from "@/domains/auth/api/useAuthUser";
 import SharedScenarioItem from "./SharedScenarioItem";
 import ProfileAvatar from "./ProfileAvatar";
+import { ScenarioInfoResponse } from "@/domains/scenarios/types";
 
 function PostContent({ id }: { id: string }) {
   const post = useGetPost(id);
@@ -80,7 +81,7 @@ function PostContent({ id }: { id: string }) {
         {category === "SCENARIO" && scenario && (
           <>
             <h3 className="text-2xl font-semibold mt-10">시나리오 정보</h3>
-            <SharedScenarioItem scenarioInfo={scenario} />
+            <SharedScenarioItem scenarioInfo={scenario as ScenarioInfoResponse} />
           </>
         )}
       </div>
