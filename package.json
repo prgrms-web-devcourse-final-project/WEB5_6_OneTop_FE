@@ -22,7 +22,7 @@
     "csrf-sync": "^4.2.1",
     "gsap": "^3.13.0",
     "lottie-react": "^2.4.1",
-    "next": "15.5.3",
+    "next": "15.5.9",
     "react": "19.1.0",
     "react-day-picker": "^9.11.0",
     "react-dom": "19.1.0",
